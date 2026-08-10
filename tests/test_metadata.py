@@ -14,11 +14,11 @@ def test_pending_manuscript_citations_make_no_publication_claim() -> None:
         assert "pending deposit" in text
 
 
-def test_citation_cff_omits_unminted_release_identifiers() -> None:
+def test_citation_cff_tracks_public_code_but_omits_unminted_release_identifiers() -> None:
     payload = yaml.safe_load((REPOSITORY / "CITATION.cff").read_text(encoding="utf-8"))
 
     assert payload["type"] == "software"
     assert payload["version"] == "0.2.0"
+    assert payload["repository-code"] == "https://github.com/Iman998/XhotpotQA"
     assert "date-released" not in payload
-    assert "repository-code" not in payload
     assert "url" not in payload

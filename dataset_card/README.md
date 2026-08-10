@@ -307,5 +307,7 @@ ShareAlike requirements. Repository software uses a separate MIT license.
 - Arash Ghafouri — Iran University of Science and Technology
 - Behrouz Minaei-Bidgoli — Iran University of Science and Technology
 
-The public code repository and persistent manuscript archive identifiers are pending deposit.
+The public code repository is available at
+[github.com/Iman998/XhotpotQA](https://github.com/Iman998/XhotpotQA). The persistent
+manuscript archive identifier is pending deposit.
 This notice will be replaced with their exact records after publication.
