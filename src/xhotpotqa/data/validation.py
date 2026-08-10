@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 
@@ -9,6 +10,9 @@ from xhotpotqa.data.checksum import compute_checksum
 from xhotpotqa.data.models import XHotpotInstance
 
 EXPECTED_SPLIT_COUNTS = {"train": 15_661, "validation": 7_405}
+_QUESTION_TYPES = {"bridge", "comparison"}
+_DIFFICULTIES = {"easy", "medium", "hard"}
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,6 +32,7 @@ def validate_instances(
     *,
     expected_count: int | None = None,
     expected_split: str | None = None,
+    strict_release: bool = False,
 ) -> ValidationReport:
     seen: set[str] = set()
     count = duplicate_ids = invalid_checksums = 0
@@ -39,6 +44,8 @@ def validate_instances(
         except ValueError as error:
             errors.append(f"{instance.id}: {error}")
             continue
+        if strict_release:
+            errors.extend(_strict_release_errors(instance))
         if expected_split is not None and instance.source_split != expected_split:
             errors.append(
                 f"{instance.id}: expected split {expected_split!r}, found {instance.source_split!r}"
@@ -51,6 +58,41 @@ def validate_instances(
     if expected_count is not None and count != expected_count:
         errors.append(f"Expected {expected_count:,} records, found {count:,}")
     return ValidationReport(count, duplicate_ids, invalid_checksums, tuple(errors))
+
+
+def _strict_release_errors(instance: XHotpotInstance) -> list[str]:
+    errors: list[str] = []
+    prefix = f"{instance.id}: "
+    if instance.question_type not in _QUESTION_TYPES:
+        errors.append(prefix + f"unsupported question_type {instance.question_type!r}")
+    if instance.difficulty not in _DIFFICULTIES:
+        errors.append(prefix + f"unsupported difficulty {instance.difficulty!r}")
+    for candidate in instance.candidates:
+        if candidate.source_title is None or not candidate.source_title.strip():
+            errors.append(prefix + f"candidate {candidate.id!r} lacks source_title")
+        if candidate.source_sentences is None:
+            errors.append(prefix + f"candidate {candidate.id!r} lacks source_sentences")
+
+    provenance = instance.provenance
+    required_text = {
+        "schema_version": provenance.schema_version,
+        "source_dataset": provenance.source_dataset,
+        "source_license": provenance.source_license,
+        "assignment_version": provenance.assignment_version,
+        "translation_model": provenance.translation_model,
+        "translation_revision": provenance.translation_revision,
+        "prompt_version": provenance.prompt_version,
+        "created_at": provenance.created_at,
+        "validation_status": provenance.validation_status,
+    }
+    for field_name, value in required_text.items():
+        if not value.strip():
+            errors.append(prefix + f"provenance.{field_name} is required")
+    if not _SHA256.fullmatch(provenance.prompt_hash):
+        errors.append(prefix + "provenance.prompt_hash must be a lowercase SHA-256 digest")
+    if provenance.retry_count < 0:
+        errors.append(prefix + "provenance.retry_count cannot be negative")
+    return errors
 
 
 def require_release_ready(reports: dict[str, ValidationReport]) -> None:

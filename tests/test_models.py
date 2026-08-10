@@ -1,7 +1,7 @@
 from dataclasses import replace
 
-from xhotpotqa.data.checksum import with_checksum
-from xhotpotqa.data.models import CandidateParagraph, SupportingFact, XHotpotInstance
+from xhotpotqa.data.checksum import compute_checksum, with_checksum
+from xhotpotqa.data.models import CandidateParagraph, Provenance, SupportingFact, XHotpotInstance
 
 
 def make_instance() -> XHotpotInstance:
@@ -34,3 +34,17 @@ def test_broken_support_index_is_rejected() -> None:
         assert "outside" in str(error)
     else:
         raise AssertionError("broken support index was accepted")
+
+
+def test_semantic_checksum_excludes_volatile_provenance() -> None:
+    first = make_instance()
+    second = replace(
+        first,
+        provenance=Provenance(
+            created_at="2026-08-10T10:00:00Z",
+            retry_count=7,
+            validation_status="revalidated",
+        ),
+    )
+
+    assert compute_checksum(first) == compute_checksum(second)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from collections.abc import Callable, Mapping, Sequence
 from types import MappingProxyType
@@ -11,7 +12,15 @@ from xhotpotqa.generation.protocols import ChatGenerator
 from xhotpotqa.languages import require_language
 
 PROMPT_VERSION = "xhotpotqa-translation-v2.0"
+SYSTEM_PROMPT = (
+    "You are the deterministic translation component of a multilingual QA dataset. "
+    "Preserve named entities, numbers, dates, yes/no polarity, and sentence boundaries. "
+    "Do not answer the question and do not add explanations. Return exactly one valid "
+    "JSON object with the requested keys and no Markdown."
+)
+PROMPT_HASH = hashlib.sha256(SYSTEM_PROMPT.encode("utf-8")).hexdigest()
 ResponseT = TypeVar("ResponseT")
+AuditWriter = Callable[[Mapping[str, object]], None]
 
 
 class StructuredTranslator:
@@ -23,6 +32,7 @@ class StructuredTranslator:
         revision: str,
         max_retries: int = 3,
         decoding: Mapping[str, object] | None = None,
+        audit_writer: AuditWriter | None = None,
     ) -> None:
         if max_retries < 1:
             raise ValueError("max_retries must be greater than zero")
@@ -30,7 +40,9 @@ class StructuredTranslator:
         self._model_id = model_id
         self._revision = revision
         self._max_retries = max_retries
+        self._retry_count = 0
         self._decoding: Mapping[str, object] = MappingProxyType(dict(decoding or {}))
+        self._audit_writer = audit_writer
 
     @property
     def model_id(self) -> str:
@@ -43,6 +55,11 @@ class StructuredTranslator:
     @property
     def decoding(self) -> Mapping[str, object]:
         return self._decoding
+
+    @property
+    def retry_count(self) -> int:
+        """Return cumulative parser/schema retries for provenance accounting."""
+        return self._retry_count
 
     def translate_text(self, text: str, target_language: str, unit: str) -> str:
         language = require_language(target_language)
@@ -77,26 +94,50 @@ class StructuredTranslator:
         payload: Mapping[str, object],
         parse_response: Callable[[Mapping[str, object]], ResponseT],
     ) -> ResponseT:
-        system = (
-            "You are the deterministic translation component of a multilingual QA dataset. "
-            "Preserve named entities, numbers, dates, yes/no polarity, and sentence boundaries. "
-            "Do not answer the question and do not add explanations. Return exactly one valid "
-            "JSON object with the requested keys and no Markdown."
-        )
         last_error: Exception | None = None
-        for _ in range(self._max_retries):
+        for attempt in range(self._max_retries):
+            if attempt:
+                self._retry_count += 1
             raw = self._generator.generate(
                 [
-                    {"role": "system", "content": system},
+                    {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
                 ]
             )
             try:
                 parsed = _parse_json_object(raw)
-                return parse_response(parsed)
+                result = parse_response(parsed)
             except (json.JSONDecodeError, TypeError, ValueError) as error:
+                self._write_audit(payload, raw, attempt + 1, "rejected", type(error).__name__)
                 last_error = error
+                continue
+            self._write_audit(payload, raw, attempt + 1, "accepted", "")
+            return result
         raise ValueError(f"Could not parse a structured translation response: {last_error}")
+
+    def _write_audit(
+        self,
+        payload: Mapping[str, object],
+        raw_response: str,
+        attempt: int,
+        status: str,
+        error_type: str,
+    ) -> None:
+        if self._audit_writer is None:
+            return
+        self._audit_writer(
+            {
+                "prompt_version": PROMPT_VERSION,
+                "prompt_hash": PROMPT_HASH,
+                "model_id": self._model_id,
+                "revision": self._revision,
+                "attempt": attempt,
+                "status": status,
+                "error_type": error_type,
+                "request": dict(payload),
+                "raw_response": raw_response,
+            }
+        )
 
 
 def _extract_json(text: str) -> str:

@@ -46,6 +46,7 @@ tags:
 - synthetic-translation
 size_categories:
 - 10K<n<100K
+- 100K<n<1M
 configs:
 - config_name: xhotpotqa
   default: true
@@ -54,6 +55,12 @@ configs:
     path: data/xhotpotqa/train.jsonl
   - split: validation
     path: data/xhotpotqa/validation.jsonl
+- config_name: xhotpotqa_plus
+  data_files:
+  - split: train
+    path: data/xhotpotqa_plus/train.jsonl
+  - split: validation
+    path: data/xhotpotqa_plus/validation.jsonl
 ---
 
 # XHotpotQA
@@ -73,6 +80,10 @@ evidence in another, ignore multilingual distractors, and answer in the question
 | Configuration | Train | Validation | Total |
 |---|---:|---:|---:|
 | XHotpotQA | 15,661 | 7,405 | 23,066 |
+| XHotpotQA+ | 375,864 | 177,720 | 553,584 |
+
+The public dataset deposit is pending. The paths in the YAML front matter are the exact paths
+validated by the release tooling and become loadable after publication.
 
 ## Languages
 
@@ -112,10 +123,15 @@ they do not imply comparable resource levels or translation quality.
 from datasets import load_dataset
 
 base = load_dataset("iman998/XHotpotQA", "xhotpotqa")
+parallel = load_dataset("iman998/XHotpotQA", "xhotpotqa_plus")
 
 example = base["validation"][0]
 print(example["question"], example["question_language"])
 print(example["supporting_facts"])
+
+# Join paired views by source_id; do not treat all 24 views as independent samples.
+paired_example = parallel["validation"][0]
+print(paired_example["source_id"], paired_example["question_language"])
 ```
 
 ## Record schema
@@ -143,12 +159,28 @@ supporting_facts: list[
   sentence_id: int
   role: bridge | answer | comparison | support
 ]
-provenance: struct
+provenance: struct[
+  schema_version: string
+  source_dataset: string
+  source_license: string
+  assignment_version: string
+  seed: int
+  translation_model: string
+  translation_revision: string
+  prompt_version: string
+  prompt_hash: SHA-256
+  retry_count: int
+  created_at: string
+  validation_status: string
+  decoding: mapping
+]
 checksum: SHA-256
 ```
 
 Paragraph IDs, sentence indices, and order are immutable. Translated titles are never used
-as annotation keys. See the repository schema document for exact invariants.
+as annotation keys. The checksum covers the canonical semantic record; `created_at`,
+`retry_count`, and `validation_status` are excluded because they describe execution rather
+than content. See the repository schema document for exact invariants.
 
 ## Construction
 
@@ -168,20 +200,37 @@ follow-up. GPT model references are frozen to the versions available in January 
 (`gpt-4o-2024-11-20` and `gpt-4o-mini-2024-07-18`). This pilot is not a substitute for a
 stratified bilingual audit of the released translations.
 
+Raw model responses may be retained through the opt-in audit writer during generation. That
+log can contain source text and model output, is not a dataset field, and must remain outside
+the public release unless a separate review explicitly authorizes disclosure.
+
+## XHotpotQA+ derived views
+
+The `xhotpotqa_plus` configuration deterministically pairs every base record with all 24 available
+question--answer translations while keeping evidence and supervision fixed. A complete input
+mapping yields 375,864 training views and 177,720 validation views (553,584 total), grouped by
+`source_id` with IDs of the form `<base-id>--qa-<language>`. The default `xhotpotqa`
+configuration retains the 23,066 canonical base records. The release gate verifies every
+parallel view against its base record and rejects changed evidence, supervision, provenance,
+ordering, IDs, or language coverage. Each view inherits base-record provenance, so the
+checksum and generation metadata for the separate question--answer translation mapping must
+be retained as a companion artifact.
+
 ## Cross-lingual descriptors
 
 For question language \(L_q\), gold paragraph set \(G\), and distractor set \(D\), the
 analysis library exposes:
 
 \[
-r_{qG}=|G|^{-1}\sum_{p\in G}\mathbf{1}[L_p\neq L_q],\qquad
-r_{qD}=|D|^{-1}\sum_{p\in D}\mathbf{1}[L_p\neq L_q].
+\rho_G=|G|^{-1}\sum_{p\in G}\mathbf{1}[L_p\neq L_q],\qquad
+\rho_D=|D|^{-1}\sum_{p\in D}\mathbf{1}[L_p\neq L_q].
 \]
 
-It also derives the number and normalized entropy of evidence languages, same/different
-script conditions, and five mutually exclusive strata: fully monolingual, multilingual
-distractors only, partial gold mismatch, full mismatch with one evidence language, and full
-mismatch with multilingual evidence.
+It also derives normalized gold-evidence entropy \(H_G\), the number of distinct candidate
+languages \(K_C\), same-, mixed-, or different-script relations between the question and gold
+evidence, and five mutually exclusive strata: fully monolingual, multilingual distractors
+only, partial gold mismatch, full mismatch with one evidence language, and full mismatch with
+multilingual evidence.
 
 ## Supported tasks and metrics
 
@@ -189,10 +238,22 @@ mismatch with multilingual evidence.
 - **Evidence selector:** predict supporting paragraphs/sentences among supplied distractors.
 - **End-to-end:** jointly predict the answer and supporting facts.
 
-The evaluator includes answer EM/F1, supporting-fact EM/precision/recall/F1, and Hotpot-style
-joint metrics. It adds macro averages by question language and scores for the five language
-conditions. For Chinese, Japanese, and Thai, answer F1 uses character tokens; English article
-removal is not applied to other languages.
+The evaluator includes answer EM/precision/recall/F1, supporting-fact
+EM/precision/recall/F1, and Hotpot-style joint metrics. It reports micro aggregates, macro
+EM/F1 by question language, per-language and script-relation aggregates, the five language
+conditions, descriptor summaries, and stable bins for \(\rho_G\), \(\rho_D\), \(H_G\), and
+\(K_C\). It also reports missing and unexpected prediction counts. For Chinese, Japanese,
+and Thai, answer F1 uses character tokens; English article removal is not applied to other
+languages.
+
+## Release integrity
+
+The uploader validates exact split cardinalities, unique IDs, schema invariants, source
+metadata, provenance fields, semantic checksums, and the base-to-parallel derivation before
+network access. The dataset card, all four JSONL files, and a generated `manifest.json` are
+then published in one Hub commit. The manifest records each configuration and split's path,
+record count, byte size, and SHA-256 hash, plus toolkit/data versions, the code revision, and
+the `pyproject.toml` hash. It does not contain the private raw response audit log.
 
 ## Intended uses
 
@@ -223,13 +284,12 @@ ShareAlike requirements. Repository software uses a separate MIT license.
 ## Citation
 
 ```bibtex
-@article{barati2026xhotpotqa,
+@unpublished{barati2026xhotpotqa,
   title   = {XHotpotQA: A 24-Language Benchmark for Cross-Lingual Multi-Hop
              Question Answering over Mixed-Language Evidence},
   author  = {Barati, Iman and Ghafouri, Arash and Minaei-Bidgoli, Behrouz},
-  journal = {Language Resources and Evaluation},
   year    = {2026},
-  note    = {Manuscript in preparation}
+  note    = {Manuscript and resource release in preparation}
 }
 
 @inproceedings{yang2018hotpotqa,
@@ -247,5 +307,5 @@ ShareAlike requirements. Repository software uses a separate MIT license.
 - Arash Ghafouri — Iran University of Science and Technology
 - Behrouz Minaei-Bidgoli — Iran University of Science and Technology
 
-For code, issue tracking, and reproducibility materials, visit
-[github.com/Iman998/XhotpotQA](https://github.com/Iman998/XhotpotQA).
+The public code repository and persistent manuscript archive identifiers are pending deposit.
+This notice will be replaced with their exact records after publication.

@@ -11,8 +11,13 @@ retrieval/selection, reading, and end-to-end reasoning can be evaluated separate
 | Languages | 24 |
 | Base instances | 23,066 |
 | Train / validation | 15,661 / 7,405 |
+| Derivable XHotpotQA+ parallel views | 553,584 |
 | Source task | HotpotQA distractor |
 | Dataset license | CC BY-SA 4.0 |
+
+> **Release status:** the public dataset deposit and persistent manuscript archive are
+> pending. This repository documents the release candidate; Hub-loading commands become
+> operational after the dataset is published.
 
 ## Why this benchmark?
 
@@ -38,18 +43,48 @@ Install the lightweight OpenAI-compatible client only when generating V2:
 pip install -e ".[generation]"
 ```
 
-## Load the released data
+## Load the data after publication
 
 ```python
 from datasets import load_dataset
 
-dataset = load_dataset("iman998/XhotpotQA")
+dataset = load_dataset("iman998/XHotpotQA")
+parallel = load_dataset("iman998/XHotpotQA", "xhotpotqa_plus")
 print(dataset["validation"][0])
+print(parallel["validation"][0])
 ```
 
 The canonical record schema is documented in [`docs/SCHEMA.md`](docs/SCHEMA.md). Every
 release is validated before upload; the validator checks exact split sizes, unique IDs,
 language codes, sentence indices, answer language, and content checksums.
+
+## Build the parallel XHotpotQA+ views
+
+XHotpotQA+ pairs every canonical base instance with all 24 available question--answer
+languages while holding the ordered candidate evidence and supporting-fact annotations fixed.
+This produces 375,864 training views and 177,720 validation views (553,584 total). The
+expansion is a deterministic data transformation and does not call a model. These views are
+published as the separate `xhotpotqa_plus` Hub configuration; `xhotpotqa` remains the default.
+
+Provide translations as either a source-ID keyed JSON object or the line-oriented JSONL form
+documented in [`docs/XHOTPOTQA_PLUS.md`](docs/XHOTPOTQA_PLUS.md), then run:
+
+```bash
+xhotpotqa expand-plus \
+  --base data/processed/validation.jsonl \
+  --translations data/processed/qa-translations.validation.jsonl \
+  --output data/processed/xhotpotqa-plus.validation.jsonl \
+  --split validation \
+  --strict-release
+```
+
+For each view, `source_id` is retained and the immutable variant ID is
+`<base-id>--qa-<language>`. Base provenance, evidence, and supervision are copied exactly;
+the semantic SHA-256 checksum is recomputed after replacing the question, answer, and their
+language code. The command validates all 24 languages for every source, rejects unmatched or
+duplicate source IDs, and writes atomically so a failed validation cannot replace an existing
+release. Preserve the translation mapping's checksum and generation metadata separately:
+inherited record provenance describes the base record, not that external mapping.
 
 ## Validate a local release
 
@@ -89,13 +124,16 @@ xhotpotqa generate-v2 \
   --input data/raw/hotpot_train_v1.1.json \
   --output data/processed/train.v2.jsonl \
   --config configs/generation/gemma4_31b.yaml \
-  --split train
+  --split train \
+  --audit-log private-audit/train.v2.responses.jsonl
 ```
 
 Generation is deterministic at the assignment layer and resumable by immutable source ID.
 It never changes sentence order or supporting-fact indices. Thinking is disabled for the
 translation pass so hidden reasoning is not stored in the resource. See
 [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) for the audit trail and server recipe.
+The optional audit log contains source text and raw model output. Keep it private and outside
+the public dataset; omit `--audit-log` when raw-response retention is not approved.
 
 ## Evaluate predictions
 
@@ -109,8 +147,10 @@ xhotpotqa evaluate \
 ```
 
 The report includes answer EM/F1, support precision/recall/F1, Hotpot-style joint metrics,
-and stratification by question–evidence mismatch, evidence-language entropy, hop condition,
-question type, and language.
+question-language and script-relation aggregates, the five language conditions, and stable
+bins/summaries for gold and distractor mismatch, gold-evidence entropy, and the number of
+distinct candidate languages. Missing predictions are scored as empty; missing and unexpected
+prediction counts are reported explicitly.
 
 ## Project layout
 
@@ -128,10 +168,11 @@ docs/                    schema, data statement, and reproducibility protocol
 ## Reproducibility and integrity
 
 - No credentials are accepted as command-line arguments or stored in configuration files.
-- Stable language assignments are derived from `seed + source_id + unit_id`; sharding does
-  not alter the benchmark.
-- Every output record contains generation provenance and a SHA-256 content checksum.
-- Upload is blocked unless the canonical split counts are exactly 15,661 and 7,405.
+- The evaluated V1 assignment is preserved by its immutable manifest. V2 assignments are
+  derived from `seed + source_id + unit_id`, so sharding does not alter regenerated data.
+- Every output record contains generation provenance and a versioned SHA-256 semantic checksum.
+- Upload is blocked unless base counts are exactly 15,661/7,405 and parallel-view counts are
+  exactly 375,864/177,720.
 - The release pipeline rejects unsupported language codes, duplicate IDs, broken support
   indices, and question/answer language disagreement.
 
@@ -141,12 +182,18 @@ Preflight a Hugging Face release without credentials or network access:
 xhotpotqa upload-hf \
   --train data/processed/train.jsonl \
   --validation data/processed/validation.jsonl \
+  --plus-train data/processed/xhotpotqa-plus.train.jsonl \
+  --plus-validation data/processed/xhotpotqa-plus.validation.jsonl \
   --card dataset_card/README.md \
   --dry-run
 ```
 
 The preflight also verifies that the card declares the exact JSONL paths uploaded by the
-release command. A real upload uses one Hub commit for the card and both validated splits.
+release command and that each parallel view preserves its base record's evidence, supervision,
+and provenance. A real upload uses one Hub commit for the card, integrity manifest, and all
+four validated split files. The generated manifest records configuration and split paths,
+record counts, byte sizes and SHA-256 hashes, the toolkit/data version, the code revision, and
+the `pyproject.toml` hash.
 
 ## License and attribution
 
@@ -157,15 +204,14 @@ terms, and consult the data statement before deployment.
 ## Citation
 
 ```bibtex
-@article{barati2026xhotpotqa,
+@unpublished{barati2026xhotpotqa,
   title   = {XHotpotQA: A 24-Language Benchmark for Cross-Lingual Multi-Hop
              Question Answering over Mixed-Language Evidence},
   author  = {Barati, Iman and Ghafouri, Arash and Minaei-Bidgoli, Behrouz},
-  journal = {Language Resources and Evaluation},
   year    = {2026},
-  note    = {Manuscript in preparation}
+  note    = {Manuscript and resource release in preparation}
 }
 ```
 
-For the full manuscript and version history, visit the
-[paper archive](https://arxiv.org/) **(coming soon after deposit)**.
+The persistent manuscript archive and version-history identifier are pending deposit. This
+notice will be replaced with the exact archive record after it has been minted.

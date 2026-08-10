@@ -10,7 +10,14 @@ from xhotpotqa.data.models import XHotpotInstance
 
 
 def compute_checksum(instance: XHotpotInstance) -> str:
-    payload = replace(instance, checksum="").to_dict()
+    # These fields describe execution history, not the record's semantic content.
+    stable_provenance = replace(
+        instance.provenance,
+        created_at="",
+        retry_count=0,
+        validation_status="",
+    )
+    payload = replace(instance, checksum="", provenance=stable_provenance).to_dict()
     return hashlib.sha256(canonical_json(payload).encode("utf-8")).hexdigest()
 
 

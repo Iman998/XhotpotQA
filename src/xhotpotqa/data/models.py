@@ -39,6 +39,7 @@ class SupportingFact:
 
 @dataclass(frozen=True, slots=True)
 class Provenance:
+    schema_version: str = "xhotpotqa-record-v2"
     source_dataset: str = "hotpotqa/hotpot_qa"
     source_license: str = "CC-BY-SA-4.0"
     assignment_version: str = "hash-v1"
@@ -46,7 +47,10 @@ class Provenance:
     translation_model: str = ""
     translation_revision: str = ""
     prompt_version: str = ""
+    prompt_hash: str = ""
+    retry_count: int = 0
     created_at: str = ""
+    validation_status: str = ""
     decoding: Mapping[str, Any] = field(default_factory=dict)
 
 
