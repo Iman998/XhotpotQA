@@ -1,0 +1,14 @@
+name: XHotpotQA
+version: 1.0.0
+source: hotpotqa/hotpot_qa
+source_config: distractor
+license: cc-by-sa-4.0
+languages: 24
+expected_counts:
+  train: 15661
+  validation: 7405
+train_filter:
+  level: hard
+question_answer_same_language: true
+candidate_language_assignment: independent
+

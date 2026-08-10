@@ -1,0 +1,10 @@
+answer_normalization: unicode_script_aware_v1
+support_key: [paragraph_id, sentence_id]
+require_output_language: true
+strata:
+  - question_language
+  - question_type
+  - hop_condition
+  - mismatch_bin
+  - evidence_entropy_bin
+

@@ -1,0 +1,8 @@
+# Dataset license
+
+XHotpotQA data are adaptations of HotpotQA and are distributed under the
+[Creative Commons Attribution-ShareAlike 4.0 International license](https://creativecommons.org/licenses/by-sa/4.0/).
+
+You must provide attribution, indicate changes, link to the license, and distribute
+adaptations under the same or a compatible license. This notice is not legal advice.
+
