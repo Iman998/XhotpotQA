@@ -53,6 +53,10 @@ class Finding:
 _PATTERNS = (
     SecretPattern("Hugging Face token", re.compile(r"\bhf_[A-Za-z0-9]{20,}\b")),
     SecretPattern("OpenAI-style token", re.compile(r"\bsk-[A-Za-z0-9_-]{20,}\b")),
+    SecretPattern(
+        "GitHub fine-grained token",
+        re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}\b"),
+    ),
     SecretPattern("GitHub token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}\b")),
     SecretPattern("AWS access key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     SecretPattern(
@@ -62,7 +66,8 @@ _PATTERNS = (
     SecretPattern(
         "non-empty credential assignment",
         re.compile(
-            r"(?i)\b(?:HF_TOKEN|HUGGINGFACE_HUB_TOKEN|OPENAI_API_KEY|AWS_SECRET_ACCESS_KEY)"
+            r"(?i)\b(?:HF_TOKEN|HUGGINGFACE_HUB_TOKEN|OPENAI_API_KEY|GH_TOKEN|"
+            r"GITHUB_TOKEN|AWS_SECRET_ACCESS_KEY)"
             r"\s*[:=]\s*[\"']?(?P<value>[^\s\"'#]+)"
         ),
         value_group="value",

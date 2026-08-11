@@ -264,6 +264,8 @@ def test_upload_cli_forwards_both_configurations(
             "plus-train.jsonl",
             "--plus-validation",
             "plus-validation.jsonl",
+            "--card",
+            str(CANONICAL_CARD_FIXTURE),
             "--dry-run",
         ]
     )

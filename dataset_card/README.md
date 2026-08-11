@@ -35,7 +35,7 @@ language_creators:
 multilinguality:
 - multilingual
 source_datasets:
-- hotpotqa/hotpot_qa
+- extended
 task_categories:
 - question-answering
 tags:
@@ -64,13 +64,26 @@ configs:
 
 ### Cross-lingual multi-hop question answering over mixed-language evidence
 
-One question. Multiple evidence paragraphs. Languages may change between hops.
+**One question · multiple evidence paragraphs · languages may change between hops**
+
+[![Rows](https://img.shields.io/badge/rows-23%2C066-0f766e?style=for-the-badge)](#dataset-at-a-glance)
+[![Languages](https://img.shields.io/badge/languages-24-7c3aed?style=for-the-badge)](#language-inventory)
+[![Task](https://img.shields.io/badge/task-multi--hop%20QA-2563eb?style=for-the-badge)](#tasks-and-evaluation)
 
 [![Release](https://img.shields.io/badge/release-recovered%20V1-f59e0b?style=flat-square)](#release-status)
 [![Audit](https://img.shields.io/badge/audit-status%20preserved-2563eb?style=flat-square)](#quality-audit)
 [![Format](https://img.shields.io/badge/format-Parquet-7c3aed?style=flat-square)](#data-format)
 [![License](https://img.shields.io/badge/data-CC%20BY--SA%204.0-16a34a?style=flat-square)](#license)
 [![Code](https://img.shields.io/badge/code-GitHub-111827?style=flat-square)](https://github.com/Iman998/XhotpotQA)
+
+[Overview](#dataset-at-a-glance) ·
+[Release status](#release-status) ·
+[Quickstart](#quickstart) ·
+[Schema](#data-format) ·
+[Audit](#quality-audit) ·
+[Results](#artifact-verified-validation-analysis) ·
+[Limitations](#limitations-and-biases) ·
+[Citation](#citation)
 
 </div>
 
@@ -86,34 +99,103 @@ recovered, audit-preserving V1 resource—not the prospective canonical V2. Ever
 source item is retained, including rows with known structural defects, and every
 row carries a machine-readable `status` and `structural_flags` field.
 
+> **ℹ️ How to read this card.** Green labels denote facts verified directly from
+> released artifacts; amber labels denote recovered historical provenance with
+> explicit uncertainty; gray labels denote prospective resources that are not
+> included. These categories prevent planned work from being mistaken for a
+> released result.
+
+| Evidence label | Meaning in this card |
+|---|---|
+| ![Verified](https://img.shields.io/badge/ARTIFACT--VERIFIED-recomputed%20from%20release-16a34a?style=flat-square) | Counts, hashes, schema, or analyses checked against the frozen V1 artifacts |
+| ![Recovered](https://img.shields.io/badge/HISTORICAL-recovered%20with%20limits-f59e0b?style=flat-square) | Information preserved from V1, but without a provider-resolved model revision or random seed |
+| ![Prospective](https://img.shields.io/badge/PROSPECTIVE-not%20in%20this%20release-6b7280?style=flat-square) | V2 or XHotpotQA+ plans that must not be reported as available data |
+
 ## Dataset at a glance
 
-| Train sources | Validation sources | Released rows | Languages |
-|---:|---:|---:|---:|
-| **15,661** | **7,405** | **23,066** | **24** |
+<table>
+  <tr>
+    <td align="center">
+      <img alt="Train rows" src="https://img.shields.io/badge/TRAIN-15%2C661-2563eb?style=for-the-badge"><br>
+      <sub>hard-source rows</sub>
+    </td>
+    <td align="center">
+      <img alt="Validation rows" src="https://img.shields.io/badge/VALIDATION-7%2C405-7c3aed?style=for-the-badge"><br>
+      <sub>full distractor validation</sub>
+    </td>
+    <td align="center">
+      <img alt="Total rows" src="https://img.shields.io/badge/TOTAL-23%2C066-0f766e?style=for-the-badge"><br>
+      <sub><b>23,066</b> · one recovered view per source</sub>
+    </td>
+    <td align="center">
+      <img alt="Languages" src="https://img.shields.io/badge/LANGUAGES-24-db2777?style=for-the-badge"><br>
+      <sub>ISO 639-1 assignments</sub>
+    </td>
+  </tr>
+</table>
 
 | Property | Value |
 |---|---|
 | Task | Fixed-candidate cross-lingual multi-hop QA |
-| Source | HotpotQA distractor; hard-only train and full distractor validation |
+| Source | [HotpotQA distractor](https://huggingface.co/datasets/hotpotqa/hotpot_qa); hard-only train and full distractor validation |
 | Evidence | Ordered candidate paragraphs with sentence boundaries |
 | Supervision | Answer plus sentence-level supporting facts |
 | Current configuration | `xhotpotqa_v1_audited` |
 | Storage | Sharded, Zstandard-compressed Parquet |
+| Released rows | 23,066 |
 | Unit of release | One recovered view per HotpotQA source |
+
+### Benchmark anatomy
+
+Each item keeps the fixed HotpotQA candidate set while independently exposing
+the language assignments of the question, the two gold paragraphs, and every
+distractor. The colors below identify **roles**, not quality grades.
+
+<table>
+  <tr>
+    <td align="center"><b>🟣 Question + answer</b><br><code>Lq</code><br><sub>answer is produced in the question language</sub></td>
+    <td align="center">→</td>
+    <td align="center"><b>🔵 Gold evidence A</b><br><code>Lg₁</code><br><sub>supporting paragraph and sentences</sub></td>
+    <td align="center">+</td>
+    <td align="center"><b>🟢 Gold evidence B</b><br><code>Lg₂</code><br><sub>second supporting paragraph</sub></td>
+    <td align="center">→</td>
+    <td align="center"><b>🟠 Composed answer</b><br><code>language(ŷ) = Lq</code><br><sub>multi-hop evidence composition</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="7"><b>⚪ Multilingual distractors</b> · supplied candidates with independently assigned paragraph languages <code>Ldⱼ</code></td>
+  </tr>
+</table>
+
+The benchmark therefore measures fixed-candidate evidence selection and answer
+composition under language mismatch. It does not claim to measure open-corpus
+retrieval or naturally occurring multilingual search behavior.
 
 ## Release status
 
 | Artifact | Status | What is available |
 |---|---|---|
-| **Audited V1 base** | **Included in this release payload** | 15,661 train rows and all 7,405 validation rows |
-| **XHotpotQA+** | **Prospective** | The historical archive contains 375,864 train views, but the 177,720-view parallel validation mapping is not available; no `xhotpotqa_plus` Hub configuration is published |
-| **Canonical V2** | **Prospective / blocked on completed artifacts and audit** | A model-agnostic OpenAI-compatible regeneration pipeline exists, but V2 data and a paired V1–V2 quality study are not part of this release |
+| **Audited V1 base** | ![Included](https://img.shields.io/badge/INCLUDED-release%20payload-16a34a?style=flat-square) | 15,661 train rows and all 7,405 validation rows |
+| **XHotpotQA+** | ![Prospective](https://img.shields.io/badge/PROSPECTIVE-not%20published-6b7280?style=flat-square) | The historical archive contains 375,864 train views, but the 177,720-view parallel validation mapping is not available; no `xhotpotqa_plus` Hub configuration is published |
+| **Canonical V2** | ![Blocked](https://img.shields.io/badge/BLOCKED-artifacts%20%2B%20audit-d97706?style=flat-square) | A model-agnostic OpenAI-compatible regeneration pipeline exists, but V2 data and a paired V1–V2 quality study are not part of this release |
 
 > **Important:** `status="quarantined"` is a data-quality label, not an
 > exclusion. Quarantined rows remain in the released splits so that counts,
 > source alignment, and reported analyses are reproducible. Users must state
 > whether they evaluate the complete split or a status-filtered subset.
+
+### Release-gate contract
+
+| Gate | Audited V1 in this payload | Prospective corrected V2 |
+|---|---|---|
+| Required rows available | ✅ Complete | ⏳ Not supplied |
+| Structural status retained | ✅ Per row | Required before release |
+| File hashes and counts frozen | ✅ `RELEASE_MANIFEST.json` | Required before release |
+| Paired V1–V2 quality evidence | Not applicable to publishing recovered V1 | ⛔ Not yet supplied |
+| Safe claim | Transparent, audit-preserving recovered resource | Pipeline plan only |
+
+The V1 release gate is **transparency**, not a claim that every translation is
+correct. A future corrected V2 has a stricter gate: completed artifacts,
+structural validation, and paired quality evidence.
 
 ## Why XHotpotQA?
 
@@ -133,6 +215,13 @@ supplied, XHotpotQA isolates evidence selection and composition; it is **not** a
 open-Wikipedia retrieval benchmark.
 
 ## Quickstart
+
+| If you want to… | Start with | Reporting requirement |
+|---|---|---|
+| Reproduce the frozen benchmark | Complete `validation` split | Denominator **7,405** |
+| Measure structural-audit sensitivity | `status == "accepted"` | Label as sensitivity analysis and report the filtered denominator |
+| Inspect without a full download | `streaming=True` | Pin the revision used |
+| Verify release integrity | `RELEASE_MANIFEST.json` | Archive the manifest with predictions |
 
 To load this configuration from a published Hub revision, install a recent
 version of `datasets`:
@@ -194,7 +283,56 @@ The complete 7,405-row validation split should remain the primary denominator
 when reproducing the frozen V1 analyses. The accepted-only view is a sensitivity
 analysis, not a replacement test split.
 
+### Record preview
+
+The following is an **abbreviated projection of a real accepted validation
+record**. Candidate text is omitted here only to keep the card readable; the
+Parquet row contains every translated title, ordered sentence, supporting fact,
+provenance field, and checksum described below.
+
+```json
+{
+  "id": "5a8b57f25542995d1e6f1371",
+  "source_split": "validation",
+  "question": "Je, Scott Derrickson na Ed Wood walikuwa wa taifa moja?",
+  "answer": "ndiyo",
+  "question_language": "sw",
+  "answer_language": "sw",
+  "question_type": "comparison",
+  "difficulty": "hard",
+  "candidate_preview": [
+    {"paragraph_id": "p00", "title": "এড উড (ফিল্ম)", "language_code": "bn"},
+    {"paragraph_id": "p01", "title": "Скотт Дерриксон", "language_code": "ru"},
+    {"paragraph_id": "p02", "title": "Woodson, Arkansas", "language_code": "vi"}
+  ],
+  "supporting_facts": [
+    {"paragraph_id": "p01", "sentence_index": 0, "in_bounds": true},
+    {"paragraph_id": "p04", "sentence_index": 0, "in_bounds": true}
+  ],
+  "status": "accepted",
+  "structural_flags": []
+}
+```
+
+This preview makes the intended challenge concrete: the Swahili question must
+be resolved from evidence assigned to other languages while distractors remain
+in the same supplied candidate set. `candidate_preview` is a card-only summary,
+not an additional dataset column.
+
 ## Data format
+
+<table>
+  <tr>
+    <td align="center"><b>🔑 Identity</b><br><code>id</code> · <code>source_id</code><br><code>source_*_position</code></td>
+    <td align="center"><b>💬 QA</b><br><code>question</code> · <code>answer</code><br>source text + language fields</td>
+    <td align="center"><b>📚 Evidence</b><br><code>candidates[]</code><br><code>supporting_facts[]</code></td>
+    <td align="center"><b>🧭 Audit</b><br><code>status</code> · <code>structural_flags[]</code><br><code>record_sha256</code></td>
+    <td align="center"><b>🧾 Provenance</b><br><code>provenance.*</code><br>source → shard → build</td>
+  </tr>
+</table>
+
+All source and release positions are explicit, nested candidates preserve their
+sentence boundaries, and an audit finding never causes an implicit row drop.
 
 ### Top-level schema
 
@@ -292,19 +430,21 @@ The released configuration is reconstructed from historical translation shards
 that used pandas `orient="columns"` JSON and did not carry HotpotQA IDs or
 support labels. The release builder performs this audited transformation:
 
-```text
-Official HotpotQA source snapshot
-              │
-              ├── ordered join ── recovered V1 translation shards
-              │
-              ▼
-     source IDs + source metadata + support labels
-              │
-              ├── deterministic train-view selection
-              ├── structural audit with no silent repair
-              ▼
-      status-bearing Parquet rows + release manifest
-```
+<div align="center">
+
+![Source](https://img.shields.io/badge/1-SOURCE%20SNAPSHOT-2563eb?style=for-the-badge)
+→
+![Join](https://img.shields.io/badge/2-ORDERED%20JOIN-7c3aed?style=for-the-badge)
+→
+![Select](https://img.shields.io/badge/3-VIEW%20SELECTION-db2777?style=for-the-badge)
+→
+![Audit](https://img.shields.io/badge/4-STRUCTURAL%20AUDIT-d97706?style=for-the-badge)
+→
+![Package](https://img.shields.io/badge/5-PARQUET%20%2B%20MANIFEST-0f766e?style=for-the-badge)
+
+<sub>Official HotpotQA snapshot + recovered V1 shards → ordered provenance join → deterministic public train projection → non-destructive audit → status-bearing release</sub>
+
+</div>
 
 1. Train sources are the 15,661 `hard` records from HotpotQA train; validation
    uses all 7,405 distractor records.
@@ -364,13 +504,34 @@ been generated or validated.
 
 | Status | Interpretation |
 |---|---|
-| `accepted` | No release-blocking structural flag was found by the automated audit |
+| `accepted` | No canonical-release-blocking structural flag was found by the automated audit |
 | `review_required` | A non-blocking ambiguity requires explicit review |
-| `quarantined` | At least one release-blocking structural defect was preserved |
+| `quarantined` | At least one structural defect requiring correction before a canonical release was preserved |
 
 These labels describe **structural validity under the implemented checks**. They
 do not certify semantic translation adequacy, fluency, cultural suitability, or
 paper acceptance.
+
+<table>
+  <tr>
+    <th>Split</th>
+    <th><img alt="Accepted" src="https://img.shields.io/badge/ACCEPTED-no%20blocking%20flag-16a34a?style=flat-square"></th>
+    <th><img alt="Review required" src="https://img.shields.io/badge/REVIEW-ambiguity-2563eb?style=flat-square"></th>
+    <th><img alt="Quarantined" src="https://img.shields.io/badge/QUARANTINED-blocking%20flag-dc2626?style=flat-square"></th>
+    <th>Total</th>
+  </tr>
+  <tr>
+    <td><b>Train</b></td><td align="right">14,721</td><td align="right">15</td><td align="right">925</td><td align="right"><b>15,661</b></td>
+  </tr>
+  <tr>
+    <td><b>Validation</b></td><td align="right">6,962</td><td align="right">4</td><td align="right">439</td><td align="right"><b>7,405</b></td>
+  </tr>
+</table>
+
+> **⚠️ Status is not a translation-quality score.** `accepted` means that the row
+> passed the implemented structural checks; `quarantined` means that the
+> detected structure was preserved for auditability. Neither label replaces
+> human semantic evaluation.
 
 The validator checks candidate cardinality and shape, sentence preservation,
 blank content, support-title resolution, support-index bounds, normalized title
@@ -387,8 +548,8 @@ The recovered validation audit retains all 7,405 sources:
 
 | Finding | Count | Counting unit |
 |---|---:|---|
-| Outside the union of release-blocking flags | **6,966** | source rows |
-| In the union of release-blocking flags | **439** (5.93%) | source rows |
+| Outside the union of canonical-release-blocking flags | **6,966** | source rows |
+| In the union of canonical-release-blocking flags | **439** (5.93%) | source rows |
 | Sentence-cardinality mismatch | 424 | paragraph events affecting 407 rows |
 | At least one blank translated sentence | 33 | source rows |
 | Unavailable translated support index | 9 | source rows |
@@ -396,7 +557,7 @@ The recovered validation audit retains all 7,405 sources:
 
 Component sets overlap and therefore must not be added. The four
 duplicate-title rows are non-blocking `review_required` records, so they belong
-to the 6,966 rows outside the release-blocking union rather than to the 439-row
+to the 6,966 rows outside the canonical-release-blocking union rather than to the 439-row
 quarantine.
 
 ### Audited train findings
@@ -429,6 +590,43 @@ subset; it does **not** make the underlying defects acceptable.
 
 ## Cross-lingual descriptors
 
+### Operational task definition
+
+Represent an item as
+
+\[
+x = (q, y, C, G, S, \Lambda),
+\]
+
+where \(q\) is the question, \(y\) the gold answer,
+\(C=(p_1,\ldots,p_m)\) the ordered candidate paragraphs, \(G\subseteq C\) the
+gold-paragraph set, \(S\) the sentence-level supporting facts, and
+\(\Lambda=(L_q,L_y,L_{p_1},\ldots,L_{p_m})\) the realized language assignment.
+For V1, \(L_y=L_q\). A reader predicts \(\hat y\); a selector predicts
+\(\hat S\) or \(\hat G\); and an end-to-end fixed-candidate system predicts both.
+
+The intended two-hop composition can be written schematically as
+
+\[
+z = f_1(q,e_1),
+\qquad
+\hat y = f_2(q,z,e_2),
+\qquad
+e_1,e_2\in S,
+\]
+
+with evidence units potentially written in different languages. This is an
+operational representation of the annotated task, not a guarantee of
+counterfactual evidence necessity: HotpotQA artifacts can occasionally permit
+single-hop or parametric solutions.
+
+| Symbol | Released representation |
+|---|---|
+| \(q,y,L_q,L_y\) | `question`, `answer`, `question_language`, `answer_language` |
+| \(C,L_{p_i}\) | ordered `candidates` and each candidate's `language_code` |
+| \(G,S\) | paragraph-linked and sentence-indexed `supporting_facts` |
+| \(\hat y,\hat S\) | consumer prediction artifacts; not stored as dataset labels |
+
 Let \(L_q\) be the question language, \(G\) the gold-paragraph set,
 \(D\) the distractor set, and \(L_p\) the assigned language of paragraph
 \(p\). XHotpotQA reports:
@@ -460,6 +658,10 @@ S1 is too small for inferential comparison, and S0 is unpopulated in this
 realized validation assignment.
 
 ## Artifact-verified validation analysis
+
+![Evidence level](https://img.shields.io/badge/EVIDENCE-artifact--verified-16a34a?style=flat-square)
+![Scope](https://img.shields.io/badge/SCOPE-frozen%20V1%20descriptives-2563eb?style=flat-square)
+![Causal claim](https://img.shields.io/badge/CAUSAL%20CLAIM-none-6b7280?style=flat-square)
 
 The following statistics were recomputed from the recovered 7,405-row validation
 metadata and surviving prediction artifacts. They are frozen-run descriptive
@@ -524,6 +726,15 @@ ranking of languages or speaker communities.
 
 ## Tasks and evaluation
 
+<table>
+  <tr>
+    <td align="center"><b>🟣 Reader</b><br><sub>gold evidence → answer</sub></td>
+    <td align="center"><b>🔵 Selector</b><br><sub>candidates → support</sub></td>
+    <td align="center"><b>🟢 End to end</b><br><sub>candidates → support + answer</sub></td>
+    <td align="center"><b>🟠 Diagnostics</b><br><sub>language and script strata</sub></td>
+  </tr>
+</table>
+
 The released fields support:
 
 - **Oracle-evidence reader:** predict the answer from gold supporting sentences.
@@ -541,6 +752,20 @@ For Chinese, Japanese, and Thai, the repository evaluator uses character tokens;
 English article removal is not applied to other languages. Always report missing
 and unexpected prediction IDs.
 
+### Minimum experiment report
+
+For a result to be interpretable and reproducible, report all of the following:
+
+- [ ] Hub configuration and pinned dataset revision;
+- [ ] split, status filter, and exact evaluated denominator;
+- [ ] answer, support, and joint metric implementation;
+- [ ] normalization and tokenization policy by script;
+- [ ] missing, duplicate, and unexpected prediction IDs;
+- [ ] model identifier, served endpoint revision when available, prompt, and
+      decoding parameters; and
+- [ ] whether evidence was oracle-provided, selected from fixed candidates, or
+      obtained through an external retriever.
+
 ## Intended uses
 
 XHotpotQA is intended for research on:
@@ -555,6 +780,20 @@ XHotpotQA is intended for research on:
 The resource should not be used to rank languages, cultures, countries, or
 speaker communities. A model score combines reasoning, translation artifacts,
 tokenization, script handling, and source-domain effects.
+
+## Out-of-scope and responsible use
+
+XHotpotQA is a research benchmark, not a production factuality or safety
+certification. Unsupported uses include making high-stakes decisions about
+people, treating assigned-language margins as measures of a language's
+intrinsic difficulty, and presenting machine-translated examples as naturally
+authored text. Systems evaluated here may still hallucinate answers, exploit
+source artifacts, or fail on naturally occurring code-switching.
+
+The source material is derived from Wikipedia through HotpotQA and may mention
+real people or organizations. Downstream users remain responsible for reviewing
+generated outputs, respecting the data license, and documenting any additional
+translation, filtering, or annotation.
 
 ## Limitations and biases
 
@@ -582,7 +821,7 @@ tokenization, script handling, and source-domain effects.
 
 ## Release integrity and manifest
 
-`RELEASE_MANIFEST.json` is the machine-readable authority for this Hub
+[`RELEASE_MANIFEST.json`](./RELEASE_MANIFEST.json) is the machine-readable authority for this Hub
 revision. It records:
 
 - release version and train selection rule;
@@ -618,8 +857,10 @@ print(manifest["validation"]["flag_counts"])
 
 ## License
 
-The dataset files are adaptations of HotpotQA and are distributed under
-**CC BY-SA 4.0**. Users must attribute XHotpotQA and the original HotpotQA work,
+The dataset files are adaptations of [HotpotQA](https://hotpotqa.github.io/) and
+are distributed under
+[**CC BY-SA 4.0**](https://creativecommons.org/licenses/by-sa/4.0/). Users must
+attribute XHotpotQA and the original HotpotQA work,
 identify modifications, and preserve the ShareAlike requirements. Repository
 software is licensed separately under the MIT License.
 

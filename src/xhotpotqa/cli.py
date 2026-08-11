@@ -115,12 +115,20 @@ def _parser() -> argparse.ArgumentParser:
         help="versioned answer normalization/tokenization contract",
     )
 
-    upload = commands.add_parser("upload-hf", help="validate and upload a public HF release")
+    upload = commands.add_parser(
+        "upload-hf",
+        help="validate and upload the prospective canonical JSONL release",
+    )
     upload.add_argument("--train", type=Path, required=True)
     upload.add_argument("--validation", type=Path, required=True)
     upload.add_argument("--plus-train", type=Path, required=True)
     upload.add_argument("--plus-validation", type=Path, required=True)
-    upload.add_argument("--card", type=Path, default=Path("dataset_card/README.md"))
+    upload.add_argument(
+        "--card",
+        type=Path,
+        required=True,
+        help="dedicated canonical-release card (not the audited-V1 Parquet card)",
+    )
     upload.add_argument("--repo-id", default="iman998/XhotpotQA")
     upload.add_argument(
         "--dry-run", action="store_true", help="validate release inputs without network access"

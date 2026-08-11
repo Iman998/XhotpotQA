@@ -56,6 +56,29 @@ def test_public_dataset_card_declares_only_the_audited_parquet_config() -> None:
     assert "iman998/XHotpotQA" not in card
 
 
+def test_repository_docs_and_builder_distinguish_the_two_release_tracks() -> None:
+    audited_config = "xhotpotqa_v1_audited"
+    for relative_path in (
+        "README.md",
+        "data/README.md",
+        "docs/SCHEMA.md",
+        "docs/XHOTPOTQA_PLUS.md",
+    ):
+        text = (REPOSITORY / relative_path).read_text(encoding="utf-8")
+        assert audited_config in text
+
+    data_readme = (REPOSITORY / "data/README.md").read_text(encoding="utf-8")
+    assert "prospective corrected canonical release" in data_readme
+    assert "publishes the canonical files" not in data_readme
+
+    plus_docs = (REPOSITORY / "docs/XHOTPOTQA_PLUS.md").read_text(encoding="utf-8")
+    assert "prospective paired-view form" in plus_docs
+    assert "It is published as" not in plus_docs
+
+    builder = (REPOSITORY / "scripts/build_hf_public_v1.py").read_text(encoding="utf-8")
+    assert f'CONFIG_NAME = "{audited_config}"' in builder
+
+
 def test_citation_cff_tracks_public_code_but_omits_unminted_release_identifiers() -> None:
     payload = yaml.safe_load((REPOSITORY / "CITATION.cff").read_text(encoding="utf-8"))
 

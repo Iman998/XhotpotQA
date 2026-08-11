@@ -1,12 +1,14 @@
 # XHotpotQA+ parallel expansion
 
-XHotpotQA+ is the paired-view form of the benchmark. It emits one question--answer view for
+XHotpotQA+ is the prospective paired-view form of the benchmark. It emits one question--answer view for
 each of the 24 supported languages while preserving the mixed-language candidate evidence of
 the canonical XHotpotQA record. Consequently, language is the only varying interface within a
-source group. It is published as the `xhotpotqa_plus` Hugging Face configuration; the smaller
-`xhotpotqa` base configuration remains the default.
+source group. Once its complete train and validation mappings pass the release gates, it will
+use the `xhotpotqa_plus` Hugging Face configuration and the corrected `xhotpotqa` base will be
+that release's default. Neither configuration is part of the current audited payload prepared
+for the Hugging Face Hub, whose sole configuration is `xhotpotqa_v1_audited`.
 
-| Split | Base records | Views per record | Expanded records |
+| Split | Required base records | Views per record | Required expanded records |
 |---|---:|---:|---:|
 | Train | 15,661 | 24 | 375,864 |
 | Validation | 7,405 | 24 | 177,720 |

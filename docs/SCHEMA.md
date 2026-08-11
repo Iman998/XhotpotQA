@@ -41,5 +41,8 @@ rewrite base provenance to describe that external mapping.
 The language order is the order of `LANGUAGE_CODES`, not JSON object insertion order. Thus
 identical ordered base JSONL and translation-map inputs produce byte-identical output across
 runs. See [`XHOTPOTQA_PLUS.md`](XHOTPOTQA_PLUS.md) for the input contract and release
-cardinalities. The derived records are published under the `xhotpotqa_plus` Hugging Face
-configuration; `xhotpotqa` is the default base configuration.
+cardinalities. Once the corrected canonical release passes all gates, these derived records
+will use the `xhotpotqa_plus` Hugging Face configuration and `xhotpotqa` will be its default
+base configuration. The current audited payload prepared for the Hugging Face Hub instead
+uses the Parquet configuration `xhotpotqa_v1_audited`; it does not claim that the parallel
+mapping is complete.
