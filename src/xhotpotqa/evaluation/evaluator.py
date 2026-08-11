@@ -9,8 +9,15 @@ from typing import Any
 
 from xhotpotqa.data.models import XHotpotInstance
 from xhotpotqa.evaluation.metrics import ExampleScore, FactKey, score_example
+from xhotpotqa.evaluation.normalization import (
+    DEFAULT_EVALUATION_PROTOCOL,
+    EVALUATION_PROTOCOL_VERSIONS,
+    EvaluationProtocol,
+    require_evaluation_protocol,
+)
 from xhotpotqa.evaluation.stratification import (
     CANDIDATE_LANGUAGE_COUNT_BINS,
+    DISTRACTOR_MISMATCH_BINS,
     ENTROPY_BINS,
     MISMATCH_BINS,
     candidate_language_count_bin,
@@ -21,8 +28,12 @@ from xhotpotqa.evaluation.stratification import (
 
 
 def evaluate(
-    gold: Iterable[XHotpotInstance], predictions: Mapping[str, Mapping[str, Any]]
+    gold: Iterable[XHotpotInstance],
+    predictions: Mapping[str, Mapping[str, Any]],
+    *,
+    protocol: EvaluationProtocol = DEFAULT_EVALUATION_PROTOCOL,
 ) -> dict[str, Any]:
+    protocol = require_evaluation_protocol(protocol)
     scores: list[ExampleScore] = []
     by_language: dict[str, list[ExampleScore]] = defaultdict(list)
     by_condition: dict[str, list[ExampleScore]] = defaultdict(list)
@@ -54,6 +65,7 @@ def evaluate(
             instance.answer_language,
             predicted_support,
             gold_support,
+            protocol=protocol,
         )
         scores.append(score)
         by_language[instance.question_language].append(score)
@@ -67,10 +79,19 @@ def evaluate(
             candidate_language_count_bin(stratum.distinct_candidate_language_count)
         ].append(score)
         gold_mismatch_values.append(stratum.gold_mismatch)
-        distractor_mismatch_values.append(stratum.distractor_mismatch)
+        if stratum.distractor_mismatch is not None:
+            distractor_mismatch_values.append(stratum.distractor_mismatch)
         gold_entropy_values.append(stratum.gold_entropy)
         distinct_candidate_language_values.append(float(stratum.distinct_candidate_language_count))
     report = {
+        "evaluation_protocol": {
+            "name": protocol,
+            "version": EVALUATION_PROTOCOL_VERSIONS[protocol],
+        },
+        "aggregation": {
+            "overall": "mean_per_example",
+            "question_language": "macro_over_language_means",
+        },
         "count": len(scores),
         "missing_predictions": len(missing),
         "unexpected_predictions": len(set(predictions) - gold_ids),
@@ -87,14 +108,18 @@ def evaluate(
         },
         "descriptor_summaries": {
             "gold_mismatch": _numeric_summary(gold_mismatch_values, "rho_G"),
-            "distractor_mismatch": _numeric_summary(distractor_mismatch_values, "rho_D"),
+            "distractor_mismatch": _numeric_summary(
+                distractor_mismatch_values, "rho_D", total_count=len(scores)
+            ),
             "gold_entropy": _numeric_summary(gold_entropy_values, "H_G"),
             "distinct_candidate_languages": _numeric_summary(
                 distinct_candidate_language_values, "K_C"
             ),
         },
         "by_gold_mismatch": _aggregate_ordered_bins(by_gold_mismatch, MISMATCH_BINS),
-        "by_distractor_mismatch": _aggregate_ordered_bins(by_distractor_mismatch, MISMATCH_BINS),
+        "by_distractor_mismatch": _aggregate_ordered_bins(
+            by_distractor_mismatch, DISTRACTOR_MISMATCH_BINS
+        ),
         "by_gold_entropy": _aggregate_ordered_bins(by_gold_entropy, ENTROPY_BINS),
         "by_distinct_candidate_languages": _aggregate_ordered_bins(
             by_distinct_candidate_languages, CANDIDATE_LANGUAGE_COUNT_BINS
@@ -148,12 +173,16 @@ def _macro(groups: Mapping[str, list[ExampleScore]]) -> dict[str, float]:
     }
 
 
-def _numeric_summary(values: list[float], symbol: str) -> dict[str, Any]:
+def _numeric_summary(
+    values: list[float], symbol: str, *, total_count: int | None = None
+) -> dict[str, Any]:
+    not_applicable = 0 if total_count is None else total_count - len(values)
     if not values:
-        return {"symbol": symbol, "n": 0}
+        return {"symbol": symbol, "n": 0, "not_applicable": not_applicable}
     return {
         "symbol": symbol,
         "n": len(values),
+        **({"not_applicable": not_applicable} if total_count is not None else {}),
         "mean": fmean(values),
         "median": median(values),
         "min": min(values),

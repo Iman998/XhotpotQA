@@ -3,4 +3,4 @@
 from xhotpotqa.data.models import XHotpotInstance
 
 __all__ = ["XHotpotInstance"]
-__version__ = "0.2.0"
+__version__ = "0.3.0"

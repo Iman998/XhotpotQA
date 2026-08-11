@@ -1,4 +1,4 @@
-"""OpenAI-compatible client for a Gemma 4 model served by vLLM."""
+"""Model-agnostic client for an OpenAI-compatible chat endpoint."""
 
 from __future__ import annotations
 
@@ -40,20 +40,20 @@ class OpenAICompatibleGenerator:
     def generate(self, messages: Sequence[dict[str, str]]) -> str:
         request_messages = _validate_messages(messages)
         client = self._get_client()
-        response = client.chat.completions.create(
-            model=self._config.model_id,
-            messages=request_messages,
-            max_tokens=self._config.max_new_tokens,
-            temperature=self._config.temperature,
-            top_p=self._config.top_p,
-            seed=self._config.seed,
-            response_format={"type": "json_object"},
-            extra_body={
-                "chat_template_kwargs": {
-                    "enable_thinking": self._config.enable_thinking,
-                }
-            },
-        )
+        request: dict[str, Any] = {
+            "model": self._config.model_id,
+            "messages": request_messages,
+            "max_tokens": self._config.max_new_tokens,
+            "temperature": self._config.temperature,
+            "top_p": self._config.top_p,
+            "seed": self._config.seed,
+            "response_format": {"type": "json_object"},
+        }
+        if self._config.chat_template_kwargs:
+            request["extra_body"] = {
+                "chat_template_kwargs": dict(self._config.chat_template_kwargs)
+            }
+        response = client.chat.completions.create(**request)
         choices = getattr(response, "choices", None)
         if not choices:
             raise ValueError("vLLM returned no completion choices")

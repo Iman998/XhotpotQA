@@ -34,6 +34,27 @@ def test_full_mismatch_multilingual_evidence() -> None:
     assert stratum.condition == "full-mismatch-multilingual-evidence"
 
 
+def test_no_distractors_are_not_treated_as_zero_mismatch() -> None:
+    instance = XHotpotInstance(
+        id="x",
+        source_id="s",
+        source_split="validation",
+        question="Question",
+        answer="Answer",
+        question_language="en",
+        answer_language="en",
+        candidates=(CandidateParagraph("p0", "A", ("a",), "en"),),
+        supporting_facts=(SupportingFact("p0", 0),),
+    )
+
+    stratum = describe_language_stratum(instance)
+
+    assert stratum.distractor_count == 0
+    assert stratum.distractor_mismatch is None
+    assert mismatch_bin(stratum.distractor_mismatch) == "not-applicable"
+    assert stratum.condition == "gold-aligned-no-distractors"
+
+
 @pytest.mark.parametrize(
     ("value", "expected"),
     [(0.0, "zero"), (0.5, "partial"), (1.0, "full")],

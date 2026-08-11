@@ -10,6 +10,7 @@ from xhotpotqa.data.models import XHotpotInstance
 from xhotpotqa.languages import require_language
 
 MISMATCH_BINS = ("zero", "partial", "full")
+DISTRACTOR_MISMATCH_BINS = ("not-applicable", *MISMATCH_BINS)
 ENTROPY_BINS = ("zero", "intermediate", "maximal")
 CANDIDATE_LANGUAGE_COUNT_BINS = ("one", "two-to-four", "five-to-eight", "nine-or-more")
 
@@ -25,12 +26,13 @@ class LanguageStratum:
     """
 
     gold_mismatch: float
-    distractor_mismatch: float
+    distractor_mismatch: float | None
     gold_language_count: int
     gold_entropy: float
     condition: str
     script_relation: str
     distinct_candidate_language_count: int = 0
+    distractor_count: int = 0
 
 
 def describe_language_stratum(instance: XHotpotInstance) -> LanguageStratum:
@@ -41,6 +43,8 @@ def describe_language_stratum(instance: XHotpotInstance) -> LanguageStratum:
         candidate.language for candidate in instance.candidates if candidate.id not in set(gold_ids)
     )
     gold_mismatch = _mismatch(instance.question_language, gold_languages)
+    if gold_mismatch is None:
+        raise ValueError("At least one gold paragraph is required for language stratification")
     distractor_mismatch = _mismatch(instance.question_language, distractor_languages)
     distinct_gold = len(set(gold_languages))
     return LanguageStratum(
@@ -53,11 +57,14 @@ def describe_language_stratum(instance: XHotpotInstance) -> LanguageStratum:
         distinct_candidate_language_count=len(
             {candidate.language for candidate in instance.candidates}
         ),
+        distractor_count=len(distractor_languages),
     )
 
 
-def mismatch_bin(value: float) -> str:
-    """Return the manuscript-aligned bin for a mismatch rate in ``[0, 1]``."""
+def mismatch_bin(value: float | None) -> str:
+    """Bin a mismatch rate; ``None`` means that its denominator is empty."""
+    if value is None:
+        return "not-applicable"
     _require_unit_interval(value, "mismatch")
     if math.isclose(value, 0.0, abs_tol=1e-12):
         return "zero"
@@ -89,9 +96,9 @@ def candidate_language_count_bin(value: int) -> str:
     return "nine-or-more"
 
 
-def _mismatch(question_language: str, languages: tuple[str, ...]) -> float:
+def _mismatch(question_language: str, languages: tuple[str, ...]) -> float | None:
     if not languages:
-        return 0.0
+        return None
     return sum(language != question_language for language in languages) / len(languages)
 
 
@@ -112,7 +119,9 @@ def _require_unit_interval(value: float, name: str) -> None:
         raise ValueError(f"{name.capitalize()} must be in [0, 1]")
 
 
-def _condition(gold_mismatch: float, distractor_mismatch: float, distinct_gold: int) -> str:
+def _condition(gold_mismatch: float, distractor_mismatch: float | None, distinct_gold: int) -> str:
+    if gold_mismatch == 0 and distractor_mismatch is None:
+        return "gold-aligned-no-distractors"
     if gold_mismatch == 0 and distractor_mismatch == 0:
         return "fully-monolingual"
     if gold_mismatch == 0:

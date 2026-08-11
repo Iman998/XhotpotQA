@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "xhotpotqa"
-version = "0.2.0"
-description = "Reproducible construction and evaluation for the 24-language XHotpotQA benchmark"
+version = "0.3.0"
+description = "Construction and evaluation for cross-lingual multi-hop QA over mixed-language evidence"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -29,6 +29,7 @@ dependencies = ["PyYAML>=6.0"]
 
 [project.optional-dependencies]
 generation = ["openai>=1.99"]
+legacy = ["ijson>=3.3"]
 release = ["datasets>=3.6", "huggingface-hub>=0.33", "pyarrow>=18"]
 dev = [
   "build>=1.2",
@@ -62,7 +63,7 @@ explicit_package_bases = true
 no_site_packages = true
 
 [[tool.mypy.overrides]]
-module = ["yaml", "openai", "huggingface_hub"]
+module = ["yaml", "openai", "huggingface_hub", "ijson"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

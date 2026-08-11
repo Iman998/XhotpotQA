@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, cast
 
@@ -22,7 +23,7 @@ class GenerationConfig:
     timeout_seconds: float = 180.0
     http_max_retries: int = 2
     seed: int = 20260810
-    enable_thinking: bool = False
+    chat_template_kwargs: Mapping[str, bool | float | int | str] = field(default_factory=dict)
     do_sample: bool = False
     temperature: float = 0.0
     top_p: float = 1.0
@@ -37,11 +38,11 @@ class GenerationConfig:
             raise ValueError("model_id must be non-empty")
         if not isinstance(self.revision, str) or not self.revision.strip():
             raise ValueError("revision must be non-empty")
-        for field_name, value in (
+        for field_name, env_value in (
             ("base_url_env", self.base_url_env),
             ("api_key_env", self.api_key_env),
         ):
-            if not isinstance(value, str) or not _ENVIRONMENT_VARIABLE.fullmatch(value):
+            if not isinstance(env_value, str) or not _ENVIRONMENT_VARIABLE.fullmatch(env_value):
                 raise ValueError(f"{field_name} is not a valid environment-variable name")
         if self.base_url_env == self.api_key_env:
             raise ValueError("base_url_env and api_key_env must be different")
@@ -56,8 +57,14 @@ class GenerationConfig:
         _require_integer("max_new_tokens", self.max_new_tokens, minimum=1)
         _require_integer("max_retries", self.max_retries, minimum=1)
         _require_integer("checkpoint_every", self.checkpoint_every, minimum=1)
-        _require_boolean("enable_thinking", self.enable_thinking)
         _require_boolean("do_sample", self.do_sample)
+        if not isinstance(self.chat_template_kwargs, Mapping):
+            raise ValueError("chat_template_kwargs must be a mapping")
+        for key, template_value in self.chat_template_kwargs.items():
+            if not isinstance(key, str) or not key.strip():
+                raise ValueError("chat_template_kwargs keys must be non-empty strings")
+            if not isinstance(template_value, (bool, int, float, str)):
+                raise ValueError("chat_template_kwargs values must be scalar JSON values")
         if (
             isinstance(self.temperature, bool)
             or not isinstance(self.temperature, (int, float))
@@ -73,10 +80,10 @@ class GenerationConfig:
         if not self.do_sample and (self.temperature != 0.0 or self.top_p != 1.0):
             raise ValueError("deterministic decoding requires temperature=0 and top_p=1")
 
-    def decoding_parameters(self) -> dict[str, bool | float | int]:
+    def decoding_parameters(self) -> dict[str, object]:
         """Return the exact request-time decoding parameters for provenance."""
         return {
-            "enable_thinking": self.enable_thinking,
+            "chat_template_kwargs": dict(self.chat_template_kwargs),
             "do_sample": self.do_sample,
             "temperature": self.temperature,
             "top_p": self.top_p,

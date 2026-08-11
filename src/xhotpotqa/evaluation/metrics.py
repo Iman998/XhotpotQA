@@ -6,7 +6,12 @@ from collections import Counter
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-from xhotpotqa.evaluation.normalization import answer_tokens, normalize_answer
+from xhotpotqa.evaluation.normalization import (
+    DEFAULT_EVALUATION_PROTOCOL,
+    EvaluationProtocol,
+    answer_tokens,
+    normalize_answer,
+)
 
 FactKey = tuple[str, int]
 
@@ -26,16 +31,27 @@ class ExampleScore:
     joint: ComponentScore
 
 
-def answer_score(prediction: str, gold: str, language: str) -> ComponentScore:
-    predicted_tokens = answer_tokens(prediction, language)
-    gold_tokens = answer_tokens(gold, language)
+def answer_score(
+    prediction: str,
+    gold: str,
+    language: str,
+    *,
+    protocol: EvaluationProtocol = DEFAULT_EVALUATION_PROTOCOL,
+) -> ComponentScore:
+    normalized_prediction = normalize_answer(prediction, language, protocol=protocol)
+    normalized_gold = normalize_answer(gold, language, protocol=protocol)
+    predicted_tokens = answer_tokens(prediction, language, protocol=protocol)
+    gold_tokens = answer_tokens(gold, language, protocol=protocol)
+    special_answers = {"yes", "no", "noanswer"}
+    if (
+        normalized_prediction in special_answers or normalized_gold in special_answers
+    ) and normalized_prediction != normalized_gold:
+        return ComponentScore(exact_match=0.0, precision=0.0, recall=0.0, f1=0.0)
     overlap = sum((Counter(predicted_tokens) & Counter(gold_tokens)).values())
     precision = _safe_ratio(overlap, len(predicted_tokens), empty_is_one=not gold_tokens)
     recall = _safe_ratio(overlap, len(gold_tokens), empty_is_one=not predicted_tokens)
     return ComponentScore(
-        exact_match=float(
-            normalize_answer(prediction, language) == normalize_answer(gold, language)
-        ),
+        exact_match=float(normalized_prediction == normalized_gold),
         precision=precision,
         recall=recall,
         f1=_harmonic_mean(precision, recall),
@@ -61,8 +77,10 @@ def score_example(
     language: str,
     predicted_support: Iterable[FactKey],
     gold_support: Iterable[FactKey],
+    *,
+    protocol: EvaluationProtocol = DEFAULT_EVALUATION_PROTOCOL,
 ) -> ExampleScore:
-    answer = answer_score(predicted_answer, gold_answer, language)
+    answer = answer_score(predicted_answer, gold_answer, language, protocol=protocol)
     support = support_score(predicted_support, gold_support)
     joint_precision = answer.precision * support.precision
     joint_recall = answer.recall * support.recall

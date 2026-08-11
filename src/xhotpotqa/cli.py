@@ -5,15 +5,24 @@ from __future__ import annotations
 import argparse
 import json
 from collections.abc import Sequence
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
 from xhotpotqa.data.assignment import LanguageAssigner
 from xhotpotqa.data.io import read_instances, read_jsonl
+from xhotpotqa.data.legacy import (
+    DEFAULT_EXPECTED_SOURCE_COUNTS,
+    import_legacy_shards,
+)
 from xhotpotqa.data.plus import load_qa_translations, write_plus_instances
 from xhotpotqa.data.release import upload_dataset
 from xhotpotqa.data.validation import EXPECTED_SPLIT_COUNTS, validate_instances
 from xhotpotqa.evaluation.evaluator import evaluate
+from xhotpotqa.evaluation.normalization import (
+    DEFAULT_EVALUATION_PROTOCOL,
+    EVALUATION_PROTOCOLS,
+)
 from xhotpotqa.generation.audit import PrivateJsonlAuditLog
 from xhotpotqa.generation.config import GenerationConfig
 from xhotpotqa.generation.openai_compatible import OpenAICompatibleGenerator
@@ -31,7 +40,38 @@ def _parser() -> argparse.ArgumentParser:
     validate.add_argument("--validation", type=Path)
     validate.add_argument("--strict-release", action="store_true")
 
-    generate = commands.add_parser("generate-v2", help="generate a Gemma 4 translation release")
+    legacy = commands.add_parser(
+        "import-legacy",
+        help="audit and ordered-join historical pandas-column translation shards",
+    )
+    legacy.add_argument(
+        "--shard",
+        type=Path,
+        action="append",
+        required=True,
+        help="legacy shard path; repeat in original source order",
+    )
+    legacy.add_argument("--source", type=Path, required=True, help="ordered HotpotQA JSON array")
+    legacy.add_argument("--output-dir", type=Path, required=True)
+    legacy.add_argument("--split", choices=("train", "validation"), required=True)
+    legacy.add_argument("--reader-backend", choices=("auto", "ijson", "stdlib"), default="auto")
+    legacy.add_argument(
+        "--expected-sources",
+        type=int,
+        help="override the canonical selected-source count (primarily for audited subsets)",
+    )
+    legacy.add_argument("--expected-source-sha256")
+    legacy.add_argument("--expected-source-order-sha256")
+    legacy.add_argument(
+        "--corrections",
+        type=Path,
+        help="optional content-addressed full-record correction JSONL",
+    )
+
+    generate = commands.add_parser(
+        "generate-v2",
+        help="generate a versioned translation release through an OpenAI-compatible API",
+    )
     generate.add_argument("--input", type=Path, required=True)
     generate.add_argument("--output", type=Path, required=True)
     generate.add_argument("--config", type=Path, required=True)
@@ -60,6 +100,12 @@ def _parser() -> argparse.ArgumentParser:
     evaluation.add_argument("--gold", type=Path, required=True)
     evaluation.add_argument("--predictions", type=Path, required=True)
     evaluation.add_argument("--output", type=Path, required=True)
+    evaluation.add_argument(
+        "--protocol",
+        choices=EVALUATION_PROTOCOLS,
+        default=DEFAULT_EVALUATION_PROTOCOL,
+        help="versioned answer normalization/tokenization contract",
+    )
 
     upload = commands.add_parser("upload-hf", help="validate and upload a public HF release")
     upload.add_argument("--train", type=Path, required=True)
@@ -78,6 +124,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "validate":
         return _validate(args)
+    if args.command == "import-legacy":
+        return _import_legacy(args)
     if args.command == "generate-v2":
         return _generate(args)
     if args.command == "expand-plus":
@@ -140,6 +188,29 @@ def _generate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _import_legacy(args: argparse.Namespace) -> int:
+    expected_sources = (
+        args.expected_sources
+        if args.expected_sources is not None
+        else DEFAULT_EXPECTED_SOURCE_COUNTS[args.split]
+    )
+    report = import_legacy_shards(
+        args.shard,
+        args.source,
+        args.output_dir,
+        args.split,
+        backend=args.reader_backend,
+        expected_source_count=expected_sources,
+        expected_source_sha256=args.expected_source_sha256,
+        expected_source_order_sha256=args.expected_source_order_sha256,
+        corrections=args.corrections,
+    )
+    payload = asdict(report)
+    payload["output_dir"] = str(report.output_dir)
+    print(json.dumps(payload, sort_keys=True))
+    return int(report.quarantined_records > 0)
+
+
 def _expand_plus(args: argparse.Namespace) -> int:
     expected_base_count = EXPECTED_SPLIT_COUNTS[args.split] if args.strict_release else None
     report = write_plus_instances(
@@ -171,7 +242,7 @@ def _evaluate(args: argparse.Namespace) -> int:
         if prediction_id in predictions:
             raise ValueError(f"Duplicate prediction id: {prediction_id!r}")
         predictions[prediction_id] = item
-    report = evaluate(read_instances(args.gold), predictions)
+    report = evaluate(read_instances(args.gold), predictions, protocol=args.protocol)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(report["overall"], ensure_ascii=False))

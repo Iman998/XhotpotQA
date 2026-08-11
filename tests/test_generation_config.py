@@ -6,12 +6,12 @@ from xhotpotqa.generation.config import GenerationConfig
 
 
 def test_reference_config_loads_and_records_exact_decoding() -> None:
-    config = GenerationConfig.from_yaml(Path("configs/generation/gemma4_31b.yaml"))
+    config = GenerationConfig.from_yaml(Path("configs/generation/openai_compatible.yaml"))
 
-    assert config.model_id == "google/gemma-4-31B-it"
+    assert config.model_id == "served-translation-model"
     assert config.http_max_retries == 2
     assert config.decoding_parameters() == {
-        "enable_thinking": False,
+        "chat_template_kwargs": {},
         "do_sample": False,
         "temperature": 0.0,
         "top_p": 1.0,
@@ -28,6 +28,8 @@ def test_reference_config_loads_and_records_exact_decoding() -> None:
         ({"http_max_retries": -1}, "http_max_retries"),
         ({"max_retries": 0}, "max_retries"),
         ({"do_sample": "false"}, "do_sample"),
+        ({"chat_template_kwargs": []}, "chat_template_kwargs"),
+        ({"chat_template_kwargs": {"nested": {"value": True}}}, "scalar JSON"),
         ({"temperature": True}, "temperature"),
         ({"top_p": 0}, "top_p"),
         ({"temperature": 0.5}, "deterministic decoding"),

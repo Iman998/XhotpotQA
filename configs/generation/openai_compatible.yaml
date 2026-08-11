@@ -1,13 +1,12 @@
-model_id: google/gemma-4-31B-it
-revision: main
+model_id: served-translation-model
+revision: replace-with-immutable-revision
 backend: openai_compatible
 base_url_env: OPENAI_BASE_URL
 api_key_env: OPENAI_API_KEY
 timeout_seconds: 180
 http_max_retries: 2
 seed: 20260810
-chat_template_kwargs:
-  enable_thinking: false
+chat_template_kwargs: {}
 do_sample: false
 temperature: 0.0
 top_p: 1.0

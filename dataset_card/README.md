@@ -65,8 +65,8 @@ configs:
 
 # XHotpotQA
 
-XHotpotQA is a 24-language benchmark for **cross-lingual multi-hop question answering
-over mixed-language evidence**. It transforms the fixed-candidate HotpotQA distractor task
+XHotpotQA is a benchmark for **cross-lingual multi-hop question answering over
+mixed-language evidence**, spanning 24 languages. It transforms the fixed-candidate HotpotQA distractor task
 while retaining ordered paragraphs, sentence boundaries, answers, question type, difficulty,
 and sentence-level supporting facts.
 
@@ -80,10 +80,12 @@ evidence in another, ignore multilingual distractors, and answer in the question
 | Configuration | Train | Validation | Total |
 |---|---:|---:|---:|
 | XHotpotQA | 15,661 | 7,405 | 23,066 |
-| XHotpotQA+ | 375,864 | 177,720 | 553,584 |
+| XHotpotQA+ target | 375,864 | 177,720 | 553,584 |
 
-The public dataset deposit is pending. The paths in the YAML front matter are the exact paths
-validated by the release tooling and become loadable after publication.
+The public dataset deposit is pending. The audited raw archive contains all 375,864 parallel
+training views and 7,405 single-view validation records, but not the 177,720-view parallel
+validation split. A structural audit also quarantines invalid legacy records before a
+canonical release. The YAML paths become loadable only after every strict release gate passes.
 
 ## Languages
 
@@ -196,9 +198,9 @@ than content. See the repository schema document for exact invariants.
 
 The historical translator-selection pilot compared GPT-4o, GPT-4o mini, and Llama 3.1 70B.
 GPT-4o mini was selected after a Persian specialist comparison and a small 23-language
-follow-up. GPT model references are frozen to the versions available in January 2025
-(`gpt-4o-2024-11-20` and `gpt-4o-mini-2024-07-18`). This pilot is not a substitute for a
-stratified bilingual audit of the released translations.
+follow-up. January 2025 snapshot IDs describe the evaluation cutoff; the raw translation
+script used a mutable provider alias and did not record the provider-resolved revision. This
+pilot and incomplete provenance are not substitutes for a stratified bilingual audit.
 
 Raw model responses may be retained through the opt-in audit writer during generation. That
 log can contain source text and model output, is not a dataset field, and must remain outside
@@ -208,9 +210,10 @@ the public release unless a separate review explicitly authorizes disclosure.
 
 The `xhotpotqa_plus` configuration deterministically pairs every base record with all 24 available
 question--answer translations while keeping evidence and supervision fixed. A complete input
-mapping yields 375,864 training views and 177,720 validation views (553,584 total), grouped by
+mapping would yield 375,864 training views and 177,720 validation views (553,584 total), grouped by
 `source_id` with IDs of the form `<base-id>--qa-<language>`. The default `xhotpotqa`
-configuration retains the 23,066 canonical base records. The release gate verifies every
+configuration targets 23,066 canonical base records. Only the training-side 24-view archive
+is currently present; the configuration is not published from partial inputs. The release gate verifies every
 parallel view against its base record and rejects changed evidence, supervision, provenance,
 ordering, IDs, or language coverage. Each view inherits base-record provenance, so the
 checksum and generation metadata for the separate question--answer translation mapping must
@@ -223,14 +226,41 @@ analysis library exposes:
 
 \[
 \rho_G=|G|^{-1}\sum_{p\in G}\mathbf{1}[L_p\neq L_q],\qquad
-\rho_D=|D|^{-1}\sum_{p\in D}\mathbf{1}[L_p\neq L_q].
+\rho_D=|D|^{-1}\sum_{p\in D}\mathbf{1}[L_p\neq L_q]\quad (|D|>0).
 \]
+
+When an item has no distractors, \(\rho_D\) is not applicable rather than zero.
 
 It also derives normalized gold-evidence entropy \(H_G\), the number of distinct candidate
 languages \(K_C\), same-, mixed-, or different-script relations between the question and gold
-evidence, and five mutually exclusive strata: fully monolingual, multilingual distractors
+evidence, and five principal strata: fully monolingual, multilingual distractors
 only, partial gold mismatch, full mismatch with one evidence language, and full mismatch with
-multilingual evidence.
+multilingual evidence. A gold-aligned item without distractors receives a separate NA stratum.
+
+## Audited validation analysis
+
+All 7,405 raw validation rows join exactly to the official HotpotQA order and to the surviving
+reader/selector inputs. The realized assignment has the intended high-mixing geometry:
+
+| Descriptor | Observed | IID expectation |
+|---|---:|---:|
+| Question differs from at least one gold paragraph | 99.811% | 99.826% |
+| Gold paragraphs use different languages | 95.598% | 95.833% |
+| Question language absent from all candidates | 65.523% | 65.490% |
+| Distinct candidate languages per item | 8.300 mean | 8.282 mean |
+
+Complete prediction artifacts survive for three readers and one selector. Under the
+Unicode/script-aware answer metric, the S4-minus-S2 reader-F1 contrasts are -15.79 (Llama 3.1
+70B), -10.25 (GPT-4o mini), and -14.05 (Qwen2 72B) points. The corresponding selector support
+F1 contrast is -1.71 points with a 95% item-bootstrap interval of [-3.55, 0.21].
+Different-script versus same-script reader gaps range from -11.98 to -23.70 points; the
+selector gap is -1.78. These are descriptive frozen-run associations, not causal language
+effects.
+
+The structural audit flags 424 paragraph sentence-cardinality mismatches, 33 items with a
+blank sentence, and nine unavailable translated support indices. Their union affects 439
+items (5.93%). These records are quarantined for correction; the public dataset is not
+released by excluding or overwriting them silently.
 
 ## Supported tasks and metrics
 
@@ -239,7 +269,7 @@ multilingual evidence.
 - **End-to-end:** jointly predict the answer and supporting facts.
 
 The evaluator includes answer EM/precision/recall/F1, supporting-fact
-EM/precision/recall/F1, and Hotpot-style joint metrics. It reports micro aggregates, macro
+EM/precision/recall/F1, and Hotpot-style joint metrics. It reports mean-per-example aggregates, macro
 EM/F1 by question language, per-language and script-relation aggregates, the five language
 conditions, descriptor summaries, and stable bins for \(\rho_G\), \(\rho_D\), \(H_G\), and
 \(K_C\). It also reports missing and unexpected prediction counts. For Chinese, Japanese,
@@ -285,8 +315,8 @@ ShareAlike requirements. Repository software uses a separate MIT license.
 
 ```bibtex
 @unpublished{barati2026xhotpotqa,
-  title   = {XHotpotQA: A 24-Language Benchmark for Cross-Lingual Multi-Hop
-             Question Answering over Mixed-Language Evidence},
+  title   = {XHotpotQA: A Benchmark for Cross-Lingual Multi-Hop Question
+             Answering over Mixed-Language Evidence},
   author  = {Barati, Iman and Ghafouri, Arash and Minaei-Bidgoli, Behrouz},
   year    = {2026},
   note    = {Manuscript and resource release in preparation}
