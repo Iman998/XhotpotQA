@@ -9,17 +9,23 @@ retrieval/selection, reading, and end-to-end reasoning can be evaluated separate
 | Property | Value |
 |---|---:|
 | Languages | 24 |
-| Historical base sources | 15,661 train / 7,405 validation |
+| Public audited V1 | 15,661 train / 7,405 validation |
 | Audited raw parallel train views | 375,864 |
 | Audited raw validation views | 7,405 |
 | Complete XHotpotQA+ target | 553,584 views (not yet complete) |
 | Source task | HotpotQA distractor |
 | Dataset license | CC BY-SA 4.0 |
 
-> **Release status:** the public dataset deposit and persistent manuscript archive are
-> pending. The strict importer currently quarantines structurally invalid legacy records,
-> and the 177,720-view XHotpotQA+ validation split is not present in the audited archive.
-> Hub-loading commands become operational only after those release gates pass.
+> **Public Hub release:** [`iman998/XhotpotQA`](https://huggingface.co/datasets/iman998/XhotpotQA),
+> configuration `xhotpotqa_v1_audited`. This is an audit-preserving recovery of V1:
+> all 15,661 train sources and all 7,405 validation sources are retained, and each row
+> exposes `status` plus `structural_flags`. A quarantined status identifies a known
+> structural defect; it does not remove the row.
+>
+> The strict canonical `xhotpotqa` and `xhotpotqa_plus` configurations remain
+> prospective. In particular, the 177,720-view parallel validation mapping required for
+> XHotpotQA+ is not present in the audited archive. Canonical V2 data are also pending a
+> completed generation and paired quality audit.
 
 ## Why this benchmark?
 
@@ -45,20 +51,101 @@ Install the lightweight OpenAI-compatible client only when generating V2:
 pip install -e ".[generation]"
 ```
 
-## Load the data after publication
+## Load the public audited V1
 
 ```python
+from collections import Counter
 from datasets import load_dataset
 
-dataset = load_dataset("iman998/XhotpotQA")
-parallel = load_dataset("iman998/XhotpotQA", "xhotpotqa_plus")
-print(dataset["validation"][0])
-print(parallel["validation"][0])
+dataset = load_dataset(
+    "iman998/XhotpotQA",
+    "xhotpotqa_v1_audited",
+)
+
+validation = dataset["validation"]
+print(len(dataset["train"]), len(validation))  # 15_661, 7_405
+print(Counter(validation["status"]))
+print(validation[0]["question_language"], validation[0]["structural_flags"])
 ```
 
-The canonical record schema is documented in [`docs/SCHEMA.md`](docs/SCHEMA.md). Every
-release is validated before upload; the validator checks exact split sizes, unique IDs,
-language codes, sentence indices, answer language, and content checksums.
+Quarantined records intentionally remain part of the complete benchmark denominator. If a
+study also reports an accepted-only sensitivity result, filter explicitly and report the
+resulting row count:
+
+```python
+accepted_validation = validation.filter(lambda row: row["status"] == "accepted")
+print(accepted_validation.num_rows)
+```
+
+The exact recovered-Parquet schema, provenance fields, status semantics, and release
+limitations are documented in the
+[`dataset_card/README.md`](dataset_card/README.md). The schema in
+[`docs/SCHEMA.md`](docs/SCHEMA.md) is the stricter canonical JSONL contract used by the
+prospective V2 and XHotpotQA+ pipeline; it is not a claim that the recovered V1 rows have
+already passed those strict gates.
+
+## Rebuild the public audited V1
+
+The public Parquet release is built directly from the two pinned HotpotQA source files and
+the recovered pandas-column translation shards. The standalone builder requires `ijson`
+for streaming JSON and `pyarrow` for Parquet:
+
+```bash
+python -m pip install ijson pyarrow
+```
+
+Set `SOURCE_DIR` to the directory containing the official HotpotQA JSON files and
+`RAW_DIR` to the recovered cross-lingual shard directory. Pass every repeated shard
+argument in exactly the order shown:
+
+```bash
+SOURCE_DIR=/path/to/hotpotqa
+RAW_DIR=/path/to/cross-lingual
+
+python scripts/build_hf_public_v1.py \
+  --train-source "$SOURCE_DIR/hotpot_train_v1.1.json" \
+  --validation-source "$SOURCE_DIR/hotpot_dev_distractor_v1.json" \
+  --train-shard "$RAW_DIR/hotpot_train_translate_0-1.json" \
+  --train-shard "$RAW_DIR/hotpot_train_translate_1-2.json" \
+  --train-shard "$RAW_DIR/hotpot_train_translate_2-3.json" \
+  --train-shard "$RAW_DIR/hotpot_train_translate_3-4.json" \
+  --train-shard "$RAW_DIR/hotpot_train_translate_4-5.json" \
+  --train-shard "$RAW_DIR/hotpot_train_translate_5-6.json" \
+  --train-shard "$RAW_DIR/hotpot_train_translate_6-7.json" \
+  --train-shard "$RAW_DIR/hotpot_train_translate_7-8.json" \
+  --train-shard "$RAW_DIR/hotpot_train_translate_8-end.json" \
+  --validation-shard "$RAW_DIR/hotpot_validation_translate_0-1.json" \
+  --validation-shard "$RAW_DIR/hotpot_validation_translate_1-2.json" \
+  --validation-shard "$RAW_DIR/hotpot_validation_translate_2-3.json" \
+  --validation-shard "$RAW_DIR/hotpot_validation_translate_3-4.json" \
+  --validation-shard "$RAW_DIR/hotpot_validation_translate_4-5.json" \
+  --validation-shard "$RAW_DIR/hotpot_validation_translate_5-6.json" \
+  --validation-shard "$RAW_DIR/hotpot_validation_translate_6-end.json" \
+  --output-dir build/hf_public_v1 \
+  --rows-per-shard 5000
+```
+
+The script hash-pins all 18 inputs—the two source snapshots plus 16 translation shards—and
+rejects unexpected basenames, order, byte sizes, SHA-256 values, duplication, or changes
+during the build. The output directory must not already exist; data are built in a temporary
+sibling directory, read back for validation, and moved into place only after all checks pass.
+
+Expected output:
+
+```text
+build/hf_public_v1/
+├── RELEASE_MANIFEST.json
+└── data/
+    └── xhotpotqa_v1_audited/
+        ├── train-*.parquet       # 15,661 rows
+        └── validation-*.parquet  # 7,405 rows
+```
+
+The manifest records the `xhotpotqa_v1_audited` configuration, 23,066 total rows,
+ordered input roles and hashes, status/flag/language counts, Parquet file hashes, builder
+version and script hash, Git revision including dirty state, and the Python/platform/library
+environment. The builder writes data and the manifest; stage the reviewed
+`dataset_card/README.md` as the Hub `README.md` when publishing the release.
 
 ## Build the parallel XHotpotQA+ views
 
@@ -67,7 +154,9 @@ languages while holding the ordered candidate evidence and supporting-fact annot
 A complete mapping would produce 375,864 training views and 177,720 validation views
 (553,584 total). The expansion itself is deterministic and does not call a model. The audited
 archive currently contains only the training-side parallel views, so publication of the
-separate `xhotpotqa_plus` Hub configuration remains blocked; `xhotpotqa` is the intended default.
+separate `xhotpotqa_plus` Hub configuration remains blocked. The strict
+`xhotpotqa` configuration is likewise prospective; the current Hub default is explicitly
+`xhotpotqa_v1_audited`.
 
 Provide translations as either a source-ID keyed JSON object or the line-oriented JSONL form
 documented in [`docs/XHOTPOTQA_PLUS.md`](docs/XHOTPOTQA_PLUS.md), then run:
@@ -206,18 +295,28 @@ docs/                    schema, data statement, and reproducibility protocol
 ## Reproducibility and integrity
 
 - No credentials are accepted as command-line arguments or stored in configuration files.
-- The audited V1 validation mapping and 24-view training groups are preserved; the exact
-  historical base-train projection remains blocked on the consolidated server manifest. V2
-  can replay a checksum-pinned V1 assignment manifest for paired quality analysis. When no
-  manifest is supplied, assignments are derived from `seed + source_id + unit_id`, so sharding
-  does not alter them.
-- Every output record contains generation provenance and a versioned SHA-256 semantic checksum.
-- Upload is blocked unless base counts are exactly 15,661/7,405 and parallel-view counts are
-  exactly 375,864/177,720.
-- The release pipeline rejects unsupported language codes, duplicate IDs, broken support
-  indices, and question/answer language disagreement.
+- The public audited V1 selects one train view per 24-view source group using a stable
+  source-ID-keyed SHA-256 rule and retains the sole recovered validation view. This is a
+  reproducible public projection, not a reconstruction of the lost historical random seed.
+- The audited release builder rejects renamed, reordered, missing, duplicated, or
+  checksum-mismatched source inputs. It preserves detected defects through `status` and
+  `structural_flags` instead of silently rewriting or dropping rows.
+- `RELEASE_MANIFEST.json` records split counts, status and flag totals, question-language
+  counts, and every Parquet shard's row count, byte size, and SHA-256.
+- V2 can replay a checksum-pinned V1 assignment manifest for paired quality analysis. When no
+  manifest is supplied, assignments are derived from `seed + source_id + unit_id`, so
+  sharding does not alter them.
+- Canonical JSONL output records contain generation provenance and a versioned SHA-256
+  semantic checksum.
 
-Preflight a Hugging Face release without credentials or network access:
+## Prospective strict canonical release
+
+The `upload-hf` command belongs to the prospective strict JSONL release path. It requires
+both canonical base splits and both complete XHotpotQA+ splits, blocks unless their counts are
+exactly 15,661/7,405 and 375,864/177,720, and validates schema, IDs, language codes,
+support indices, answer language, checksums, and base-to-parallel invariants.
+
+Preflight that future release without credentials or network access:
 
 ```bash
 xhotpotqa upload-hf \
@@ -225,16 +324,15 @@ xhotpotqa upload-hf \
   --validation data/processed/validation.jsonl \
   --plus-train data/processed/xhotpotqa-plus.train.jsonl \
   --plus-validation data/processed/xhotpotqa-plus.validation.jsonl \
-  --card dataset_card/README.md \
+  --card path/to/canonical-release-card.md \
   --dry-run
 ```
 
-The preflight also verifies that the card declares the exact JSONL paths uploaded by the
-release command and that each parallel view preserves its base record's evidence, supervision,
-and provenance. A real upload uses one Hub commit for the card, integrity manifest, and all
-four validated split files. The generated manifest records configuration and split paths,
-record counts, byte sizes and SHA-256 hashes, the toolkit/data version, the code revision, and
-the `pyproject.toml` hash.
+The current `dataset_card/README.md` declares the audited Parquet configuration and is
+deliberately not a canonical JSONL release card. The strict preflight verifies that its
+dedicated card declares the exact JSONL paths and that each parallel view preserves its base
+record's evidence, supervision, and provenance. A future canonical upload uses one Hub commit
+for its card, integrity manifest, and all four validated split files.
 
 ## License and attribution
 
