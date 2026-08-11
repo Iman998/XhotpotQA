@@ -150,7 +150,7 @@ dataset = load_dataset(
 )
 
 print(dataset)
-print(len(dataset["train"]))       # 15_661
+print(len(dataset["train"]))  # 15_661
 print(len(dataset["validation"]))  # 7_405
 
 row = dataset["validation"][0]

@@ -20,6 +20,8 @@ from xhotpotqa.data.models import (
 from xhotpotqa.data.plus import QATranslation, expand_instance
 from xhotpotqa.languages import LANGUAGE_CODES
 
+CANONICAL_CARD_FIXTURE = Path(__file__).parent / "fixtures" / "canonical_release_card.md"
+
 
 def _base(split: str) -> XHotpotInstance:
     return with_checksum(
@@ -68,29 +70,27 @@ def _views(base: XHotpotInstance) -> tuple[XHotpotInstance, ...]:
     return expand_instance(base, translations)
 
 
-def test_dataset_card_matches_uploaded_artifacts() -> None:
-    release.validate_dataset_card(Path("dataset_card/README.md"))
+def test_canonical_dataset_card_fixture_matches_uploaded_artifacts() -> None:
+    release.validate_dataset_card(CANONICAL_CARD_FIXTURE)
 
 
-def test_dataset_card_rejects_stale_data_path(tmp_path: Path) -> None:
-    source = Path("dataset_card/README.md").read_text(encoding="utf-8")
+def test_canonical_dataset_card_rejects_stale_data_path(tmp_path: Path) -> None:
+    source = CANONICAL_CARD_FIXTURE.read_text(encoding="utf-8")
+    mutated = source.replace("data/xhotpotqa/train.jsonl", "data/xhotpotqa/train-*.parquet")
+    assert mutated != source
     stale_card = tmp_path / "README.md"
-    stale_card.write_text(
-        source.replace("data/xhotpotqa/train.jsonl", "data/xhotpotqa/train-*.parquet"),
-        encoding="utf-8",
-    )
+    stale_card.write_text(mutated, encoding="utf-8")
 
     with pytest.raises(ValueError, match="paths must match"):
         release.validate_dataset_card(stale_card)
 
 
-def test_dataset_card_rejects_missing_parallel_config(tmp_path: Path) -> None:
-    source = Path("dataset_card/README.md").read_text(encoding="utf-8")
+def test_canonical_dataset_card_rejects_missing_parallel_config(tmp_path: Path) -> None:
+    source = CANONICAL_CARD_FIXTURE.read_text(encoding="utf-8")
+    mutated = source.replace("- config_name: xhotpotqa_plus", "- config_name: undeclared")
+    assert mutated != source
     stale_card = tmp_path / "README.md"
-    stale_card.write_text(
-        source.replace("- config_name: xhotpotqa_plus", "- config_name: undeclared"),
-        encoding="utf-8",
-    )
+    stale_card.write_text(mutated, encoding="utf-8")
 
     with pytest.raises(ValueError, match="configs must match"):
         release.validate_dataset_card(stale_card)
@@ -109,7 +109,7 @@ def test_dry_run_stops_before_credentials_or_hub_import(
         Path("validation.jsonl"),
         Path("plus-train.jsonl"),
         Path("plus-validation.jsonl"),
-        Path("dataset_card/README.md"),
+        CANONICAL_CARD_FIXTURE,
         dry_run=True,
     )
 
