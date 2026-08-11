@@ -81,7 +81,7 @@ distractor task to 24 languages while retaining paragraph order, sentence
 boundaries, question type, difficulty, answers, and sentence-level supporting
 facts.
 
-This Hub revision is deliberately named **`xhotpotqa_v1_audited`**. It is a
+This release payload is deliberately named **`xhotpotqa_v1_audited`**. It is a
 recovered, audit-preserving V1 resource—not the prospective canonical V2. Every
 source item is retained, including rows with known structural defects, and every
 row carries a machine-readable `status` and `structural_flags` field.
@@ -106,7 +106,7 @@ row carries a machine-readable `status` and `structural_flags` field.
 
 | Artifact | Status | What is available |
 |---|---|---|
-| **Audited V1 base** | **Available in this Hub revision** | 15,661 train rows and all 7,405 validation rows |
+| **Audited V1 base** | **Included in this release payload** | 15,661 train rows and all 7,405 validation rows |
 | **XHotpotQA+** | **Prospective** | The historical archive contains 375,864 train views, but the 177,720-view parallel validation mapping is not available; no `xhotpotqa_plus` Hub configuration is published |
 | **Canonical V2** | **Prospective / blocked on completed artifacts and audit** | A model-agnostic OpenAI-compatible regeneration pipeline exists, but V2 data and a paired V1–V2 quality study are not part of this release |
 
@@ -134,8 +134,8 @@ open-Wikipedia retrieval benchmark.
 
 ## Quickstart
 
-Install a recent version of `datasets`, then load the single public
-configuration:
+To load this configuration from a published Hub revision, install a recent
+version of `datasets`:
 
 ```bash
 pip install -U datasets

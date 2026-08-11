@@ -9,15 +9,18 @@ retrieval/selection, reading, and end-to-end reasoning can be evaluated separate
 | Property | Value |
 |---|---:|
 | Languages | 24 |
-| Public audited V1 | 15,661 train / 7,405 validation |
+| Audited V1 release payload | 15,661 train / 7,405 validation |
 | Audited raw parallel train views | 375,864 |
 | Audited raw validation views | 7,405 |
 | Complete XHotpotQA+ target | 553,584 views (not yet complete) |
 | Source task | HotpotQA distractor |
 | Dataset license | CC BY-SA 4.0 |
 
-> **Public Hub release:** [`iman998/XhotpotQA`](https://huggingface.co/datasets/iman998/XhotpotQA),
-> configuration `xhotpotqa_v1_audited`. This is an audit-preserving recovery of V1:
+> **Hugging Face target (payload ready; upload pending):**
+> [`iman998/XhotpotQA`](https://huggingface.co/datasets/iman998/XhotpotQA), configuration
+> `xhotpotqa_v1_audited`. The complete payload has passed the local publication gate, but
+> the target repository still requires dataset-create/write authorization. This is an
+> audit-preserving recovery of V1:
 > all 15,661 train sources and all 7,405 validation sources are retained, and each row
 > exposes `status` plus `structural_flags`. A quarantined status identifies a known
 > structural defect; it does not remove the row.
@@ -51,7 +54,7 @@ Install the lightweight OpenAI-compatible client only when generating V2:
 pip install -e ".[generation]"
 ```
 
-## Load the public audited V1
+## Load after Hub publication
 
 ```python
 from collections import Counter
@@ -77,7 +80,8 @@ accepted_validation = validation.filter(lambda row: row["status"] == "accepted")
 print(accepted_validation.num_rows)
 ```
 
-The exact recovered-Parquet schema, provenance fields, status semantics, and release
+The command above becomes operational after the Hub commit is published. The exact
+recovered-Parquet schema, provenance fields, status semantics, and release
 limitations are documented in the
 [`dataset_card/README.md`](dataset_card/README.md). The schema in
 [`docs/SCHEMA.md`](docs/SCHEMA.md) is the stricter canonical JSONL contract used by the
@@ -155,8 +159,8 @@ A complete mapping would produce 375,864 training views and 177,720 validation v
 (553,584 total). The expansion itself is deterministic and does not call a model. The audited
 archive currently contains only the training-side parallel views, so publication of the
 separate `xhotpotqa_plus` Hub configuration remains blocked. The strict
-`xhotpotqa` configuration is likewise prospective; the current Hub default is explicitly
-`xhotpotqa_v1_audited`.
+`xhotpotqa` configuration is likewise prospective; when the audited payload is published,
+its Hub default is explicitly `xhotpotqa_v1_audited`.
 
 Provide translations as either a source-ID keyed JSON object or the line-oriented JSONL form
 documented in [`docs/XHOTPOTQA_PLUS.md`](docs/XHOTPOTQA_PLUS.md), then run:
@@ -295,7 +299,7 @@ docs/                    schema, data statement, and reproducibility protocol
 ## Reproducibility and integrity
 
 - No credentials are accepted as command-line arguments or stored in configuration files.
-- The public audited V1 selects one train view per 24-view source group using a stable
+- The audited V1 release payload selects one train view per 24-view source group using a stable
   source-ID-keyed SHA-256 rule and retains the sole recovered validation view. This is a
   reproducible public projection, not a reconstruction of the lost historical random seed.
 - The audited release builder rejects renamed, reordered, missing, duplicated, or
