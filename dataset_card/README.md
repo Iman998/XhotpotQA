@@ -124,8 +124,8 @@ they do not imply comparable resource levels or translation quality.
 ```python
 from datasets import load_dataset
 
-base = load_dataset("iman998/XHotpotQA", "xhotpotqa")
-parallel = load_dataset("iman998/XHotpotQA", "xhotpotqa_plus")
+base = load_dataset("iman998/XhotpotQA", "xhotpotqa")
+parallel = load_dataset("iman998/XhotpotQA", "xhotpotqa_plus")
 
 example = base["validation"][0]
 print(example["question"], example["question_language"])
@@ -166,7 +166,8 @@ provenance: struct[
   source_dataset: string
   source_license: string
   assignment_version: string
-  seed: int
+  assignment_manifest_sha256: SHA-256 | empty
+  seed: int | null
   translation_model: string
   translation_revision: string
   prompt_version: string
@@ -249,18 +250,35 @@ reader/selector inputs. The realized assignment has the intended high-mixing geo
 | Question language absent from all candidates | 65.523% | 65.490% |
 | Distinct candidate languages per item | 8.300 mean | 8.282 mean |
 
-Complete prediction artifacts survive for three readers and one selector. Under the
+Three 7,405-row reader artifacts and one 7,405-row selector artifact survive. The Llama
+reader has 7,403 non-null outputs; its two missing responses are scored as empty. Under the
 Unicode/script-aware answer metric, the S4-minus-S2 reader-F1 contrasts are -15.79 (Llama 3.1
 70B), -10.25 (GPT-4o mini), and -14.05 (Qwen2 72B) points. The corresponding selector support
-F1 contrast is -1.71 points with a 95% item-bootstrap interval of [-3.55, 0.21].
+F1 contrast is -1.71 points with a 95% item-bootstrap interval of [-3.60, 0.21].
 Different-script versus same-script reader gaps range from -11.98 to -23.70 points; the
 selector gap is -1.78. These are descriptive frozen-run associations, not causal language
-effects.
+effects. The Llama label is historical: the surviving client used a private
+OpenAI-compatible endpoint and does not independently prove the served checkpoint without
+the corresponding server log.
+
+Assigned gold-paragraph language shows model-specific variation rather than a universal
+language hierarchy. Marginal reader F1 spans 34.6--51.1, 43.7--52.4, and 36.4--45.4 points
+for the three readers, compared with 81.8--86.1 selector support F1. In a one-row-per-source
+joint model controlling question language, question/answer type, script relation, exact
+alignment, gold-language pairing, support-fact count, and structural flags, no gold-language
+coefficient survives within-outcome FDR correction for GPT-4o mini, Qwen2 72B, or the
+selector. Only the historically labeled Llama reader retains four negative associations
+relative to substituting an English-assigned gold paragraph. These coefficients remain
+descriptive because translation quality and the second gold language are not experimentally
+isolated.
 
 The structural audit flags 424 paragraph sentence-cardinality mismatches, 33 items with a
 blank sentence, and nine unavailable translated support indices. Their union affects 439
 items (5.93%). These records are quarantined for correction; the public dataset is not
-released by excluding or overwriting them silently.
+released by excluding or overwriting them silently. Excluding the 439 items changes every
+tested aggregate EM/F1 metric by at most 0.51 points and the two primary language-condition
+contrasts by at most 0.22 points; all eight paired bootstrap intervals for contrast shifts
+include zero.
 
 ## Supported tasks and metrics
 

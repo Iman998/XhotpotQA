@@ -50,8 +50,8 @@ pip install -e ".[generation]"
 ```python
 from datasets import load_dataset
 
-dataset = load_dataset("iman998/XHotpotQA")
-parallel = load_dataset("iman998/XHotpotQA", "xhotpotqa_plus")
+dataset = load_dataset("iman998/XhotpotQA")
+parallel = load_dataset("iman998/XhotpotQA", "xhotpotqa_plus")
 print(dataset["validation"][0])
 print(parallel["validation"][0])
 ```
@@ -124,7 +124,14 @@ refuses to overwrite an existing import directory. See
 
 The V2 pipeline is model-agnostic. It sends a strict JSON translation contract to any model
 already exposed through an OpenAI-compatible chat-completions endpoint. The data process is
-a lightweight client and never loads model weights itself.
+a lightweight client and never loads model weights itself. Each user payload includes an
+explicit JSON `response_schema`: single units must return only a non-empty `translation`
+string, while sentence arrays must return only a `translations` array with exactly the same
+cardinality as the input. The frozen prompt identity is recorded in every generated record.
+Its SHA-256 covers the canonical prompt specification---the system message plus both request
+and response-schema templates---rather than the system text alone. The parser removes only
+surrounding whitespace: prose, Markdown fences, wrapper objects, duplicate keys, and multiple
+JSON values are rejected and retried.
 
 For example, start any compatible checkpoint with vLLM (replace all angle-bracket values):
 
@@ -148,8 +155,14 @@ xhotpotqa generate-v2 \
   --output data/processed/train.v2.jsonl \
   --config configs/generation/openai_compatible.yaml \
   --split train \
+  --assignment-manifest data/manifests/v1.train.assignments.json \
   --audit-log private-audit/train.v2.responses.jsonl
 ```
+
+`--assignment-manifest` is optional. Use it for the corrective V2 run to preserve every V1
+question--answer and paragraph language exactly; omit it to retain the seeded `sha256-hash-v1`
+assignment path. The manifest schema, strict validation rules, and paired-audit key are defined
+in [`docs/ASSIGNMENT_MANIFEST.md`](docs/ASSIGNMENT_MANIFEST.md).
 
 Generation is deterministic at the assignment layer and resumable by immutable source ID.
 It never changes sentence order or supporting-fact indices. Model-specific chat-template
@@ -195,7 +208,9 @@ docs/                    schema, data statement, and reproducibility protocol
 - No credentials are accepted as command-line arguments or stored in configuration files.
 - The audited V1 validation mapping and 24-view training groups are preserved; the exact
   historical base-train projection remains blocked on the consolidated server manifest. V2
-  assignments are derived from `seed + source_id + unit_id`, so sharding does not alter them.
+  can replay a checksum-pinned V1 assignment manifest for paired quality analysis. When no
+  manifest is supplied, assignments are derived from `seed + source_id + unit_id`, so sharding
+  does not alter them.
 - Every output record contains generation provenance and a versioned SHA-256 semantic checksum.
 - Upload is blocked unless base counts are exactly 15,661/7,405 and parallel-view counts are
   exactly 375,864/177,720.

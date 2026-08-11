@@ -1,6 +1,8 @@
+import hashlib
 from dataclasses import replace
 
 from xhotpotqa.data.checksum import compute_checksum, with_checksum
+from xhotpotqa.data.io import canonical_json
 from xhotpotqa.data.models import CandidateParagraph, Provenance, SupportingFact, XHotpotInstance
 
 
@@ -48,3 +50,12 @@ def test_semantic_checksum_excludes_volatile_provenance() -> None:
     )
 
     assert compute_checksum(first) == compute_checksum(second)
+
+
+def test_empty_manifest_hash_preserves_pre_manifest_checksum_contract() -> None:
+    instance = make_instance()
+    legacy_payload = instance.to_dict()
+    del legacy_payload["provenance"]["assignment_manifest_sha256"]
+    expected = hashlib.sha256(canonical_json(legacy_payload).encode()).hexdigest()
+
+    assert compute_checksum(instance) == expected

@@ -18,6 +18,11 @@ def compute_checksum(instance: XHotpotInstance) -> str:
         validation_status="",
     )
     payload = replace(instance, checksum="", provenance=stable_provenance).to_dict()
+    # Preserve checksums of pre-manifest records. The field is semantic only when
+    # a manifest-backed assignment actually records a digest.
+    provenance = payload["provenance"]
+    if isinstance(provenance, dict) and not provenance["assignment_manifest_sha256"]:
+        del provenance["assignment_manifest_sha256"]
     return hashlib.sha256(canonical_json(payload).encode("utf-8")).hexdigest()
 
 

@@ -90,6 +90,12 @@ def _strict_release_errors(instance: XHotpotInstance) -> list[str]:
             errors.append(prefix + f"provenance.{field_name} is required")
     if not _SHA256.fullmatch(provenance.prompt_hash):
         errors.append(prefix + "provenance.prompt_hash must be a lowercase SHA-256 digest")
+    if provenance.assignment_manifest_sha256 and not _SHA256.fullmatch(
+        provenance.assignment_manifest_sha256
+    ):
+        errors.append(
+            prefix + "provenance.assignment_manifest_sha256 must be a lowercase SHA-256 digest"
+        )
     if provenance.retry_count < 0:
         errors.append(prefix + "provenance.retry_count cannot be negative")
     return errors

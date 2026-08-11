@@ -144,7 +144,7 @@ def upload_dataset(
     plus_validation: Path,
     dataset_card: Path,
     *,
-    repo_id: str = "iman998/XHotpotQA",
+    repo_id: str = "iman998/XhotpotQA",
     dry_run: bool = False,
 ) -> None:
     if not _REPO_ID.fullmatch(repo_id) or ".." in repo_id:

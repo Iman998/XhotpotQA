@@ -6,7 +6,10 @@ from collections.abc import Mapping
 from datetime import datetime, timezone
 from typing import Any
 
-from xhotpotqa.data.assignment import LanguageAssigner
+from xhotpotqa.data.assignment import (
+    QUESTION_ANSWER_UNIT_ID,
+    LanguageAssignmentStrategy,
+)
 from xhotpotqa.data.checksum import with_checksum
 from xhotpotqa.data.models import (
     CandidateParagraph,
@@ -19,7 +22,11 @@ from xhotpotqa.generation.translation import PROMPT_HASH, PROMPT_VERSION
 
 
 class XHotpotBuilder:
-    def __init__(self, translator: TranslationService, assigner: LanguageAssigner) -> None:
+    def __init__(
+        self,
+        translator: TranslationService,
+        assigner: LanguageAssignmentStrategy,
+    ) -> None:
         self._translator = translator
         self._assigner = assigner
 
@@ -27,7 +34,8 @@ class XHotpotBuilder:
     def resume_signature(self) -> dict[str, object]:
         """Return immutable settings that must match before resuming output."""
         return {
-            "assignment_version": "sha256-hash-v1",
+            "assignment_version": self._assigner.assignment_version,
+            "assignment_manifest_sha256": self._assigner.assignment_manifest_sha256,
             "seed": self._assigner.seed,
             "translation_model": self._translator.model_id,
             "translation_revision": self._translator.revision,
@@ -40,8 +48,14 @@ class XHotpotBuilder:
         source_id = str(source.get("_id", source.get("id", "")))
         if not source_id:
             raise ValueError("HotpotQA source record is missing _id/id")
+        raw_context = tuple(source["context"])
+        unit_ids = (
+            QUESTION_ANSWER_UNIT_ID,
+            *(f"paragraph:{index}" for index in range(len(raw_context))),
+        )
+        self._assigner.validate_source(source_id, unit_ids)
         retries_before = int(getattr(self._translator, "retry_count", 0))
-        question_language = self._assigner.assign(source_id, "question-answer")
+        question_language = self._assigner.assign(source_id, QUESTION_ANSWER_UNIT_ID)
         question = self._translator.translate_text(
             str(source["question"]), question_language, "question"
         )
@@ -49,7 +63,7 @@ class XHotpotBuilder:
 
         candidates: list[CandidateParagraph] = []
         source_title_to_ids: dict[str, list[str]] = {}
-        for index, raw_candidate in enumerate(source["context"]):
+        for index, raw_candidate in enumerate(raw_context):
             source_title, source_sentences = raw_candidate
             paragraph_id = f"p{index:02d}"
             language = self._assigner.assign(source_id, f"paragraph:{index}")
@@ -75,7 +89,8 @@ class XHotpotBuilder:
             for title, sentence_id in source["supporting_facts"]
         )
         provenance = Provenance(
-            assignment_version="sha256-hash-v1",
+            assignment_version=self._assigner.assignment_version,
+            assignment_manifest_sha256=self._assigner.assignment_manifest_sha256,
             seed=self._assigner.seed,
             translation_model=self._translator.model_id,
             translation_revision=self._translator.revision,

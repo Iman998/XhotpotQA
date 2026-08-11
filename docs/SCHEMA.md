@@ -9,9 +9,10 @@ Each JSONL record contains:
   optional English source fields.
 - `supporting_facts`: ordered `{paragraph_id, sentence_id, role}` objects. `role` is one of
   `bridge`, `answer`, `comparison`, or `support`.
-- `provenance`: schema and assignment versions, seed, model ID/revision, prompt version/hash,
-  decoding parameters, parser-retry count, creation timestamp, structural-validation status,
-  source dataset, and source license.
+- `provenance`: schema and assignment versions, optional assignment-manifest SHA-256, seed,
+  model ID/revision, prompt version/hash, decoding parameters, parser-retry count, creation
+  timestamp, structural-validation status, source dataset, and source license. Manifest-backed
+  V2 records use `seed: null`; hash-assigned records leave `assignment_manifest_sha256` empty.
 - `checksum`: SHA-256 over the canonical semantic payload. Volatile execution fields
   (`created_at`, retry count, and validation status) are excluded.
 

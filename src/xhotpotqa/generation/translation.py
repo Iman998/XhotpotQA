@@ -15,10 +15,72 @@ PROMPT_VERSION = "xhotpotqa-translation-v2.0"
 SYSTEM_PROMPT = (
     "You are the deterministic translation component of a multilingual QA dataset. "
     "Preserve named entities, numbers, dates, yes/no polarity, and sentence boundaries. "
-    "Do not answer the question and do not add explanations. Return exactly one valid "
-    "JSON object with the requested keys and no Markdown."
+    "Do not answer the question and do not add explanations. The user request contains a "
+    "response_schema; return exactly one valid JSON object that satisfies it, with no "
+    "additional keys and no Markdown."
 )
-PROMPT_HASH = hashlib.sha256(SYSTEM_PROMPT.encode("utf-8")).hexdigest()
+
+
+def _single_translation_schema() -> dict[str, object]:
+    """Return the exact wire-level response contract for one translated unit."""
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["translation"],
+        "properties": {
+            "translation": {
+                "type": "string",
+                "minLength": 1,
+            }
+        },
+    }
+
+
+def _sentence_array_schema(expected_count: int | str) -> dict[str, object]:
+    """Return the exact response contract for an aligned sentence array."""
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["translations"],
+        "properties": {
+            "translations": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "minLength": 1,
+                },
+                "minItems": expected_count,
+                "maxItems": expected_count,
+            }
+        },
+    }
+
+
+_PROMPT_SPECIFICATION = {
+    "system_prompt": SYSTEM_PROMPT,
+    "requests": {
+        "translate": {
+            "task": "translate",
+            "unit": "{unit}",
+            "target_language": "{target_language}",
+            "text": "{text}",
+            "response_schema": _single_translation_schema(),
+        },
+        "translate_sentence_array": {
+            "task": "translate_sentence_array",
+            "target_language": "{target_language}",
+            "sentences": ["{sentence_0}", "..."],
+            "response_schema": _sentence_array_schema("{sentence_count}"),
+        },
+    },
+}
+_CANONICAL_PROMPT_SPECIFICATION = json.dumps(
+    _PROMPT_SPECIFICATION,
+    ensure_ascii=False,
+    sort_keys=True,
+    separators=(",", ":"),
+)
+PROMPT_HASH = hashlib.sha256(_CANONICAL_PROMPT_SPECIFICATION.encode("utf-8")).hexdigest()
 ResponseT = TypeVar("ResponseT")
 AuditWriter = Callable[[Mapping[str, object]], None]
 
@@ -70,6 +132,7 @@ class StructuredTranslator:
             "unit": unit,
             "target_language": language.name,
             "text": text,
+            "response_schema": _single_translation_schema(),
         }
         return self._request(request, _parse_translation)
 
@@ -83,6 +146,7 @@ class StructuredTranslator:
             "task": "translate_sentence_array",
             "target_language": language.name,
             "sentences": list(sentences),
+            "response_schema": _sentence_array_schema(len(sentences)),
         }
         return self._request(
             request,
@@ -140,21 +204,28 @@ class StructuredTranslator:
         )
 
 
-def _extract_json(text: str) -> str:
-    start, end = text.find("{"), text.rfind("}")
-    if start < 0 or end < start:
-        raise ValueError("Response contains no JSON object")
-    return text[start : end + 1]
-
-
 def _parse_json_object(text: str) -> dict[str, object]:
-    parsed: object = json.loads(_extract_json(text))
+    stripped = text.strip()
+    if not stripped:
+        raise ValueError("Response is empty")
+    parsed: object = json.loads(stripped, object_pairs_hook=_object_without_duplicate_keys)
     if not isinstance(parsed, dict) or not all(isinstance(key, str) for key in parsed):
-        raise ValueError("Expected a JSON object with string keys")
+        raise ValueError("Entire response must be one JSON object with string keys")
     return cast(dict[str, object], parsed)
 
 
+def _object_without_duplicate_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    parsed: dict[str, object] = {}
+    for key, value in pairs:
+        if key in parsed:
+            raise ValueError(f"Response contains duplicate JSON key {key!r}")
+        parsed[key] = value
+    return parsed
+
+
 def _parse_translation(response: Mapping[str, object]) -> str:
+    if set(response) != {"translation"}:
+        raise ValueError("Translation response must contain only the 'translation' key")
     translation = response.get("translation")
     if not isinstance(translation, str) or not translation.strip():
         raise ValueError("Translation response lacks a non-empty 'translation' string")
@@ -162,6 +233,8 @@ def _parse_translation(response: Mapping[str, object]) -> str:
 
 
 def _parse_translations(response: Mapping[str, object], *, expected_count: int) -> tuple[str, ...]:
+    if set(response) != {"translations"}:
+        raise ValueError("Sentence-array response must contain only the 'translations' key")
     translated = response.get("translations")
     if not isinstance(translated, list) or not all(isinstance(item, str) for item in translated):
         raise ValueError("Translation response lacks a string 'translations' array")

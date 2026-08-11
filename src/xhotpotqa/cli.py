@@ -9,7 +9,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
-from xhotpotqa.data.assignment import LanguageAssigner
+from xhotpotqa.data.assignment import LanguageAssigner, ManifestLanguageAssigner
 from xhotpotqa.data.io import read_instances, read_jsonl
 from xhotpotqa.data.legacy import (
     DEFAULT_EXPECTED_SOURCE_COUNTS,
@@ -77,6 +77,14 @@ def _parser() -> argparse.ArgumentParser:
     generate.add_argument("--config", type=Path, required=True)
     generate.add_argument("--split", choices=("train", "validation"), required=True)
     generate.add_argument(
+        "--assignment-manifest",
+        type=Path,
+        help=(
+            "optional frozen source/unit/language manifest; when omitted, use the "
+            "configured hash-based assignment"
+        ),
+    )
+    generate.add_argument(
         "--audit-log",
         type=Path,
         help="optional private JSONL log containing requests and raw model responses",
@@ -113,7 +121,7 @@ def _parser() -> argparse.ArgumentParser:
     upload.add_argument("--plus-train", type=Path, required=True)
     upload.add_argument("--plus-validation", type=Path, required=True)
     upload.add_argument("--card", type=Path, default=Path("dataset_card/README.md"))
-    upload.add_argument("--repo-id", default="iman998/XHotpotQA")
+    upload.add_argument("--repo-id", default="iman998/XhotpotQA")
     upload.add_argument(
         "--dry-run", action="store_true", help="validate release inputs without network access"
     )
@@ -176,7 +184,12 @@ def _generate(args: argparse.Namespace) -> int:
         decoding=config.decoding_parameters(),
         audit_writer=PrivateJsonlAuditLog(args.audit_log) if args.audit_log else None,
     )
-    builder = XHotpotBuilder(translator, LanguageAssigner(config.seed))
+    assigner = (
+        ManifestLanguageAssigner.from_path(args.assignment_manifest)
+        if args.assignment_manifest
+        else LanguageAssigner(config.seed)
+    )
+    builder = XHotpotBuilder(translator, assigner)
     written = generate_dataset(
         load_hotpot_records(args.input, args.split),
         args.output,
@@ -184,7 +197,16 @@ def _generate(args: argparse.Namespace) -> int:
         builder,
         checkpoint_every=config.checkpoint_every,
     )
-    print(json.dumps({"written": written, "output": str(args.output)}))
+    print(
+        json.dumps(
+            {
+                "written": written,
+                "output": str(args.output),
+                "assignment_version": assigner.assignment_version,
+                "assignment_manifest_sha256": assigner.assignment_manifest_sha256 or None,
+            }
+        )
+    )
     return 0
 
 

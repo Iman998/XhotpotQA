@@ -43,6 +43,7 @@ class Provenance:
     source_dataset: str = "hotpotqa/hotpot_qa"
     source_license: str = "CC-BY-SA-4.0"
     assignment_version: str = ""
+    assignment_manifest_sha256: str = ""
     # Historical V1 assignments were sampled without a recorded seed.  ``None``
     # distinguishes that missing provenance from a genuine seed of zero.
     seed: int | None = None

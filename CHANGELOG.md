@@ -14,6 +14,10 @@
   script-relation summaries, mismatch/entropy bins, and an explicit no-distractor/NA stratum.
 - Make V2 generation model-agnostic through a generic OpenAI-compatible configuration and
   vLLM serving script; retain the Gemma configuration only as an optional example.
+- Finalize the pre-release V2 wire contract by embedding task-specific JSON response schemas
+  in every translation request while retaining prompt version `xhotpotqa-translation-v2.0`.
+- Add optional, checksum-pinned replay of V1 question--answer and paragraph language
+  assignments for source/unit/language-paired corrective V2 audits.
 
 ## 0.2.0 - 2026-08-10
 

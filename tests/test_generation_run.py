@@ -20,6 +20,7 @@ def test_resume_rejects_incompatible_provenance(tmp_path: Path) -> None:
             make_instance(),
             provenance=Provenance(
                 assignment_version="sha256-hash-v1",
+                assignment_manifest_sha256="a" * 64,
                 seed=42,
                 translation_model="model-a",
                 translation_revision="rev-a",
@@ -36,7 +37,7 @@ def test_resume_rejects_incompatible_provenance(tmp_path: Path) -> None:
         completed_source_ids(
             output,
             expected_split="validation",
-            expected_signature={"translation_model": "model-b"},
+            expected_signature={"assignment_manifest_sha256": "b" * 64},
         )
 
 

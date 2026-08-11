@@ -1,16 +1,57 @@
+import json
 from collections.abc import Sequence
 
-from xhotpotqa.generation.translation import StructuredTranslator
+import pytest
+
+from xhotpotqa.generation.translation import PROMPT_HASH, PROMPT_VERSION, StructuredTranslator
 
 
 class SequenceGenerator:
     def __init__(self, responses: Sequence[str]) -> None:
         self.responses = list(responses)
         self.calls = 0
+        self.messages: list[list[dict[str, str]]] = []
 
     def generate(self, messages: Sequence[dict[str, str]]) -> str:
         self.calls += 1
+        self.messages.append([dict(message) for message in messages])
         return self.responses.pop(0)
+
+
+def _user_payload(generator: SequenceGenerator) -> dict[str, object]:
+    return json.loads(generator.messages[-1][1]["content"])
+
+
+def test_prompt_identity_is_frozen_for_v2() -> None:
+    assert PROMPT_VERSION == "xhotpotqa-translation-v2.0"
+    assert PROMPT_HASH == "623496d198d7850c244ff4e2303b7ba9b61548499ce10256ae6691a6b58e71f3"
+
+
+def test_single_translation_wire_contract_is_explicit() -> None:
+    generator = SequenceGenerator(['{"translation":"answer"}'])
+    translator = StructuredTranslator(generator, model_id="model", revision="revision")
+
+    assert translator.translate_text("source", "fa", "answer") == "answer"
+    payload = _user_payload(generator)
+    assert payload["task"] == "translate"
+    assert payload["response_schema"] == {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["translation"],
+        "properties": {"translation": {"type": "string", "minLength": 1}},
+    }
+
+
+def test_sentence_array_wire_contract_fixes_output_cardinality() -> None:
+    generator = SequenceGenerator(['{"translations":["one","two"]}'])
+    translator = StructuredTranslator(generator, model_id="model", revision="revision")
+
+    assert translator.translate_sentences(("first", "second"), "fa") == ("one", "two")
+    payload = _user_payload(generator)
+    translations = payload["response_schema"]["properties"]["translations"]
+    assert translations["minItems"] == 2
+    assert translations["maxItems"] == 2
+    assert payload["response_schema"]["required"] == ["translations"]
 
 
 def test_schema_error_is_retried_not_just_invalid_json() -> None:
@@ -22,6 +63,50 @@ def test_schema_error_is_retried_not_just_invalid_json() -> None:
     assert translator.translate_text("answer", "fa", "answer") == "پاسخ"
     assert generator.calls == 2
     assert translator.retry_count == 1
+
+
+def test_additional_response_keys_are_retried() -> None:
+    generator = SequenceGenerator(
+        ['{"translation":"answer","explanation":"extra"}', '{"translation":"answer"}']
+    )
+    translator = StructuredTranslator(
+        generator, model_id="model", revision="revision", max_retries=2
+    )
+
+    assert translator.translate_text("source", "fa", "answer") == "answer"
+    assert generator.calls == 2
+    assert translator.retry_count == 1
+
+
+@pytest.mark.parametrize(
+    "invalid_response",
+    [
+        'Here is the translation: {"translation":"answer"}',
+        '```json\n{"translation":"answer"}\n```',
+        '{"translation":"answer"} trailing prose',
+        '{"translation":"first"}{"translation":"second"}',
+        '[{"translation":"answer"}]',
+        '{"response":{"translation":"answer"}}',
+        '{"translation":"first","translation":"second"}',
+    ],
+)
+def test_response_must_be_exactly_one_unwrapped_json_object(invalid_response: str) -> None:
+    generator = SequenceGenerator([invalid_response, '{"translation":"answer"}'])
+    translator = StructuredTranslator(
+        generator, model_id="model", revision="revision", max_retries=2
+    )
+
+    assert translator.translate_text("source", "fa", "answer") == "answer"
+    assert generator.calls == 2
+    assert translator.retry_count == 1
+
+
+def test_surrounding_whitespace_is_the_only_permitted_wrapper() -> None:
+    generator = SequenceGenerator([' \r\n\t{"translation":"answer"}\n '])
+    translator = StructuredTranslator(generator, model_id="model", revision="revision")
+
+    assert translator.translate_text("source", "fa", "answer") == "answer"
+    assert generator.calls == 1
 
 
 def test_sentence_cardinality_error_is_retried() -> None:
