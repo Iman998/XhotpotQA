@@ -1,18 +1,24 @@
+# Generated data and logs
+data/processed/
+data/smoke_val_50.json
+*.log
+*.errors.jsonl
+
+# Python
 __pycache__/
 *.py[cod]
 *.egg-info/
-.coverage
-coverage.xml
-.mypy_cache/
-.pytest_cache/
-.ruff_cache/
-.venv/
+*.egg-link
+.eggs/
 build/
 dist/
-.env
-data/raw/
-data/processed/
-outputs/
-*.parquet
-*.jsonl
-!tests/fixtures/*.jsonl
+
+# Virtual envs
+.venv/
+venv/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp

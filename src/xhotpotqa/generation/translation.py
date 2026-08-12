@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import threading
 from collections.abc import Callable, Mapping, Sequence
 from types import MappingProxyType
 from typing import TypeVar, cast
@@ -103,6 +104,7 @@ class StructuredTranslator:
         self._revision = revision
         self._max_retries = max_retries
         self._retry_count = 0
+        self._retry_lock = threading.Lock()
         self._decoding: Mapping[str, object] = MappingProxyType(dict(decoding or {}))
         self._audit_writer = audit_writer
 
@@ -179,7 +181,8 @@ class StructuredTranslator:
         last_error: Exception | None = None
         for attempt in range(self._max_retries):
             if attempt:
-                self._retry_count += 1
+                with self._retry_lock:
+                    self._retry_count += 1
             raw = self._generator.generate(
                 [
                     {"role": "system", "content": SYSTEM_PROMPT},

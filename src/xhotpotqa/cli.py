@@ -89,6 +89,17 @@ def _parser() -> argparse.ArgumentParser:
         type=Path,
         help="optional private JSONL log containing requests and raw model responses",
     )
+    generate.add_argument(
+        "--max-workers",
+        type=int,
+        default=1,
+        help="concurrent worker threads for translation (default: 1 = sequential)",
+    )
+    generate.add_argument(
+        "--no-progress",
+        action="store_true",
+        help="disable the tqdm progress bar (used only when --max-workers > 1)",
+    )
 
     expand = commands.add_parser(
         "expand-plus",
@@ -198,13 +209,26 @@ def _generate(args: argparse.Namespace) -> int:
         else LanguageAssigner(config.seed)
     )
     builder = XHotpotBuilder(translator, assigner)
-    written = generate_dataset(
-        load_hotpot_records(args.input, args.split),
-        args.output,
-        args.split,
-        builder,
-        checkpoint_every=config.checkpoint_every,
-    )
+    if args.max_workers and args.max_workers > 1:
+        from xhotpotqa.generation.run import generate_dataset_parallel
+
+        written = generate_dataset_parallel(
+            load_hotpot_records(args.input, args.split),
+            args.output,
+            args.split,
+            builder,
+            max_workers=args.max_workers,
+            checkpoint_every=config.checkpoint_every,
+            progress=not args.no_progress,
+        )
+    else:
+        written = generate_dataset(
+            load_hotpot_records(args.input, args.split),
+            args.output,
+            args.split,
+            builder,
+            checkpoint_every=config.checkpoint_every,
+        )
     print(
         json.dumps(
             {
