@@ -58,29 +58,31 @@ configs:
     path: data/xhotpotqa_v1_audited/validation-*.parquet
 ---
 
-<div align="center">
-
-# XHotpotQA
-
-### Cross-lingual multi-hop question answering over mixed-language evidence
-
-**One question · multiple evidence paragraphs · languages may change between hops**
-
-[![Rows: 23,066](https://img.shields.io/badge/23%2C066-ROWS-0f766e?style=for-the-badge)](#dataset-at-a-glance)
-[![Task: cross-lingual multi-hop QA](https://img.shields.io/badge/CROSS--LINGUAL-MULTI--HOP%20QA-4f46e5?style=for-the-badge)](#task-formulation-and-analysis-strata)
-[![Release: audited V1](https://img.shields.io/badge/AUDITED%20V1-RECOVERED-d97706?style=for-the-badge)](#release-status)
-
-[![Format: Parquet](https://img.shields.io/badge/FORMAT-Parquet-7c3aed?style=flat-square)](#data-format)
-[![License: CC BY-SA 4.0](https://img.shields.io/badge/DATA-CC%20BY--SA%204.0-16a34a?style=flat-square)](#license)
-[![Code repository](https://img.shields.io/badge/CODE-GitHub-111827?style=flat-square)](https://github.com/Iman998/XhotpotQA)
-
-[Overview](#dataset-at-a-glance) ·
-[Load](#load-in-30-seconds) ·
-[Structure](#data-format) ·
-[Quality](#quality-and-version-policy) ·
-[Findings](#artifact-verified-validation-analysis) ·
-[Citation](#citation)
-
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;border:1px solid #64748b;border-radius:16px;overflow:hidden;margin:0 0 24px;box-shadow:0 8px 24px rgba(15,23,42,.08);">
+  <div style="background:linear-gradient(135deg,#0f172a 0%,#164e63 55%,#0f766e 100%);color:#ffffff;padding:24px;">
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
+      <h1 style="color:#ffffff;margin:0;border:0;font-size:30px;line-height:1.2;">XHotpotQA</h1>
+      <span style="background:#fef3c7;color:#78350f;border:1px solid #fbbf24;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;letter-spacing:.04em;">AUDITED V1 · PUBLIC</span>
+    </div>
+    <p style="color:#ccfbf1;margin:10px 0 3px;font-size:17px;font-weight:700;">Cross-lingual multi-hop question answering over mixed-language evidence</p>
+    <p style="color:#e2e8f0;margin:0;font-size:14px;">One question · multiple evidence paragraphs · languages may change between hops</p>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px;border-bottom:1px solid #64748b;">
+    <span style="border:1px solid #2563eb;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">23,066 released rows</span>
+    <span style="border:1px solid #0f766e;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">Supplied-candidate MHQA</span>
+    <span style="border:1px solid #7c3aed;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">Parquet · 22 fields</span>
+    <span style="border:1px solid #16a34a;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">CC BY-SA 4.0</span>
+  </div>
+  <div style="padding:14px 18px;line-height:1.8;">
+    <strong>Navigate:</strong>
+    <a href="#dataset-at-a-glance">Overview</a> ·
+    <a href="#load-in-30-seconds">Load</a> ·
+    <a href="#data-format">Structure</a> ·
+    <a href="#quality-and-version-policy">Quality</a> ·
+    <a href="#artifact-verified-validation-analysis">Findings</a> ·
+    <a href="#citation">Citation</a> ·
+    <a href="https://github.com/Iman998/XhotpotQA">Code</a>
+  </div>
 </div>
 
 XHotpotQA is a controlled benchmark for studying whether a system can select and
@@ -99,33 +101,33 @@ known structural defects, and every row carries machine-readable `status` and
 data snapshot is Hub revision
 [`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`](https://huggingface.co/datasets/Iman998/XhotpotQA/tree/52b8bee41ff2bb0d41cd400ff5646c0e800b5127).
 
-> **Release status.** This page serves a transparent, artifact-verified V1
-> recovery. Amber denotes incomplete historical provenance; “prospective” means
-> that an artifact is not included. Neither label should be read as evidence that
-> corrected V2 data have already been generated.
+<div style="border-left:5px solid #d97706;border-radius:0 10px 10px 0;padding:13px 16px;margin:18px 0;">
+  <strong>Release status · recovered and audited, not corrected V2.</strong><br>
+  This page serves a transparent, artifact-verified V1 recovery. Amber denotes
+  incomplete historical provenance; “prospective” means that an artifact is not
+  included. Neither label means that corrected V2 data have already been generated.
+</div>
 
 ## Dataset at a glance
 
-<table>
-  <tr>
-    <td align="center">
-      <img alt="Train rows" src="https://img.shields.io/badge/TRAIN-15%2C661-2563eb?style=for-the-badge"><br>
-      <sub>hard-source rows</sub>
-    </td>
-    <td align="center">
-      <img alt="Validation rows" src="https://img.shields.io/badge/VALIDATION-7%2C405-7c3aed?style=for-the-badge"><br>
-      <sub>full distractor validation</sub>
-    </td>
-    <td align="center">
-      <img alt="Total rows" src="https://img.shields.io/badge/TOTAL-23%2C066-0f766e?style=for-the-badge"><br>
-      <sub><b>23,066</b> · one recovered view per source</sub>
-    </td>
-    <td align="center">
-      <img alt="Languages" src="https://img.shields.io/badge/LANGUAGES-24-db2777?style=for-the-badge"><br>
-      <sub>ISO 639-1 assignments</sub>
-    </td>
-  </tr>
-</table>
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;">
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #93c5fd;border-radius:10px;border-top:4px solid #2563eb;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">TRAIN</strong>
+    <span style="font-size:24px;font-weight:800;">15,661</span><br><small>hard-source rows</small>
+  </div>
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #c4b5fd;border-radius:10px;border-top:4px solid #7c3aed;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">VALIDATION</strong>
+    <span style="font-size:24px;font-weight:800;">7,405</span><br><small>full distractor validation</small>
+  </div>
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #5eead4;border-radius:10px;border-top:4px solid #0f766e;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">TOTAL</strong>
+    <span style="font-size:24px;font-weight:800;">23,066</span><br><small>one view per source</small>
+  </div>
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #f9a8d4;border-radius:10px;border-top:4px solid #db2777;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">LANGUAGE SPACE</strong>
+    <span style="font-size:24px;font-weight:800;">24</span><br><small>ISO 639-1 assignments</small>
+  </div>
+</div>
 
 | Property | Value |
 |---|---|
@@ -144,12 +146,13 @@ Each item keeps the supplied HotpotQA candidate set while independently exposing
 the language assignments of the question, the two gold paragraphs, and every
 distractor. The colors below identify **roles**, not quality grades.
 
-| Role | Language assignment | Function |
-|---|---|---|
-| 🟣 Question + stored gold answer | <code>Lq = Ly</code> | The target output language for predictions is <code>Lq</code> |
-| 🔵 Gold paragraph A | <code>Lg1</code> | Supplies annotated evidence for one part of the chain |
-| 🟢 Gold paragraph B | <code>Lg2</code> | Supplies the complementary evidence needed for composition |
-| ⚪ Distractor <code>j</code> | <code>Ldj</code> | Remains in the supplied candidate set and must be rejected |
+<div style="display:flex;flex-wrap:wrap;gap:9px;margin:12px 0 16px;">
+  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #c4b5fd;border-radius:10px;border-top:4px solid #7c3aed;"><strong>Question</strong><br><span style="font-size:13px;">assigned language \\(L_q\\)</span></div>
+  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #93c5fd;border-radius:10px;border-top:4px solid #2563eb;"><strong>Gold A</strong><br><span style="font-size:13px;">evidence language \\(L_{g_1}\\)</span></div>
+  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #86efac;border-radius:10px;border-top:4px solid #16a34a;"><strong>Gold B</strong><br><span style="font-size:13px;">evidence language \\(L_{g_2}\\)</span></div>
+  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;border-top:4px solid #64748b;"><strong>Distractor \\(j\\)</strong><br><span style="font-size:13px;">assigned language \\(L_{d_j}\\)</span></div>
+  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #f9a8d4;border-radius:10px;border-top:4px solid #db2777;"><strong>Gold answer</strong><br><span style="font-size:13px;"><code>L_y = L_q</code></span></div>
+</div>
 
 **Example from the released validation split:** a Swahili question and stored
 answer are paired with supporting and distractor paragraphs assigned to other
@@ -162,11 +165,20 @@ retrieval or naturally occurring multilingual search behavior.
 
 ## Release status
 
-| Artifact | Status | What is available |
-|---|---|---|
-| **Audited V1 base** | ![Included](https://img.shields.io/badge/INCLUDED-release%20payload-16a34a?style=flat-square) | 15,661 train rows and all 7,405 validation rows |
-| **XHotpotQA+** | ![Prospective](https://img.shields.io/badge/PROSPECTIVE-not%20published-6b7280?style=flat-square) | The historical archive contains 375,864 train views, but the 177,720-view parallel validation mapping is not available; no `xhotpotqa_plus` Hub configuration is published |
-| **Canonical V2** | ![Blocked](https://img.shields.io/badge/BLOCKED-artifacts%20%2B%20audit-d97706?style=flat-square) | A model-agnostic OpenAI-compatible regeneration pipeline exists, but V2 data and a paired V1–V2 quality study are not part of this release |
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 16px;">
+  <div style="flex:1 1 190px;min-width:0;padding:14px;border:1px solid #86efac;border-radius:10px;border-top:5px solid #16a34a;">
+    <strong>AVAILABLE · AUDITED V1</strong><br>
+    <span style="font-size:13px;">15,661 train rows and all 7,405 validation rows are public.</span>
+  </div>
+  <div style="flex:1 1 190px;min-width:0;padding:14px;border:1px solid #cbd5e1;border-radius:10px;border-top:5px solid #64748b;">
+    <strong>NOT PUBLISHED · XHotpotQA+</strong><br>
+    <span style="font-size:13px;">The complete parallel validation mapping is unavailable; no Hub config is claimed.</span>
+  </div>
+  <div style="flex:1 1 190px;min-width:0;padding:14px;border:1px solid #fcd34d;border-radius:10px;border-top:5px solid #d97706;">
+    <strong>PROSPECTIVE · CANONICAL V2</strong><br>
+    <span style="font-size:13px;">The model-agnostic pipeline exists; generated data and paired quality evidence do not.</span>
+  </div>
+</div>
 
 > **Important:** `status="quarantined"` is a data-quality label, not an
 > exclusion. Quarantined rows remain in the released splits so that counts,
@@ -174,6 +186,9 @@ retrieval or naturally occurring multilingual search behavior.
 > whether they evaluate the complete split or a status-filtered subset.
 
 ### Release-gate contract
+
+<details>
+<summary><b>Why audited V1 publication does not satisfy the corrected V2 gate</b></summary>
 
 | Gate | Audited V1 in this payload | Prospective corrected V2 |
 |---|---|---|
@@ -186,6 +201,8 @@ retrieval or naturally occurring multilingual search behavior.
 The V1 release gate is **transparency**, not a claim that every translation is
 correct. A future corrected V2 has a stricter gate: completed artifacts,
 structural validation, and paired quality evidence.
+
+</details>
 
 ## Why XHotpotQA?
 
@@ -204,12 +221,19 @@ returning the answer in the question language. Because the candidate set is
 supplied, XHotpotQA isolates evidence selection and composition; it is **not** an
 open-Wikipedia retrieval benchmark.
 
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 4px;">
+  <div style="flex:1 1 180px;min-width:0;padding:14px;border:1px solid #93c5fd;border-radius:10px;"><strong>Mixed evidence</strong><br><span style="font-size:13px;">Language varies within an item—not only between dataset examples.</span></div>
+  <div style="flex:1 1 180px;min-width:0;padding:14px;border:1px solid #5eead4;border-radius:10px;"><strong>Role-aware analysis</strong><br><span style="font-size:13px;">Question, gold hops, and distractors remain separately identifiable.</span></div>
+  <div style="flex:1 1 180px;min-width:0;padding:14px;border:1px solid #c4b5fd;border-radius:10px;"><strong>Auditable release</strong><br><span style="font-size:13px;">Every row carries provenance, status, flags, and a record checksum.</span></div>
+</div>
+
 ## Load in 30 seconds
 
 | If you want to… | Start with | Reporting requirement |
 |---|---|---|
 | Reproduce the frozen benchmark | Complete `validation` split | Denominator **7,405** |
-| Measure structural-audit sensitivity | `status == "accepted"` | Label as sensitivity analysis and report the filtered denominator |
+| Reproduce the reported 439-item exclusion | `status != "quarantined"` | Denominator **6,966**, including four `review_required` rows |
+| Run the stricter accepted-only view | `status == "accepted"` | Denominator **6,962**; label it separately |
 | Inspect without a full download | `streaming=True` | Pin the revision used |
 | Verify release integrity | `RELEASE_MANIFEST.json` | Archive the manifest with predictions |
 
@@ -262,12 +286,17 @@ first = next(iter(stream))
 print(first["source_id"], first["question_language"])
 ```
 
-For a strict sensitivity subset, filter by `status` and always report the
-resulting denominator:
+The paper's 439-item structural-gate sensitivity keeps both `accepted` and
+`review_required` rows. The stricter accepted-only view removes four additional
+non-blocking title-collision cases:
 
 ```python
 validation = dataset["validation"]
+non_quarantined = validation.filter(lambda row: row["status"] != "quarantined")
 accepted_only = validation.filter(lambda row: row["status"] == "accepted")
+
+print(len(non_quarantined))  # 6_966: reproduces the reported 439-item exclusion
+print(len(accepted_only))  # 6_962: stricter sensitivity view
 
 print(
     {
@@ -278,8 +307,8 @@ print(
 ```
 
 The complete 7,405-row validation split should remain the primary denominator
-when reproducing the frozen V1 analyses. The accepted-only view is a sensitivity
-analysis, not a replacement test split.
+when reproducing the frozen V1 analyses. Neither filtered view is a replacement
+test split, and the two denominators must not be conflated.
 
 </details>
 
@@ -466,13 +495,13 @@ The historical base mapping was random and its seed was not preserved. It cannot
 be reproduced exactly from the surviving archive. To make this public one-view
 release reproducible, the selected training view is:
 
-\[
+$$
 v_i =
 \operatorname{int}\!\left(
 \operatorname{SHA256}
 (\texttt{"xhotpotqa-public-v1|"} \Vert \texttt{source\_id}_i)[0{:}8]
 \right) \bmod 24.
-\]
+$$
 
 Here `[0:8]` means the first eight digest bytes interpreted as an unsigned
 big-endian integer. This is a **release selection rule**, not a reconstruction of
@@ -590,7 +619,8 @@ The authoritative machine-readable counts and file hashes are in
 
 ### Sensitivity to the validation quality gate
 
-Removing the 439 flagged validation items changed every tested aggregate EM/F1
+Removing the 439 `quarantined` validation items while retaining all 6,966
+non-quarantined rows changed every tested aggregate EM/F1
 metric by at most **0.51 points** and either primary language-condition contrast
 by at most **0.22 points**. All eight item-bootstrap intervals for the
 clean-minus-complete contrast shifts included zero. This paired source-item
@@ -604,26 +634,26 @@ subset; it does **not** make the underlying defects acceptable.
 
 Represent an item as
 
-\[
+$$
 x = (q, y, C, G, S, \Lambda),
-\]
+$$
 
-where \(q\) is the question, \(y\) the gold answer,
-\(C=(p_1,\ldots,p_m)\) the ordered candidate paragraphs, \(G\subseteq C\) the
-gold-paragraph set, \(S\) the sentence-level supporting facts, and
-\(\Lambda=(L_q,L_y,L_{p_1},\ldots,L_{p_m})\) the realized language assignment.
-For V1, \(L_y=L_q\). A reader predicts \(\hat y\); a selector predicts
-\(\hat S\) or \(\hat G\); and an end-to-end supplied-candidate system predicts both.
+where \\(q\\) is the question, \\(y\\) the gold answer,
+\\(C=(p_1,\ldots,p_m)\\) the ordered candidate paragraphs, \\(G\subseteq C\\) the
+gold-paragraph set, \\(S\\) the sentence-level supporting facts, and
+\\(\Lambda=(L_q,L_y,L_{p_1},\ldots,L_{p_m})\\) the realized language assignment.
+For V1, \\(L_y=L_q\\). A reader predicts \\(\hat y\\); a selector predicts
+\\(\hat S\\) or \\(\hat G\\); and an end-to-end supplied-candidate system predicts both.
 
 The intended two-hop composition can be written schematically as
 
-\[
-z = f_1(q,e_1),
-\qquad
-\hat y = f_2(q,z,e_2),
-\qquad
-e_1,e_2\in S,
-\]
+$$
+\begin{aligned}
+z &= f_1(q,e_1), \\
+\hat y &= f_2(q,z,e_2),
+\qquad e_1,e_2\in S.
+\end{aligned}
+$$
 
 with evidence units potentially written in different languages. This is an
 operational representation of the annotated task, not a guarantee of
@@ -632,35 +662,32 @@ single-hop or parametric solutions.
 
 | Symbol | Released representation |
 |---|---|
-| \(q,y,L_q,L_y\) | `question`, `answer`, `question_language`, `answer_language` |
-| \(C,L_{p_i}\) | ordered `candidates` and each candidate's `language_code` |
-| \(G,S\) | paragraph-linked and sentence-indexed `supporting_facts` |
-| \(\hat y,\hat S\) | consumer prediction artifacts; not stored as dataset labels |
+| \\(q,y,L_q,L_y\\) | `question`, `answer`, `question_language`, `answer_language` |
+| \\(C,L_{p_i}\\) | ordered `candidates` and each candidate's `language_code` |
+| \\(G,S\\) | paragraph-linked and sentence-indexed `supporting_facts` |
+| \\(\hat y,\hat S\\) | consumer prediction artifacts; not stored as dataset labels |
 
-Let \(L_q\) be the question language, \(G\) the gold-paragraph set,
-\(D\) the distractor set, and \(L_p\) the assigned language of paragraph
-\(p\). XHotpotQA reports:
+Let \\(L_q\\) be the question language, \\(G\\) the gold-paragraph set,
+\\(D\\) the distractor set, and \\(L_p\\) the assigned language of paragraph
+\\(p\\). XHotpotQA reports:
 
-\[
-\rho_G =
-\frac{1}{|G|}
-\sum_{p\in G}\mathbf{1}[L_p \neq L_q],
-\qquad
-\rho_D =
-\frac{1}{|D|}
-\sum_{p\in D}\mathbf{1}[L_p \neq L_q].
-\]
+$$
+\begin{aligned}
+\rho_G &= \frac{1}{|G|}\sum_{p\in G}\mathbf{1}[L_p \neq L_q], \\
+\rho_D &= \frac{1}{|D|}\sum_{p\in D}\mathbf{1}[L_p \neq L_q].
+\end{aligned}
+$$
 
-When an item has no distractors, \(\rho_D\) is not applicable rather than
+When an item has no distractors, \\(\rho_D\\) is not applicable rather than
 zero. The analysis also derives normalized gold-evidence language entropy
-\(H_G\), candidate-language count \(K_C\), question-to-gold script
+\\(H_G\\), candidate-language count \\(K_C\\), question-to-gold script
 relation, and these realized strata:
 
 | Stratum | Definition | Validation count |
 |---|---|---:|
 | S0 | Gold and distractors fully aligned with the question | 0 |
 | S1 | Gold aligned; multilingual distractors | 14 |
-| S2 | Partial gold mismatch, \(0<\rho_G<1\) | 564 |
+| S2 | Partial gold mismatch, \\(0<\rho_G<1\\) | 564 |
 | S3 | Full gold mismatch in one evidence language | 312 |
 | S4 | Full gold mismatch across multiple evidence languages | 6,515 |
 
@@ -669,19 +696,33 @@ realized validation assignment.
 
 ## Artifact-verified validation analysis
 
-![Evidence level](https://img.shields.io/badge/EVIDENCE-artifact--verified-16a34a?style=flat-square)
-![Scope](https://img.shields.io/badge/SCOPE-frozen%20V1%20descriptives-2563eb?style=flat-square)
-![Causal claim](https://img.shields.io/badge/CAUSAL%20CLAIM-none-6b7280?style=flat-square)
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;">
+  <span style="border:1px solid #16a34a;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">EVIDENCE · artifact verified</span>
+  <span style="border:1px solid #2563eb;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">SCOPE · frozen V1 descriptives</span>
+  <span style="border:1px solid #64748b;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">CAUSAL CLAIM · none</span>
+</div>
 
 The following statistics were recomputed from the recovered 7,405-row validation
 metadata and surviving prediction artifacts. They are frozen-run descriptive
 associations—not a leaderboard and not causal estimates of language effects.
 
-| Verified takeaway | Frozen V1 observation |
-|---|---|
-| **Mixing is pervasive** | 99.811% of questions differ from at least one assigned gold-paragraph language |
-| **Readers are more sensitive** | S4−S2 answer-F1 contrasts range from −10.25 to −15.79 points across the three surviving reader artifacts |
-| **Selector contrast is smaller** | The corresponding support-F1 contrast is −1.71 points, with an interval that includes zero |
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 20px;">
+  <div style="flex:1 1 180px;min-width:0;padding:14px;border:1px solid #5eead4;border-radius:10px;border-top:5px solid #0f766e;">
+    <strong style="display:block;font-size:12px;">PERVASIVE MIXING</strong>
+    <span style="font-size:24px;font-weight:800;">99.811%</span><br><span style="font-size:13px;">question differs from at least one assigned gold-paragraph language</span>
+  </div>
+  <div style="flex:1 1 180px;min-width:0;padding:14px;border:1px solid #fca5a5;border-radius:10px;border-top:5px solid #dc2626;">
+    <strong style="display:block;font-size:12px;">READER S4 − S2</strong>
+    <span style="font-size:22px;font-weight:800;">−10.25 to −15.79</span><br><span style="font-size:13px;">answer-F1 points across three surviving artifacts</span>
+  </div>
+  <div style="flex:1 1 180px;min-width:0;padding:14px;border:1px solid #93c5fd;border-radius:10px;border-top:5px solid #2563eb;">
+    <strong style="display:block;font-size:12px;">SELECTOR S4 − S2</strong>
+    <span style="font-size:22px;font-weight:800;">−1.71</span><br><span style="font-size:13px;">support-F1 points; 95% interval [−3.60, 0.21]</span>
+  </div>
+</div>
+
+These are **descriptive, non-causal contrasts** from frozen historical artifacts;
+they are not a leaderboard or a ranking of languages.
 
 ### Assignment geometry
 
@@ -707,12 +748,19 @@ Reader rows receive annotated gold supporting sentences and therefore do not
 evaluate evidence retrieval. Intervals in the following table use 10,000
 item-level bootstrap replicates with seed `20260810`.
 
-| System / metric | S2 | S3 | S4 | S4 − S2 (95% item-bootstrap interval) | Question-to-gold: different-script − same-script-only |
-|---|---:|---:|---:|---:|---:|
-| Llama 3.1 70B label / answer F1 | 60.60 | 39.60 | 44.81 | −15.79 [−19.41, −12.12] | −19.79 [−22.58, −16.99] |
-| GPT-4o mini label / answer F1 | 57.79 | 47.34 | 47.54 | −10.25 [−13.75, −6.83] | −11.98 [−14.70, −9.25] |
-| Qwen2 72B label / answer F1 | 53.83 | 36.58 | 39.78 | −14.05 [−17.63, −10.46] | −23.70 [−26.45, −20.91] |
-| Adapted selector / support F1 | 85.93 | 86.26 | 84.22 | −1.71 [−3.60, 0.21] | −1.78 [−3.20, −0.32] |
+| System / metric | S2 | S3 | S4 | S4 − S2 (95% item-bootstrap interval) |
+|---|---:|---:|---:|---:|
+| Llama 3.1 70B label / answer F1 | 60.60 | 39.60 | 44.81 | −15.79 [−19.41, −12.12] |
+| GPT-4o mini label / answer F1 | 57.79 | 47.34 | 47.54 | −10.25 [−13.75, −6.83] |
+| Qwen2 72B label / answer F1 | 53.83 | 36.58 | 39.78 | −14.05 [−17.63, −10.46] |
+| Adapted selector / support F1 | 85.93 | 86.26 | 84.22 | −1.71 [−3.60, 0.21] |
+
+| System / metric | Question-to-gold: different-script − same-script-only |
+|---|---:|
+| Llama 3.1 70B label / answer F1 | −19.79 [−22.58, −16.99] |
+| GPT-4o mini label / answer F1 | −11.98 [−14.70, −9.25] |
+| Qwen2 72B label / answer F1 | −23.70 [−26.45, −20.91] |
+| Adapted selector / support F1 | −1.78 [−3.20, −0.32] |
 
 S2 contains one question-aligned gold paragraph; S4 places all gold evidence
 outside the question language and across multiple languages. In these frozen
@@ -732,16 +780,18 @@ not treated as independent observations.
 | Different-language, same-script pair | 2,006 |
 | Different-script pair | 5,073 |
 
-Marginal reader F1 ranges were 34.6–51.1, 43.7–52.4, and 36.4–45.4 across
-assigned gold languages for the three reader artifacts; selector support F1
-ranged from 81.8–86.1. These margins mix question language, script, support
-role, and the second gold language.
+Across assigned gold languages, marginal reader F1 ranged from 34.6–51.1 for
+the historical Llama label, 43.7–52.4 for the GPT-4o mini label, and 36.4–45.4
+for the Qwen2 label; selector support F1 ranged from 81.8–86.1. These margins
+mix question language, script, support role, and the second gold language.
 
-A one-row-per-source F1 sensitivity model jointly represented both gold
-languages and controlled question language, question type, answer type, script
-relation, exact alignment, same-language pairing, support-fact count, and
-structural flags. It used HC3 standard errors and Benjamini–Hochberg correction
-within each outcome; marginal intervals used 2,000 bootstrap replicates. No
+A one-row-per-source F1 sensitivity model used all 7,405 items and represented
+the two assigned gold-document languages as joint language counts, with English
+as the substitution reference. It controlled question language, question type,
+answer type, script relation, exact alignment, same-language pairing,
+support-fact count, and structural flags. It used HC3 standard errors and
+Benjamini–Hochberg correction within each outcome; marginal intervals used
+2,000 bootstrap replicates. No
 gold-language coefficient survived within-outcome FDR correction for
 the GPT-4o mini label, Qwen2 label, or selector. Only the historical Llama label
 retained four negative associations relative to substituting an English-assigned
@@ -767,8 +817,8 @@ The released fields support:
 - **End-to-end supplied-candidate QA:** jointly predict the answer and supporting
   facts.
 - **Language-conditioned analysis:** stratify by question language, gold
-  language, script relation, \(\rho_G\), \(\rho_D\), \(H_G\), or
-  \(K_C\).
+  language, script relation, \\(\rho_G\\), \\(\rho_D\\), \\(H_G\\), or
+  \\(K_C\\).
 
 Recommended metrics are answer EM/F1, support EM/F1, and Hotpot-style joint
 EM/F1. Report both micro averages and language-/condition-stratified results.

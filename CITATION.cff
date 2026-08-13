@@ -2,7 +2,8 @@ cff-version: 1.2.0
 message: "If you use XHotpotQA, please cite the benchmark paper and HotpotQA."
 title: "XHotpotQA: A Benchmark for Cross-Lingual Multi-Hop Question Answering over Mixed-Language Evidence"
 type: software
-version: 0.3.0
+version: 0.3.1
+date-released: 2026-08-13
 authors:
   - family-names: Barati
     given-names: Iman

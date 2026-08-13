@@ -72,9 +72,23 @@ def test_dataset_card_navigation_targets_plain_stable_headings() -> None:
         for heading in heading_text
         if re.fullmatch(r"[A-Za-z0-9 _-]+", heading)
     }
-    targets = set(re.findall(r"\]\(#([a-z0-9-]+)\)", card))
+    markdown_targets = set(re.findall(r"\]\(#([a-z0-9-]+)\)", card))
+    html_targets = set(re.findall(r'href="#([a-z0-9-]+)"', card))
+    targets = markdown_targets | html_targets
 
     assert targets <= headings
+
+
+def test_dataset_card_uses_hugging_face_katex_delimiters() -> None:
+    """Guard the Hub-specific math contract documented for repository cards."""
+    card = (REPOSITORY / "dataset_card/README.md").read_text(encoding="utf-8")
+    prose = re.sub(r"```.*?```", "", card, flags=re.DOTALL)
+
+    assert not re.search(r"(?m)^\s*\\[\[\]]\s*$", prose)
+    assert not re.search(r"(?<!\\)\\[()]", prose)
+    assert prose.count("$$") == 8
+    assert prose.count(r"\\(") == prose.count(r"\\)")
+    assert prose.count(r"\\(") > 0
 
 
 def test_repository_docs_and_builder_distinguish_the_two_release_tracks() -> None:
@@ -111,8 +125,8 @@ def test_citation_cff_tracks_public_code_but_omits_unminted_release_identifiers(
     payload = yaml.safe_load((REPOSITORY / "CITATION.cff").read_text(encoding="utf-8"))
 
     assert payload["type"] == "software"
-    assert payload["version"] == "0.3.0"
+    assert payload["version"] == "0.3.1"
     assert payload["repository-code"] == "https://github.com/Iman998/XhotpotQA"
     assert "24-Language" not in payload["title"]
-    assert "date-released" not in payload
+    assert str(payload["date-released"]) == "2026-08-13"
     assert "url" not in payload

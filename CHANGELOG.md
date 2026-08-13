@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1 - 2026-08-13
+
+- Upgrade the public dataset card with a responsive scientific visual hierarchy,
+  compact release-state panels, role-aware benchmark anatomy, and verified-result cards.
+- Use Hugging Face's documented KaTeX delimiters throughout the card and add a
+  regression test that rejects non-rendering display or inline math syntax.
+- Distinguish the 6,966-row non-quarantined sensitivity view from the stricter
+  6,962-row accepted-only view in loading and reporting guidance.
+
 ## 0.3.0 - 2026-08-13
 
 - Publish the audit-preserving `xhotpotqa_v1_audited` Parquet configuration on the Hugging
