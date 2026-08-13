@@ -13,13 +13,14 @@ data/processed/xhotpotqa-plus.train.jsonl
 data/processed/xhotpotqa-plus.validation.jsonl
 ```
 
-The current publication payload prepared for the Hugging Face Hub uses the audited Parquet
-configuration
-`xhotpotqa_v1_audited` and the paths
+The public [XHotpotQA dataset](https://huggingface.co/datasets/Iman998/XHotpotQA) uses the
+audited Parquet configuration `xhotpotqa_v1_audited` and the paths
 `data/xhotpotqa_v1_audited/{train,validation}-*.parquet`. Its 15,661 training rows and
 7,405 validation rows retain `status` and `structural_flags`; quarantined records remain in
-the benchmark denominator. Rebuild that payload with `scripts/build_hf_public_v1.py` and
-publish the reviewed dataset card as its repository-level `README.md`.
+the benchmark denominator. The frozen data revision is
+`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`. Rebuild that snapshot with
+`scripts/build_hf_public_v1.py`; the reviewed `dataset_card/README.md` is the source for the
+Hub repository-level card.
 
 The JSONL names above belong to the prospective corrected canonical release. That future
 release will expose `xhotpotqa` and the complete parallel expansion `xhotpotqa_plus` only

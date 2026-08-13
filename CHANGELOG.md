@@ -1,13 +1,18 @@
 # Changelog
 
-## 0.3.0 - 2026-08-11
+## 0.3.0 - 2026-08-13
+
+- Publish the audit-preserving `xhotpotqa_v1_audited` Parquet configuration on the Hugging
+  Face Hub with 15,661 train rows, 7,405 validation rows, per-row structural status, and a
+  checksum-bearing release manifest.
 
 - Add deterministic, atomic construction of all 24 XHotpotQA+ question--answer views from
   canonical base records and source-ID keyed translations.
 - Add `expand-plus`, strict canonical cardinality gates, JSON/JSONL input contracts, and
   integrity tests for fixed evidence, provenance, IDs, and checksums.
-- Publish XHotpotQA+ as a second Hugging Face configuration, with streaming validation
-  against the base data and an atomic four-file Hub release manifest.
+- Implement release support for the prospective XHotpotQA+ configuration, including
+  streaming validation against the base data and an atomic four-file Hub release manifest;
+  the incomplete parallel artifacts are not published.
 - Add a streaming, checksum-pinned importer for the historical pandas-column shards, with
   content-addressed corrections, quarantine manifests, and strict ordered joins to HotpotQA.
 - Version the evaluation normalization contract and add Unicode/script-aware answer scoring,

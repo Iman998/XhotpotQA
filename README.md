@@ -9,18 +9,19 @@ retrieval/selection, reading, and end-to-end reasoning can be evaluated separate
 | Property | Value |
 |---|---:|
 | Languages | 24 |
-| Audited V1 release payload | 15,661 train / 7,405 validation |
+| Public audited V1 dataset | 15,661 train / 7,405 validation |
+| Frozen data revision | `52b8bee41ff2bb0d41cd400ff5646c0e800b5127` |
 | Audited raw parallel train views | 375,864 |
 | Audited raw validation views | 7,405 |
 | Complete XHotpotQA+ target | 553,584 views (not yet complete) |
 | Source task | HotpotQA distractor |
 | Dataset license | CC BY-SA 4.0 |
 
-> **Hugging Face target (payload ready; upload pending):**
-> [`iman998/XhotpotQA`](https://huggingface.co/datasets/iman998/XhotpotQA), configuration
-> `xhotpotqa_v1_audited`. The complete payload has passed the local publication gate, but
-> the target repository still requires dataset-create/write authorization. This is an
-> audit-preserving recovery of V1:
+> **Public audited V1 dataset:**
+> [`Iman998/XHotpotQA`](https://huggingface.co/datasets/Iman998/XHotpotQA), configuration
+> `xhotpotqa_v1_audited`. For reproducible experiments, pin data revision
+> [`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`](https://huggingface.co/datasets/Iman998/XHotpotQA/tree/52b8bee41ff2bb0d41cd400ff5646c0e800b5127).
+> This public dataset is an audit-preserving recovery of V1:
 > all 15,661 train sources and all 7,405 validation sources are retained, and each row
 > exposes `status` plus `structural_flags`. A quarantined status identifies a known
 > structural defect; it does not remove the row.
@@ -54,15 +55,18 @@ Install the lightweight OpenAI-compatible client only when generating V2:
 pip install -e ".[generation]"
 ```
 
-## Load after Hub publication
+## Load the frozen public dataset
 
 ```python
 from collections import Counter
 from datasets import load_dataset
 
+DATA_REVISION = "52b8bee41ff2bb0d41cd400ff5646c0e800b5127"
+
 dataset = load_dataset(
-    "iman998/XhotpotQA",
+    "Iman998/XHotpotQA",
     "xhotpotqa_v1_audited",
+    revision=DATA_REVISION,
 )
 
 validation = dataset["validation"]
@@ -80,8 +84,9 @@ accepted_validation = validation.filter(lambda row: row["status"] == "accepted")
 print(accepted_validation.num_rows)
 ```
 
-The command above becomes operational after the Hub commit is published. The exact
-recovered-Parquet schema, provenance fields, status semantics, and release
+The pinned revision identifies the published audited-V1 data snapshot even if the Hub card
+later receives documentation-only updates. The exact recovered-Parquet schema, provenance
+fields, status semantics, and release
 limitations are documented in the
 [`dataset_card/README.md`](dataset_card/README.md). The schema in
 [`docs/SCHEMA.md`](docs/SCHEMA.md) is the stricter canonical JSONL contract used by the
@@ -148,8 +153,9 @@ build/hf_public_v1/
 The manifest records the `xhotpotqa_v1_audited` configuration, 23,066 total rows,
 ordered input roles and hashes, status/flag/language counts, Parquet file hashes, builder
 version and script hash, Git revision including dirty state, and the Python/platform/library
-environment. The builder writes data and the manifest; stage the reviewed
-`dataset_card/README.md` as the Hub `README.md` when publishing the release.
+environment. The builder writes data and the manifest. When reproducing the published
+snapshot in another Hub repository, stage the reviewed `dataset_card/README.md` as its
+repository-level `README.md`.
 
 ## Build the parallel XHotpotQA+ views
 
@@ -159,8 +165,8 @@ A complete mapping would produce 375,864 training views and 177,720 validation v
 (553,584 total). The expansion itself is deterministic and does not call a model. The audited
 archive currently contains only the training-side parallel views, so publication of the
 separate `xhotpotqa_plus` Hub configuration remains blocked. The strict
-`xhotpotqa` configuration is likewise prospective; when the audited payload is published,
-its Hub default is explicitly `xhotpotqa_v1_audited`.
+`xhotpotqa` configuration is likewise prospective. The public audited-V1 repository has
+`xhotpotqa_v1_audited` as its sole and default configuration.
 
 Provide translations as either a source-ID keyed JSON object or the line-oriented JSONL form
 documented in [`docs/XHOTPOTQA_PLUS.md`](docs/XHOTPOTQA_PLUS.md), then run:
@@ -347,12 +353,15 @@ terms, and consult the data statement before deployment.
 ## Citation
 
 ```bibtex
-@unpublished{barati2026xhotpotqa,
+@misc{barati2026xhotpotqa,
   title   = {XHotpotQA: A Benchmark for Cross-Lingual Multi-Hop Question
              Answering over Mixed-Language Evidence},
   author  = {Barati, Iman and Ghafouri, Arash and Minaei-Bidgoli, Behrouz},
   year    = {2026},
-  note    = {Manuscript and resource release in preparation}
+  howpublished = {Hugging Face dataset},
+  url     = {https://huggingface.co/datasets/Iman998/XHotpotQA},
+  note    = {Audited V1 data snapshot, revision
+             52b8bee41ff2bb0d41cd400ff5646c0e800b5127; manuscript in preparation}
 }
 ```
 

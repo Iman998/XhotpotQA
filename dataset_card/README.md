@@ -75,6 +75,7 @@ configs:
 [![Format](https://img.shields.io/badge/format-Parquet-7c3aed?style=flat-square)](#data-format)
 [![License](https://img.shields.io/badge/data-CC%20BY--SA%204.0-16a34a?style=flat-square)](#license)
 [![Code](https://img.shields.io/badge/code-GitHub-111827?style=flat-square)](https://github.com/Iman998/XhotpotQA)
+[![Snapshot](https://img.shields.io/badge/data%20snapshot-52b8bee-0f766e?style=flat-square)](https://huggingface.co/datasets/Iman998/XHotpotQA/tree/52b8bee41ff2bb0d41cd400ff5646c0e800b5127)
 
 [Overview](#dataset-at-a-glance) ·
 [Release status](#release-status) ·
@@ -94,10 +95,12 @@ distractor task to 24 languages while retaining paragraph order, sentence
 boundaries, question type, difficulty, answers, and sentence-level supporting
 facts.
 
-This release payload is deliberately named **`xhotpotqa_v1_audited`**. It is a
+The public release is deliberately named **`xhotpotqa_v1_audited`**. It is a
 recovered, audit-preserving V1 resource—not the prospective canonical V2. Every
 source item is retained, including rows with known structural defects, and every
-row carries a machine-readable `status` and `structural_flags` field.
+row carries a machine-readable `status` and `structural_flags` field. The frozen
+data snapshot is Hub revision
+[`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`](https://huggingface.co/datasets/Iman998/XHotpotQA/tree/52b8bee41ff2bb0d41cd400ff5646c0e800b5127).
 
 > **ℹ️ How to read this card.** Green labels denote facts verified directly from
 > released artifacts; amber labels denote recovered historical provenance with
@@ -223,8 +226,7 @@ open-Wikipedia retrieval benchmark.
 | Inspect without a full download | `streaming=True` | Pin the revision used |
 | Verify release integrity | `RELEASE_MANIFEST.json` | Archive the manifest with predictions |
 
-To load this configuration from a published Hub revision, install a recent
-version of `datasets`:
+Install a recent version of `datasets`:
 
 ```bash
 pip install -U datasets
@@ -233,9 +235,12 @@ pip install -U datasets
 ```python
 from datasets import load_dataset
 
+DATA_REVISION = "52b8bee41ff2bb0d41cd400ff5646c0e800b5127"
+
 dataset = load_dataset(
-    "iman998/XhotpotQA",
+    "Iman998/XHotpotQA",
     "xhotpotqa_v1_audited",
+    revision=DATA_REVISION,
 )
 
 print(dataset)
@@ -253,11 +258,14 @@ For low-memory inspection, stream Parquet shards:
 ```python
 from datasets import load_dataset
 
+DATA_REVISION = "52b8bee41ff2bb0d41cd400ff5646c0e800b5127"
+
 stream = load_dataset(
-    "iman998/XhotpotQA",
+    "Iman998/XHotpotQA",
     "xhotpotqa_v1_audited",
     split="validation",
     streaming=True,
+    revision=DATA_REVISION,
 )
 
 first = next(iter(stream))
@@ -821,8 +829,8 @@ translation, filtering, or annotation.
 
 ## Release integrity and manifest
 
-[`RELEASE_MANIFEST.json`](./RELEASE_MANIFEST.json) is the machine-readable authority for this Hub
-revision. It records:
+[`RELEASE_MANIFEST.json`](https://huggingface.co/datasets/Iman998/XHotpotQA/blob/52b8bee41ff2bb0d41cd400ff5646c0e800b5127/RELEASE_MANIFEST.json)
+is the machine-readable authority for the frozen audited-V1 data snapshot. It records:
 
 - release version and train selection rule;
 - split-level source counts;
@@ -842,9 +850,10 @@ from huggingface_hub import hf_hub_download
 import json
 
 manifest_path = hf_hub_download(
-    repo_id="iman998/XhotpotQA",
+    repo_id="Iman998/XHotpotQA",
     repo_type="dataset",
     filename="RELEASE_MANIFEST.json",
+    revision="52b8bee41ff2bb0d41cd400ff5646c0e800b5127",
 )
 
 with open(manifest_path, encoding="utf-8") as stream:
@@ -869,12 +878,15 @@ software is licensed separately under the MIT License.
 If you use the resource, cite both XHotpotQA and HotpotQA:
 
 ```bibtex
-@unpublished{barati2026xhotpotqa,
+@misc{barati2026xhotpotqa,
   title  = {XHotpotQA: A Benchmark for Cross-Lingual Multi-Hop Question
             Answering over Mixed-Language Evidence},
   author = {Barati, Iman and Ghafouri, Arash and Minaei-Bidgoli, Behrouz},
   year   = {2026},
-  note   = {Manuscript and resource release in preparation}
+  howpublished = {Hugging Face dataset},
+  url    = {https://huggingface.co/datasets/Iman998/XHotpotQA},
+  note   = {Audited V1 data snapshot, revision
+            52b8bee41ff2bb0d41cd400ff5646c0e800b5127; manuscript in preparation}
 }
 
 @inproceedings{yang2018hotpotqa,
@@ -897,6 +909,11 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
 
 Code, generation, evaluation, and audit tooling:
 [github.com/Iman998/XhotpotQA](https://github.com/Iman998/XhotpotQA)
+
+Public audited V1 data:
+[huggingface.co/datasets/Iman998/XHotpotQA](https://huggingface.co/datasets/Iman998/XHotpotQA)
+(configuration `xhotpotqa_v1_audited`; frozen data revision
+`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`).
 
 A persistent manuscript archive link will be added after deposit. Until then,
 cite the versioned Hub revision and preserve its `RELEASE_MANIFEST.json`.
