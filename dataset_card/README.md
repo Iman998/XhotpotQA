@@ -104,7 +104,7 @@ data snapshot is Hub revision
 > that an artifact is not included. Neither label should be read as evidence that
 > corrected V2 data have already been generated.
 
-## 📦 Dataset at a glance
+## Dataset at a glance
 
 <table>
   <tr>
@@ -160,7 +160,7 @@ The benchmark therefore measures supplied-candidate evidence selection and answe
 composition under language mismatch. It does not claim to measure open-corpus
 retrieval or naturally occurring multilingual search behavior.
 
-## 🧭 Release status
+## Release status
 
 | Artifact | Status | What is available |
 |---|---|---|
@@ -204,7 +204,7 @@ returning the answer in the question language. Because the candidate set is
 supplied, XHotpotQA isolates evidence selection and composition; it is **not** an
 open-Wikipedia retrieval benchmark.
 
-## ⚡ Load in 30 seconds
+## Load in 30 seconds
 
 | If you want to… | Start with | Reporting requirement |
 |---|---|---|
@@ -319,7 +319,7 @@ be resolved from evidence assigned to other languages while distractors remain
 in the same supplied candidate set. `candidate_preview` is a card-only summary,
 not an additional dataset column.
 
-## 🧱 Data format
+## Data format
 
 | Field family | Core fields | Purpose |
 |---|---|---|
@@ -502,7 +502,7 @@ been generated or validated.
 
 </details>
 
-## 🧪 Quality and version policy
+## Quality and version policy
 
 ### What the status field means
 
@@ -598,7 +598,7 @@ sensitivity analysis used 2,000 bootstrap replicates. The result indicates that 
 reported V1 language-alignment pattern is not concentrated in the flagged
 subset; it does **not** make the underlying defects acceptable.
 
-## 🧭 Task formulation and analysis strata
+## Task formulation and analysis strata
 
 ### Operational task definition
 
@@ -667,7 +667,7 @@ relation, and these realized strata:
 S1 is too small for inferential comparison, and S0 is unpopulated in this
 realized validation assignment.
 
-## 📊 Artifact-verified validation analysis
+## Artifact-verified validation analysis
 
 ![Evidence level](https://img.shields.io/badge/EVIDENCE-artifact--verified-16a34a?style=flat-square)
 ![Scope](https://img.shields.io/badge/SCOPE-frozen%20V1%20descriptives-2563eb?style=flat-square)
@@ -885,7 +885,7 @@ print(manifest["validation"]["flag_counts"])
 
 </details>
 
-## 📜 License
+## License
 
 The dataset files are adaptations of [HotpotQA](https://hotpotqa.github.io/) and
 are distributed under
@@ -894,7 +894,7 @@ attribute XHotpotQA and the original HotpotQA work,
 identify modifications, and preserve the ShareAlike requirements. Repository
 software is licensed separately under the MIT License.
 
-## 📖 Citation
+## Citation
 
 If you use the resource, cite both XHotpotQA and HotpotQA:
 

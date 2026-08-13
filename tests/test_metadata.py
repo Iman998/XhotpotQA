@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import yaml
@@ -57,6 +58,23 @@ def test_public_dataset_card_declares_only_the_audited_parquet_config() -> None:
     assert "Iman998/XhotpotQA" in card
     assert "revision=DATA_REVISION" in card
     assert 'revision="52b8bee41ff2bb0d41cd400ff5646c0e800b5127"' in card
+
+
+def test_dataset_card_navigation_targets_plain_stable_headings() -> None:
+    card = (REPOSITORY / "dataset_card/README.md").read_text(encoding="utf-8")
+    heading_text = [
+        re.sub(r"^#{1,6}\s+", "", line).strip()
+        for line in card.splitlines()
+        if re.match(r"^#{1,6}\s+", line)
+    ]
+    headings = {
+        re.sub(r"[ _]+", "-", heading.lower())
+        for heading in heading_text
+        if re.fullmatch(r"[A-Za-z0-9 _-]+", heading)
+    }
+    targets = set(re.findall(r"\]\(#([a-z0-9-]+)\)", card))
+
+    assert targets <= headings
 
 
 def test_repository_docs_and_builder_distinguish_the_two_release_tracks() -> None:
