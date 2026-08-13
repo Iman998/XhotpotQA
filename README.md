@@ -18,9 +18,9 @@ retrieval/selection, reading, and end-to-end reasoning can be evaluated separate
 | Dataset license | CC BY-SA 4.0 |
 
 > **Public audited V1 dataset:**
-> [`Iman998/XHotpotQA`](https://huggingface.co/datasets/Iman998/XHotpotQA), configuration
+> [`Iman998/XhotpotQA`](https://huggingface.co/datasets/Iman998/XhotpotQA), configuration
 > `xhotpotqa_v1_audited`. For reproducible experiments, pin data revision
-> [`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`](https://huggingface.co/datasets/Iman998/XHotpotQA/tree/52b8bee41ff2bb0d41cd400ff5646c0e800b5127).
+> [`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`](https://huggingface.co/datasets/Iman998/XhotpotQA/tree/52b8bee41ff2bb0d41cd400ff5646c0e800b5127).
 > This public dataset is an audit-preserving recovery of V1:
 > all 15,661 train sources and all 7,405 validation sources are retained, and each row
 > exposes `status` plus `structural_flags`. A quarantined status identifies a known
@@ -64,7 +64,7 @@ from datasets import load_dataset
 DATA_REVISION = "52b8bee41ff2bb0d41cd400ff5646c0e800b5127"
 
 dataset = load_dataset(
-    "Iman998/XHotpotQA",
+    "Iman998/XhotpotQA",
     "xhotpotqa_v1_audited",
     revision=DATA_REVISION,
 )
@@ -359,7 +359,7 @@ terms, and consult the data statement before deployment.
   author  = {Barati, Iman and Ghafouri, Arash and Minaei-Bidgoli, Behrouz},
   year    = {2026},
   howpublished = {Hugging Face dataset},
-  url     = {https://huggingface.co/datasets/Iman998/XHotpotQA},
+  url     = {https://huggingface.co/datasets/Iman998/XhotpotQA},
   note    = {Audited V1 data snapshot, revision
              52b8bee41ff2bb0d41cd400ff5646c0e800b5127; manuscript in preparation}
 }

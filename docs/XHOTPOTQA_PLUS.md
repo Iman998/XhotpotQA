@@ -6,7 +6,7 @@ the canonical XHotpotQA record. Consequently, language is the only varying inter
 source group. Once its complete train and validation mappings pass the release gates, it will
 use the `xhotpotqa_plus` Hugging Face configuration and the corrected `xhotpotqa` base will be
 that release's default. Neither configuration is part of the
-[public audited V1 dataset](https://huggingface.co/datasets/Iman998/XHotpotQA), whose sole
+[public audited V1 dataset](https://huggingface.co/datasets/Iman998/XhotpotQA), whose sole
 configuration is `xhotpotqa_v1_audited` at frozen data revision
 `52b8bee41ff2bb0d41cd400ff5646c0e800b5127`.
 

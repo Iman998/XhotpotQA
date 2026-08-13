@@ -66,55 +66,45 @@ configs:
 
 **One question · multiple evidence paragraphs · languages may change between hops**
 
-[![Rows](https://img.shields.io/badge/rows-23%2C066-0f766e?style=for-the-badge)](#dataset-at-a-glance)
-[![Languages](https://img.shields.io/badge/languages-24-7c3aed?style=for-the-badge)](#language-inventory)
-[![Task](https://img.shields.io/badge/task-multi--hop%20QA-2563eb?style=for-the-badge)](#tasks-and-evaluation)
+[![Rows: 23,066](https://img.shields.io/badge/23%2C066-ROWS-0f766e?style=for-the-badge)](#dataset-at-a-glance)
+[![Task: cross-lingual multi-hop QA](https://img.shields.io/badge/CROSS--LINGUAL-MULTI--HOP%20QA-4f46e5?style=for-the-badge)](#task-formulation-and-analysis-strata)
+[![Release: audited V1](https://img.shields.io/badge/AUDITED%20V1-RECOVERED-d97706?style=for-the-badge)](#release-status)
 
-[![Release](https://img.shields.io/badge/release-recovered%20V1-f59e0b?style=flat-square)](#release-status)
-[![Audit](https://img.shields.io/badge/audit-status%20preserved-2563eb?style=flat-square)](#quality-audit)
-[![Format](https://img.shields.io/badge/format-Parquet-7c3aed?style=flat-square)](#data-format)
-[![License](https://img.shields.io/badge/data-CC%20BY--SA%204.0-16a34a?style=flat-square)](#license)
-[![Code](https://img.shields.io/badge/code-GitHub-111827?style=flat-square)](https://github.com/Iman998/XhotpotQA)
-[![Snapshot](https://img.shields.io/badge/data%20snapshot-52b8bee-0f766e?style=flat-square)](https://huggingface.co/datasets/Iman998/XHotpotQA/tree/52b8bee41ff2bb0d41cd400ff5646c0e800b5127)
+[![Format: Parquet](https://img.shields.io/badge/FORMAT-Parquet-7c3aed?style=flat-square)](#data-format)
+[![License: CC BY-SA 4.0](https://img.shields.io/badge/DATA-CC%20BY--SA%204.0-16a34a?style=flat-square)](#license)
+[![Code repository](https://img.shields.io/badge/CODE-GitHub-111827?style=flat-square)](https://github.com/Iman998/XhotpotQA)
 
 [Overview](#dataset-at-a-glance) ·
-[Release status](#release-status) ·
-[Quickstart](#quickstart) ·
-[Schema](#data-format) ·
-[Audit](#quality-audit) ·
-[Results](#artifact-verified-validation-analysis) ·
-[Limitations](#limitations-and-biases) ·
+[Load](#load-in-30-seconds) ·
+[Structure](#data-format) ·
+[Quality](#quality-and-version-policy) ·
+[Findings](#artifact-verified-validation-analysis) ·
 [Citation](#citation)
 
 </div>
 
 XHotpotQA is a controlled benchmark for studying whether a system can select and
 compose evidence when the question, gold paragraphs, and distractors are not
-necessarily written in the same language. It adapts the fixed-candidate HotpotQA
-distractor task to 24 languages while retaining paragraph order, sentence
-boundaries, question type, difficulty, answers, and sentence-level supporting
-facts.
+necessarily written in the same language. It adapts the supplied-candidate
+[HotpotQA distractor task](https://huggingface.co/datasets/hotpotqa/hotpot_qa)
+to 24 languages. It preserves recovered paragraph order, sentence arrays, task
+metadata, answers, and support annotations while explicitly flagging structural
+deviations from the source.
 
 The public release is deliberately named **`xhotpotqa_v1_audited`**. It is a
 recovered, audit-preserving V1 resource—not the prospective canonical V2. Every
-source item is retained, including rows with known structural defects, and every
-row carries a machine-readable `status` and `structural_flags` field. The frozen
+eligible source item in the released scope is retained, including rows with
+known structural defects, and every row carries machine-readable `status` and
+`structural_flags` fields. The frozen
 data snapshot is Hub revision
-[`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`](https://huggingface.co/datasets/Iman998/XHotpotQA/tree/52b8bee41ff2bb0d41cd400ff5646c0e800b5127).
+[`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`](https://huggingface.co/datasets/Iman998/XhotpotQA/tree/52b8bee41ff2bb0d41cd400ff5646c0e800b5127).
 
-> **ℹ️ How to read this card.** Green labels denote facts verified directly from
-> released artifacts; amber labels denote recovered historical provenance with
-> explicit uncertainty; gray labels denote prospective resources that are not
-> included. These categories prevent planned work from being mistaken for a
-> released result.
+> **Release status.** This page serves a transparent, artifact-verified V1
+> recovery. Amber denotes incomplete historical provenance; “prospective” means
+> that an artifact is not included. Neither label should be read as evidence that
+> corrected V2 data have already been generated.
 
-| Evidence label | Meaning in this card |
-|---|---|
-| ![Verified](https://img.shields.io/badge/ARTIFACT--VERIFIED-recomputed%20from%20release-16a34a?style=flat-square) | Counts, hashes, schema, or analyses checked against the frozen V1 artifacts |
-| ![Recovered](https://img.shields.io/badge/HISTORICAL-recovered%20with%20limits-f59e0b?style=flat-square) | Information preserved from V1, but without a provider-resolved model revision or random seed |
-| ![Prospective](https://img.shields.io/badge/PROSPECTIVE-not%20in%20this%20release-6b7280?style=flat-square) | V2 or XHotpotQA+ plans that must not be reported as available data |
-
-## Dataset at a glance
+## 📦 Dataset at a glance
 
 <table>
   <tr>
@@ -139,41 +129,38 @@ data snapshot is Hub revision
 
 | Property | Value |
 |---|---|
-| Task | Fixed-candidate cross-lingual multi-hop QA |
+| Task | Supplied-candidate cross-lingual multi-hop QA |
 | Source | [HotpotQA distractor](https://huggingface.co/datasets/hotpotqa/hotpot_qa); hard-only train and full distractor validation |
-| Evidence | Ordered candidate paragraphs with sentence boundaries |
+| Evidence | Ordered candidate paragraphs with recovered sentence arrays |
 | Supervision | Answer plus sentence-level supporting facts |
 | Current configuration | `xhotpotqa_v1_audited` |
 | Storage | Sharded, Zstandard-compressed Parquet |
 | Released rows | 23,066 |
 | Unit of release | One recovered view per HotpotQA source |
 
-### Benchmark anatomy
+### One item, several language roles
 
-Each item keeps the fixed HotpotQA candidate set while independently exposing
+Each item keeps the supplied HotpotQA candidate set while independently exposing
 the language assignments of the question, the two gold paragraphs, and every
 distractor. The colors below identify **roles**, not quality grades.
 
-<table>
-  <tr>
-    <td align="center"><b>🟣 Question + answer</b><br><code>Lq</code><br><sub>answer is produced in the question language</sub></td>
-    <td align="center">→</td>
-    <td align="center"><b>🔵 Gold evidence A</b><br><code>Lg₁</code><br><sub>supporting paragraph and sentences</sub></td>
-    <td align="center">+</td>
-    <td align="center"><b>🟢 Gold evidence B</b><br><code>Lg₂</code><br><sub>second supporting paragraph</sub></td>
-    <td align="center">→</td>
-    <td align="center"><b>🟠 Composed answer</b><br><code>language(ŷ) = Lq</code><br><sub>multi-hop evidence composition</sub></td>
-  </tr>
-  <tr>
-    <td align="center" colspan="7"><b>⚪ Multilingual distractors</b> · supplied candidates with independently assigned paragraph languages <code>Ldⱼ</code></td>
-  </tr>
-</table>
+| Role | Language assignment | Function |
+|---|---|---|
+| 🟣 Question + stored gold answer | <code>Lq = Ly</code> | The target output language for predictions is <code>Lq</code> |
+| 🔵 Gold paragraph A | <code>Lg1</code> | Supplies annotated evidence for one part of the chain |
+| 🟢 Gold paragraph B | <code>Lg2</code> | Supplies the complementary evidence needed for composition |
+| ⚪ Distractor <code>j</code> | <code>Ldj</code> | Remains in the supplied candidate set and must be rejected |
 
-The benchmark therefore measures fixed-candidate evidence selection and answer
+**Example from the released validation split:** a Swahili question and stored
+answer are paired with supporting and distractor paragraphs assigned to other
+languages. The task is to connect the annotated evidence and return the answer
+in Swahili; the full record preview appears under [Data format](#data-format).
+
+The benchmark therefore measures supplied-candidate evidence selection and answer
 composition under language mismatch. It does not claim to measure open-corpus
 retrieval or naturally occurring multilingual search behavior.
 
-## Release status
+## 🧭 Release status
 
 | Artifact | Status | What is available |
 |---|---|---|
@@ -217,7 +204,7 @@ returning the answer in the question language. Because the candidate set is
 supplied, XHotpotQA isolates evidence selection and composition; it is **not** an
 open-Wikipedia retrieval benchmark.
 
-## Quickstart
+## ⚡ Load in 30 seconds
 
 | If you want to… | Start with | Reporting requirement |
 |---|---|---|
@@ -238,7 +225,7 @@ from datasets import load_dataset
 DATA_REVISION = "52b8bee41ff2bb0d41cd400ff5646c0e800b5127"
 
 dataset = load_dataset(
-    "Iman998/XHotpotQA",
+    "Iman998/XhotpotQA",
     "xhotpotqa_v1_audited",
     revision=DATA_REVISION,
 )
@@ -253,6 +240,9 @@ print(row["status"], row["structural_flags"])
 print(row["supporting_facts"])
 ```
 
+<details>
+<summary><b>Advanced loading: streaming and status filters</b></summary>
+
 For low-memory inspection, stream Parquet shards:
 
 ```python
@@ -261,7 +251,7 @@ from datasets import load_dataset
 DATA_REVISION = "52b8bee41ff2bb0d41cd400ff5646c0e800b5127"
 
 stream = load_dataset(
-    "Iman998/XHotpotQA",
+    "Iman998/XhotpotQA",
     "xhotpotqa_v1_audited",
     split="validation",
     streaming=True,
@@ -290,6 +280,8 @@ print(
 The complete 7,405-row validation split should remain the primary denominator
 when reproducing the frozen V1 analyses. The accepted-only view is a sensitivity
 analysis, not a replacement test split.
+
+</details>
 
 ### Record preview
 
@@ -327,20 +319,22 @@ be resolved from evidence assigned to other languages while distractors remain
 in the same supplied candidate set. `candidate_preview` is a card-only summary,
 not an additional dataset column.
 
-## Data format
+## 🧱 Data format
 
-<table>
-  <tr>
-    <td align="center"><b>🔑 Identity</b><br><code>id</code> · <code>source_id</code><br><code>source_*_position</code></td>
-    <td align="center"><b>💬 QA</b><br><code>question</code> · <code>answer</code><br>source text + language fields</td>
-    <td align="center"><b>📚 Evidence</b><br><code>candidates[]</code><br><code>supporting_facts[]</code></td>
-    <td align="center"><b>🧭 Audit</b><br><code>status</code> · <code>structural_flags[]</code><br><code>record_sha256</code></td>
-    <td align="center"><b>🧾 Provenance</b><br><code>provenance.*</code><br>source → shard → build</td>
-  </tr>
-</table>
+| Field family | Core fields | Purpose |
+|---|---|---|
+| 🔑 Identity | `id`, `source_id`, `source_*_position` | Stable identity and source/release alignment |
+| 💬 QA | `question`, `answer`, source text, language fields | Translated task plus original reference text |
+| 📚 Evidence | `candidates[]`, `supporting_facts[]` | Ordered paragraphs and sentence-level supervision |
+| 🧭 Audit | `status`, `structural_flags[]`, `record_sha256` | Non-destructive quality findings and integrity |
+| 🧾 Provenance | `provenance.*` | Traceable source → shard → release build |
 
-All source and release positions are explicit, nested candidates preserve their
-sentence boundaries, and an audit finding never causes an implicit row drop.
+All source and release positions are explicit, nested candidates preserve the
+recovered sentence arrays, and an audit finding never causes an implicit row
+drop.
+
+<details>
+<summary><b>Complete 22-field schema, nested fields, and language inventory</b></summary>
 
 ### Top-level schema
 
@@ -430,29 +424,26 @@ instead of inventing a repair.
 Language codes follow ISO 639-1. Top-level `question_language` and
 `answer_language` contain codes; their `*_language_name` companions contain
 names. Candidate structs likewise contain both `language_code` and
-`language`. These assignments are not human quality certifications.
+`language`. The schema permits `und` for unresolved assignments, but no frozen
+question or answer row uses it. The display name “Mandarin Chinese” for `zh`
+follows the recovered assignment vocabulary; it is not a language-identification
+result. These assignments are not human quality certifications.
 
-## Construction and provenance
+</details>
+
+## 🏗️ Construction and provenance
 
 The released configuration is reconstructed from historical translation shards
 that used pandas `orient="columns"` JSON and did not carry HotpotQA IDs or
 support labels. The release builder performs this audited transformation:
 
-<div align="center">
-
-![Source](https://img.shields.io/badge/1-SOURCE%20SNAPSHOT-2563eb?style=for-the-badge)
-→
-![Join](https://img.shields.io/badge/2-ORDERED%20JOIN-7c3aed?style=for-the-badge)
-→
-![Select](https://img.shields.io/badge/3-VIEW%20SELECTION-db2777?style=for-the-badge)
-→
-![Audit](https://img.shields.io/badge/4-STRUCTURAL%20AUDIT-d97706?style=for-the-badge)
-→
-![Package](https://img.shields.io/badge/5-PARQUET%20%2B%20MANIFEST-0f766e?style=for-the-badge)
-
-<sub>Official HotpotQA snapshot + recovered V1 shards → ordered provenance join → deterministic public train projection → non-destructive audit → status-bearing release</sub>
-
-</div>
+| Step | Operation | Reproducibility artifact |
+|---:|---|---|
+| **1** | Freeze the official HotpotQA snapshot and recovered V1 shards | Pinned names, sizes, and SHA-256 values |
+| **2** | Reattach IDs, task metadata, and support labels by an ordered join | Source positions and source-record hashes |
+| **3** | Select one public train view per source | Explicit SHA-256 selection rule |
+| **4** | Run a non-destructive structural audit | Per-row status and flags |
+| **5** | Package Parquet shards and freeze the release | `RELEASE_MANIFEST.json` |
 
 1. Train sources are the 15,661 `hard` records from HotpotQA train; validation
    uses all 7,405 distractor records.
@@ -465,6 +456,9 @@ support labels. The release builder performs this audited transformation:
    sentence, title, answer, or support index is silently rewritten.
 6. Parquet file hashes, row counts, status counts, flag counts, and language
    counts are recorded in `RELEASE_MANIFEST.json`.
+
+<details>
+<summary><b>Historical assignment and deterministic public train selection</b></summary>
 
 ### Deterministic public train selection
 
@@ -506,7 +500,9 @@ any compatible model can be served, including through vLLM. A Gemma setup is an
 example configuration, not a requirement and not evidence that V2 has already
 been generated or validated.
 
-## Quality audit
+</details>
+
+## 🧪 Quality and version policy
 
 ### What the status field means
 
@@ -550,6 +546,9 @@ findings, including flags such as
 `support_index_out_of_range`, and
 `duplicate_normalized_translated_title`.
 
+<details>
+<summary><b>Detailed train and validation audit counts</b></summary>
+
 ### Audited validation findings
 
 The recovered validation audit retains all 7,405 sources:
@@ -587,16 +586,19 @@ Flag sets overlap; the status rows form the exhaustive 15,661-row partition.
 The authoritative machine-readable counts and file hashes are in
 `RELEASE_MANIFEST.json` next to the released Parquet files.
 
+</details>
+
 ### Sensitivity to the validation quality gate
 
 Removing the 439 flagged validation items changed every tested aggregate EM/F1
 metric by at most **0.51 points** and either primary language-condition contrast
 by at most **0.22 points**. All eight item-bootstrap intervals for the
-clean-minus-complete contrast shifts included zero. This indicates that the
+clean-minus-complete contrast shifts included zero. This paired source-item
+sensitivity analysis used 2,000 bootstrap replicates. The result indicates that the
 reported V1 language-alignment pattern is not concentrated in the flagged
 subset; it does **not** make the underlying defects acceptable.
 
-## Cross-lingual descriptors
+## 🧭 Task formulation and analysis strata
 
 ### Operational task definition
 
@@ -611,7 +613,7 @@ where \(q\) is the question, \(y\) the gold answer,
 gold-paragraph set, \(S\) the sentence-level supporting facts, and
 \(\Lambda=(L_q,L_y,L_{p_1},\ldots,L_{p_m})\) the realized language assignment.
 For V1, \(L_y=L_q\). A reader predicts \(\hat y\); a selector predicts
-\(\hat S\) or \(\hat G\); and an end-to-end fixed-candidate system predicts both.
+\(\hat S\) or \(\hat G\); and an end-to-end supplied-candidate system predicts both.
 
 The intended two-hop composition can be written schematically as
 
@@ -665,7 +667,7 @@ relation, and these realized strata:
 S1 is too small for inferential comparison, and S0 is unpopulated in this
 realized validation assignment.
 
-## Artifact-verified validation analysis
+## 📊 Artifact-verified validation analysis
 
 ![Evidence level](https://img.shields.io/badge/EVIDENCE-artifact--verified-16a34a?style=flat-square)
 ![Scope](https://img.shields.io/badge/SCOPE-frozen%20V1%20descriptives-2563eb?style=flat-square)
@@ -675,17 +677,25 @@ The following statistics were recomputed from the recovered 7,405-row validation
 metadata and surviving prediction artifacts. They are frozen-run descriptive
 associations—not a leaderboard and not causal estimates of language effects.
 
+| Verified takeaway | Frozen V1 observation |
+|---|---|
+| **Mixing is pervasive** | 99.811% of questions differ from at least one assigned gold-paragraph language |
+| **Readers are more sensitive** | S4−S2 answer-F1 contrasts range from −10.25 to −15.79 points across the three surviving reader artifacts |
+| **Selector contrast is smaller** | The corresponding support-F1 contrast is −1.71 points, with an interval that includes zero |
+
 ### Assignment geometry
 
-| Descriptor | Observed | IID assignment expectation |
+| Descriptor | Observed | IID-uniform assignment expectation |
 |---|---:|---:|
 | Question differs from at least one gold paragraph | 99.811% | 99.826% |
 | Two gold paragraphs use different languages | 95.598% | 95.833% |
 | Question language absent from every candidate | 65.523% | 65.490% |
 | Distinct candidate languages per item | 8.300 mean | 8.282 mean |
 
-The close observed/expected agreement supports the intended high-mixing geometry;
-it is not evidence of equal translation quality across languages.
+The expectations assume independent uniform assignment over 24 languages,
+conditional on each item's realized candidate count. The close agreement is
+consistent with the intended IID-uniform mixing geometry; it is not evidence of
+equal translation quality across languages.
 
 ### Reader and selector sensitivity
 
@@ -693,8 +703,11 @@ Three 7,405-row oracle-evidence reader artifacts and one 7,405-row evidence-
 selector artifact survive. The historically labeled Llama reader has 7,403
 non-null outputs; its two missing outputs are scored as empty. Its endpoint
 identity is not independently verified without the corresponding server log.
+Reader rows receive annotated gold supporting sentences and therefore do not
+evaluate evidence retrieval. Intervals in the following table use 10,000
+item-level bootstrap replicates with seed `20260810`.
 
-| System / metric | S2 | S3 | S4 | S4 − S2 (95% item-bootstrap interval) | Different − same script |
+| System / metric | S2 | S3 | S4 | S4 − S2 (95% item-bootstrap interval) | Question-to-gold: different-script − same-script-only |
 |---|---:|---:|---:|---:|---:|
 | Llama 3.1 70B label / answer F1 | 60.60 | 39.60 | 44.81 | −15.79 [−19.41, −12.12] | −19.79 [−22.58, −16.99] |
 | GPT-4o mini label / answer F1 | 57.79 | 47.34 | 47.54 | −10.25 [−13.75, −6.83] | −11.98 [−14.70, −9.25] |
@@ -703,9 +716,10 @@ identity is not independently verified without the corresponding server log.
 
 S2 contains one question-aligned gold paragraph; S4 places all gold evidence
 outside the question language and across multiple languages. In these frozen
-artifacts, the mismatch is associated much more strongly with answer composition
-from oracle evidence than with selecting evidence among supplied candidates.
-Group composition is not held fixed.
+artifacts, the absolute descriptive reader contrasts are numerically larger than
+the selector contrast. The question-to-gold script contrast compares 3,846
+different-script items with 1,126 same-script-only items. Group composition is
+not held fixed.
 
 ### Assigned gold-paragraph language
 
@@ -723,16 +737,18 @@ assigned gold languages for the three reader artifacts; selector support F1
 ranged from 81.8–86.1. These margins mix question language, script, support
 role, and the second gold language.
 
-A one-row-per-source sensitivity model jointly represented both gold languages
-and controlled question language, question type, answer type, script relation,
-exact alignment, same-language pairing, support-fact count, and structural
-flags. No gold-language coefficient survived within-outcome FDR correction for
+A one-row-per-source F1 sensitivity model jointly represented both gold
+languages and controlled question language, question type, answer type, script
+relation, exact alignment, same-language pairing, support-fact count, and
+structural flags. It used HC3 standard errors and Benjamini–Hochberg correction
+within each outcome; marginal intervals used 2,000 bootstrap replicates. No
+gold-language coefficient survived within-outcome FDR correction for
 the GPT-4o mini label, Qwen2 label, or selector. Only the historical Llama label
 retained four negative associations relative to substituting an English-assigned
 gold paragraph. This supports **model-specific associations**, not a universal
 ranking of languages or speaker communities.
 
-## Tasks and evaluation
+## 🎯 Tasks and evaluation
 
 <table>
   <tr>
@@ -748,7 +764,7 @@ The released fields support:
 - **Oracle-evidence reader:** predict the answer from gold supporting sentences.
 - **Evidence selector:** identify supporting paragraphs or sentences among the
   supplied multilingual candidates.
-- **End-to-end fixed-candidate QA:** jointly predict the answer and supporting
+- **End-to-end supplied-candidate QA:** jointly predict the answer and supporting
   facts.
 - **Language-conditioned analysis:** stratify by question language, gold
   language, script relation, \(\rho_G\), \(\rho_D\), \(H_G\), or
@@ -771,10 +787,10 @@ For a result to be interpretable and reproducible, report all of the following:
 - [ ] missing, duplicate, and unexpected prediction IDs;
 - [ ] model identifier, served endpoint revision when available, prompt, and
       decoding parameters; and
-- [ ] whether evidence was oracle-provided, selected from fixed candidates, or
+- [ ] whether evidence was oracle-provided, selected from supplied candidates, or
       obtained through an external retriever.
 
-## Intended uses
+## ✅ Intended uses
 
 XHotpotQA is intended for research on:
 
@@ -789,7 +805,7 @@ The resource should not be used to rank languages, cultures, countries, or
 speaker communities. A model score combines reasoning, translation artifacts,
 tokenization, script handling, and source-domain effects.
 
-## Out-of-scope and responsible use
+## ⛔ Out-of-scope and responsible use
 
 XHotpotQA is a research benchmark, not a production factuality or safety
 certification. Unsupported uses include making high-stakes decisions about
@@ -803,7 +819,7 @@ real people or organizations. Downstream users remain responsible for reviewing
 generated outputs, respecting the data license, and documenting any additional
 translation, filtering, or annotation.
 
-## Limitations and biases
+## ⚖️ Limitations and biases
 
 - **English-origin content.** Questions and evidence originate in English
   Wikipedia through HotpotQA; they are not naturally authored information needs
@@ -827,9 +843,9 @@ translation, filtering, or annotation.
   require the prospective complete XHotpotQA+ validation mapping or V2; they
   cannot be claimed from this one-view release.
 
-## Release integrity and manifest
+## 🔒 Release integrity and manifest
 
-[`RELEASE_MANIFEST.json`](https://huggingface.co/datasets/Iman998/XHotpotQA/blob/52b8bee41ff2bb0d41cd400ff5646c0e800b5127/RELEASE_MANIFEST.json)
+[`RELEASE_MANIFEST.json`](https://huggingface.co/datasets/Iman998/XhotpotQA/blob/52b8bee41ff2bb0d41cd400ff5646c0e800b5127/RELEASE_MANIFEST.json)
 is the machine-readable authority for the frozen audited-V1 data snapshot. It records:
 
 - release version and train selection rule;
@@ -845,12 +861,15 @@ fingerprints of the joined HotpotQA source record, the recovered four-field
 legacy payload, and the canonical released row. Consumers should pin a Hub
 revision for experiments and archive the manifest with predictions.
 
+<details>
+<summary><b>Load and inspect the release manifest in Python</b></summary>
+
 ```python
 from huggingface_hub import hf_hub_download
 import json
 
 manifest_path = hf_hub_download(
-    repo_id="Iman998/XHotpotQA",
+    repo_id="Iman998/XhotpotQA",
     repo_type="dataset",
     filename="RELEASE_MANIFEST.json",
     revision="52b8bee41ff2bb0d41cd400ff5646c0e800b5127",
@@ -864,7 +883,9 @@ print(manifest["train"]["status_counts"])
 print(manifest["validation"]["flag_counts"])
 ```
 
-## License
+</details>
+
+## 📜 License
 
 The dataset files are adaptations of [HotpotQA](https://hotpotqa.github.io/) and
 are distributed under
@@ -873,7 +894,7 @@ attribute XHotpotQA and the original HotpotQA work,
 identify modifications, and preserve the ShareAlike requirements. Repository
 software is licensed separately under the MIT License.
 
-## Citation
+## 📖 Citation
 
 If you use the resource, cite both XHotpotQA and HotpotQA:
 
@@ -884,7 +905,7 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
   author = {Barati, Iman and Ghafouri, Arash and Minaei-Bidgoli, Behrouz},
   year   = {2026},
   howpublished = {Hugging Face dataset},
-  url    = {https://huggingface.co/datasets/Iman998/XHotpotQA},
+  url    = {https://huggingface.co/datasets/Iman998/XhotpotQA},
   note   = {Audited V1 data snapshot, revision
             52b8bee41ff2bb0d41cd400ff5646c0e800b5127; manuscript in preparation}
 }
@@ -901,7 +922,7 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
 }
 ```
 
-## Maintainers and resources
+## 👥 Maintainers and resources
 
 - **Iman Barati** — methodology and resource construction
 - Arash Ghafouri — supervision and manuscript review
@@ -911,7 +932,7 @@ Code, generation, evaluation, and audit tooling:
 [github.com/Iman998/XhotpotQA](https://github.com/Iman998/XhotpotQA)
 
 Public audited V1 data:
-[huggingface.co/datasets/Iman998/XHotpotQA](https://huggingface.co/datasets/Iman998/XHotpotQA)
+[huggingface.co/datasets/Iman998/XhotpotQA](https://huggingface.co/datasets/Iman998/XhotpotQA)
 (configuration `xhotpotqa_v1_audited`; frozen data revision
 `52b8bee41ff2bb0d41cd400ff5646c0e800b5127`).
 

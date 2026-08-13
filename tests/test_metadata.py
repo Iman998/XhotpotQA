@@ -22,7 +22,7 @@ def test_citations_identify_public_data_but_not_an_unpublished_article() -> None
         assert "@misc{barati2026xhotpotqa" in text
         assert "journal = {Language Resources and Evaluation}" not in text
         assert "https://arxiv.org/" not in text
-        assert "https://huggingface.co/datasets/Iman998/XHotpotQA" in text
+        assert "https://huggingface.co/datasets/Iman998/XhotpotQA" in text
         assert "52b8bee41ff2bb0d41cd400ff5646c0e800b5127" in text
         assert "manuscript in preparation" in text
         assert "A 24-Language Benchmark" not in text
@@ -54,7 +54,7 @@ def test_public_dataset_card_declares_only_the_audited_parquet_config() -> None:
     ]
 
     card = (REPOSITORY / "dataset_card/README.md").read_text(encoding="utf-8")
-    assert "Iman998/XHotpotQA" in card
+    assert "Iman998/XhotpotQA" in card
     assert "revision=DATA_REVISION" in card
     assert 'revision="52b8bee41ff2bb0d41cd400ff5646c0e800b5127"' in card
 

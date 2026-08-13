@@ -43,7 +43,7 @@ identical ordered base JSONL and translation-map inputs produce byte-identical o
 runs. See [`XHOTPOTQA_PLUS.md`](XHOTPOTQA_PLUS.md) for the input contract and release
 cardinalities. Once the corrected canonical release passes all gates, these derived records
 will use the `xhotpotqa_plus` Hugging Face configuration and `xhotpotqa` will be its default
-base configuration. The [public audited V1 dataset](https://huggingface.co/datasets/Iman998/XHotpotQA)
+base configuration. The [public audited V1 dataset](https://huggingface.co/datasets/Iman998/XhotpotQA)
 instead uses the Parquet configuration `xhotpotqa_v1_audited` at frozen data revision
 `52b8bee41ff2bb0d41cd400ff5646c0e800b5127`; it does not claim that the parallel mapping is
 complete.

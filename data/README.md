@@ -13,7 +13,7 @@ data/processed/xhotpotqa-plus.train.jsonl
 data/processed/xhotpotqa-plus.validation.jsonl
 ```
 
-The public [XHotpotQA dataset](https://huggingface.co/datasets/Iman998/XHotpotQA) uses the
+The public [XHotpotQA dataset](https://huggingface.co/datasets/Iman998/XhotpotQA) uses the
 audited Parquet configuration `xhotpotqa_v1_audited` and the paths
 `data/xhotpotqa_v1_audited/{train,validation}-*.parquet`. Its 15,661 training rows and
 7,405 validation rows retain `status` and `structural_flags`; quarantined records remain in
