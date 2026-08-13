@@ -81,7 +81,7 @@ configs:
     <a href="#quality-and-version-policy">Quality</a> ·
     <a href="#artifact-verified-validation-analysis">Findings</a> ·
     <a href="#citation">Citation</a> ·
-    <a href="https://github.com/Iman998/XhotpotQA">Code</a>
+    <a href="https://github.com/Iman998/XhotpotQA/tree/v0.3.1">Code v0.3.1</a>
   </div>
 </div>
 
@@ -904,6 +904,11 @@ is the machine-readable authority for the frozen audited-V1 data snapshot. It re
 - every Parquet shard's relative path, row count, byte size, and SHA-256; and
 - total rows and bytes.
 
+The companion software is frozen at
+[**GitHub release `v0.3.1`**](https://github.com/Iman998/XhotpotQA/tree/v0.3.1).
+The code tag and frozen Hub data revision serve different purposes: the former
+fixes the toolkit, while the latter fixes the released Parquet bytes.
+
 Each row additionally carries
 `provenance.source_record_sha256`,
 `provenance.legacy_raw_sha256`, and `record_sha256`: respectively,
@@ -957,7 +962,8 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
   howpublished = {Hugging Face dataset},
   url    = {https://huggingface.co/datasets/Iman998/XhotpotQA},
   note   = {Audited V1 data snapshot, revision
-            52b8bee41ff2bb0d41cd400ff5646c0e800b5127; manuscript in preparation}
+            52b8bee41ff2bb0d41cd400ff5646c0e800b5127; code v0.3.1;
+            manuscript in preparation}
 }
 
 @inproceedings{yang2018hotpotqa,
@@ -979,7 +985,7 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
 - Behrouz Minaei-Bidgoli — supervision and manuscript review
 
 Code, generation, evaluation, and audit tooling:
-[github.com/Iman998/XhotpotQA](https://github.com/Iman998/XhotpotQA)
+[GitHub release `v0.3.1`](https://github.com/Iman998/XhotpotQA/tree/v0.3.1)
 
 Public audited V1 data:
 [huggingface.co/datasets/Iman998/XhotpotQA](https://huggingface.co/datasets/Iman998/XhotpotQA)
