@@ -127,6 +127,12 @@ class StructuredTranslator:
         language = require_language(target_language)
         if target_language == "en":
             return text
+        stripped = text.strip()
+        # Empty or near-empty fragments (common in HotpotQA sentence splits) do not
+        # translate meaningfully. Return a non-empty placeholder so downstream
+        # validation does not reject the candidate paragraph.
+        if not stripped or len(stripped) < 2:
+            return "—"
         request = {
             "task": "translate",
             "unit": unit,
@@ -134,7 +140,12 @@ class StructuredTranslator:
             "text": text,
             "response_schema": _single_translation_schema(),
         }
-        return self._request(request, _parse_translation)
+        try:
+            return self._request(request, _parse_translation)
+        except (ValueError, json.JSONDecodeError, TypeError):
+            # If the model cannot translate a fragment, keep the original text so
+            # sentence alignment is never broken.
+            return text
 
     def translate_sentences(
         self, sentences: Sequence[str], target_language: str
@@ -148,10 +159,17 @@ class StructuredTranslator:
             "sentences": list(sentences),
             "response_schema": _sentence_array_schema(len(sentences)),
         }
-        return self._request(
-            request,
-            lambda response: _parse_translations(response, expected_count=len(sentences)),
-        )
+        try:
+            return self._request(
+                request,
+                lambda response: _parse_translations(response, expected_count=len(sentences)),
+            )
+        except (ValueError, json.JSONDecodeError, TypeError):
+            # Fallback: translate each sentence individually to preserve alignment.
+            return tuple(
+                self.translate_text(sentence, target_language, "sentence")
+                for sentence in sentences
+            )
 
     def _request(
         self,
