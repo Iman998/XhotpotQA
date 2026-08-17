@@ -1,0 +1,28 @@
+api:
+  # OpenAI-compatible BASE URL. Do not append /chat/completions here.
+  base_url: "https://llm-api.boof-ai.com/v1"
+
+  # Direct API key. Because API keys are secrets, do not commit a real key to Git.
+  api_key: "sk-octopus-hMEk9ggtwwEyJmc1ByUiLpC3utsQEkVBuJ9y4qr7Z9AXv7mE"
+
+  # null = OpenAI SDK default timeout; otherwise seconds.
+  timeout_seconds: 6000
+
+  # Retry count handled by the OpenAI Python SDK.
+  max_retries: 2
+
+question_generation:
+  # Same model as the answer stage.
+  model_name: "glm-5.2"
+
+judge:
+  # Concurrent worker threads for judge requests (set to 1 as requested).
+  max_workers: 1
+  seed: 20260810
+  paragraph_sample_per_lang: 80
+  question_sample_per_lang: 20
+
+source:
+  # HotpotQA JSON arrays used to recover the original English questions.
+  train: "/data/Iman/dataset/hf_sft/xhotpot/hotpot_train_v1.1.json"
+  validation: "/data/Iman/dataset/hf_sft/xhotpot/hotpot_dev_distractor_v1.json"

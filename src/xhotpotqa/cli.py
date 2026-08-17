@@ -19,6 +19,7 @@ from xhotpotqa.data.plus import load_qa_translations, write_plus_instances
 from xhotpotqa.data.release import upload_dataset
 from xhotpotqa.data.validation import EXPECTED_SPLIT_COUNTS, validate_instances
 from xhotpotqa.evaluation.evaluator import evaluate
+from xhotpotqa.evaluation.judge import JudgeConfig, load_source_questions, run_judge
 from xhotpotqa.evaluation.normalization import (
     DEFAULT_EVALUATION_PROTOCOL,
     EVALUATION_PROTOCOLS,
@@ -144,6 +145,15 @@ def _parser() -> argparse.ArgumentParser:
     upload.add_argument(
         "--dry-run", action="store_true", help="validate release inputs without network access"
     )
+
+    judge = commands.add_parser(
+        "judge",
+        help="score v2 translation quality with an LLM-as-a-judge",
+    )
+    judge.add_argument("--input", type=Path, required=True, help="v2 JSONL file to evaluate")
+    judge.add_argument("--output", type=Path, required=True, help="output path prefix for reports")
+    judge.add_argument("--config", type=Path, required=True, help="judge YAML configuration")
+    judge.add_argument("--no-progress", action="store_true", help="disable the tqdm progress bar")
     return parser
 
 
@@ -171,6 +181,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         print(json.dumps({"validated": True, "uploaded": not args.dry_run}))
         return 0
+    if args.command == "judge":
+        return _judge(args)
     raise AssertionError(f"Unhandled command: {args.command}")
 
 
@@ -301,3 +313,31 @@ def _evaluate(args: argparse.Namespace) -> int:
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(report["overall"], ensure_ascii=False))
     return 0
+
+
+def _judge(args: argparse.Namespace) -> int:
+    from xhotpotqa.data.models import XHotpotInstance
+
+    config = JudgeConfig.from_yaml(args.config)
+    source_paths = {
+        "train": Path(config.source_train) if config.source_train else None,
+        "validation": Path(config.source_validation) if config.source_validation else None,
+    }
+    source_questions = load_source_questions(source_paths)
+    instances = [XHotpotInstance.from_dict(item) for item in read_jsonl(args.input)]
+    report = run_judge(
+        instances,
+        config,
+        source_questions=source_questions,
+        output_path=args.output,
+        progress=not args.no_progress,
+    )
+    summary = {
+        "model_name": report.model_name,
+        "total_units": report.total_units,
+        "judged_units": report.judged_units,
+        "failed_units": report.failed_units,
+        "overall_score_mean": report.overall_score_mean,
+    }
+    print(json.dumps(summary, ensure_ascii=False))
+    return int(report.failed_units > 0)
