@@ -1,0 +1,16 @@
+model_id: gemma-4-31B-it
+revision: gemma-4-31B-it-vllm-v0.19.1
+backend: openai_compatible
+base_url_env: OPENAI_BASE_URL
+api_key_env: OPENAI_API_KEY
+timeout_seconds: 600
+http_max_retries: 5
+seed: 20260810
+chat_template_kwargs:
+  enable_thinking: false
+do_sample: true
+temperature: 0.2
+top_p: 1.0
+max_new_tokens: 4096
+max_retries: 3
+checkpoint_every: 25
