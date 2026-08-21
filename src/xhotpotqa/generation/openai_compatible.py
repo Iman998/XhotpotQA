@@ -5,10 +5,12 @@ from __future__ import annotations
 import os
 from collections.abc import Sequence
 from ipaddress import ip_address
+from threading import Lock
 from typing import Any
 from urllib.parse import urlsplit
 
 from xhotpotqa.generation.config import GenerationConfig
+from xhotpotqa.generation.protocols import GenerationResponseError
 
 
 class OpenAICompatibleGenerator:
@@ -19,23 +21,25 @@ class OpenAICompatibleGenerator:
             raise ValueError("Expected backend=openai_compatible")
         self._config = config
         self._client = client
+        self._client_lock = Lock()
 
     def _get_client(self) -> Any:
-        if self._client is None:
-            base_url, api_key = _connection_settings(self._config)
-            try:
-                from openai import OpenAI
-            except ImportError as error:
-                raise RuntimeError(
-                    'Install generation dependencies with pip install -e ".[generation]"'
-                ) from error
-            self._client = OpenAI(
-                base_url=base_url,
-                api_key=api_key,
-                timeout=self._config.timeout_seconds,
-                max_retries=self._config.http_max_retries,
-            )
-        return self._client
+        with self._client_lock:
+            if self._client is None:
+                base_url, api_key = _connection_settings(self._config)
+                try:
+                    from openai import OpenAI
+                except ImportError as error:
+                    raise RuntimeError(
+                        'Install generation dependencies with pip install -e ".[generation]"'
+                    ) from error
+                self._client = OpenAI(
+                    base_url=base_url,
+                    api_key=api_key,
+                    timeout=self._config.timeout_seconds,
+                    max_retries=self._config.http_max_retries,
+                )
+            return self._client
 
     def generate(self, messages: Sequence[dict[str, str]]) -> str:
         request_messages = _validate_messages(messages)
@@ -56,14 +60,14 @@ class OpenAICompatibleGenerator:
         response = client.chat.completions.create(**request)
         choices = getattr(response, "choices", None)
         if not choices:
-            raise ValueError("vLLM returned no completion choices")
+            raise GenerationResponseError("Endpoint returned no completion choices")
         choice = choices[0]
         if getattr(choice, "finish_reason", None) == "length":
-            raise ValueError("vLLM truncated the response at max_new_tokens")
+            raise GenerationResponseError("Endpoint truncated the response at max_new_tokens")
         message = getattr(choice, "message", None)
         content = getattr(message, "content", None)
         if not isinstance(content, str) or not content.strip():
-            raise ValueError("vLLM returned an empty assistant message")
+            raise GenerationResponseError("Endpoint returned an empty assistant message")
         return content.strip()
 
 

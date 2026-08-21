@@ -254,6 +254,8 @@ xhotpotqa generate-v2 \
   --output data/processed/train.v2.jsonl \
   --config configs/generation/openai_compatible.yaml \
   --split train \
+  --difficulty hard \
+  --max-workers 8 \
   --assignment-manifest data/manifests/v1.train.assignments.json \
   --audit-log private-audit/train.v2.responses.jsonl
 ```
@@ -263,6 +265,13 @@ question--answer and paragraph language exactly; omit it to retain the seeded `s
 assignment path. The manifest schema, strict validation rules, and paired-audit key are defined
 in [`docs/ASSIGNMENT_MANIFEST.md`](docs/ASSIGNMENT_MANIFEST.md).
 
+Difficulty filtering is explicit: omit `--difficulty` to process every source record. Parallel
+generation bounds in-flight requests and writes successful records in input order. A sidecar
+lock rejects a second writer for the same output, and the atomically replaced
+`*.errors.jsonl` ledger retains only unresolved failures. Any unresolved record makes the
+command exit nonzero; no source text or placeholder is silently substituted for a failed
+translation.
+
 Generation is deterministic at the assignment layer and resumable by immutable source ID.
 It never changes sentence order or supporting-fact indices. Model-specific chat-template
 arguments are optional YAML settings, not assumptions in the client. A Gemma configuration
@@ -270,6 +279,27 @@ is included only as an example in `configs/generation/gemma4_31b.yaml`. See
 [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) for the audit trail and server recipe.
 The optional audit log contains source text and raw model output. Keep it private and outside
 the public dataset; omit `--audit-log` when raw-response retention is not approved.
+
+## Audit translation quality with an OpenAI-compatible judge
+
+The judge uses the same environment-only connection contract. It freezes a deterministic,
+language-balanced sample manifest, pairs sampled questions and answers, requires a strict JSON
+score response, and compacts resumed attempts into one record per sampled unit:
+
+```bash
+xhotpotqa judge \
+  --input data/processed/train.v2.jsonl \
+  --input data/processed/validation.v2.jsonl \
+  --source-train data/raw/hotpot_train_v1.1.json \
+  --source-validation data/raw/hotpot_dev_distractor_v1.json \
+  --output outputs/translation-judge \
+  --config configs/evaluation/openai_compatible.yaml
+```
+
+The resulting `.sample.jsonl`, `.records.jsonl`, and `.report.json` artifacts record the model
+alias, prompt version/hash, sample-manifest hash, and application retries. Hidden reasoning is
+never requested or retained. Use a new output prefix when changing the model, prompt, inputs,
+or sampling configuration.
 
 ## Evaluate predictions
 

@@ -1,28 +1,36 @@
-# Generated data and logs
-data/processed/
-data/smoke_val_50.json
-*.log
-*.errors.jsonl
-
-# Python
+# Python and test artifacts
 __pycache__/
 *.py[cod]
 *.egg-info/
 *.egg-link
 .eggs/
+.coverage
+coverage.xml
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
 build/
 dist/
 
-# Virtual envs
-.venv/
-venv/
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
 
-# Editor / OS
+# Generated datasets, logs, and model outputs
+data/raw/
+data/processed/
+outputs/
+*.log
+*.errors.jsonl
+*.parquet
+*.jsonl
+!tests/fixtures/*.jsonl
+
+# Editor and operating-system files
 .DS_Store
 .idea/
 .vscode/
 *.swp
-
-# Environment-specific retry scripts (hardcoded local paths/IPs)
-retry_failed*.sh
-retry_temp01*.py

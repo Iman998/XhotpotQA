@@ -1,17 +1,22 @@
 import hashlib
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
+from contextlib import contextmanager
 from pathlib import Path
 
 from xhotpotqa.data.assignment import MANIFEST_SCHEMA_VERSION, ManifestLanguageAssigner
 from xhotpotqa.generation.pipeline import XHotpotBuilder
+from xhotpotqa.generation.protocols import TranslationStats
 
 
 class PassthroughTranslator:
     model_id = "served-model"
     revision = "immutable-revision"
     decoding: Mapping[str, object] = {"temperature": 0.0}
-    retry_count = 0
+
+    @contextmanager
+    def record_scope(self) -> Iterator[TranslationStats]:
+        yield TranslationStats()
 
     def translate_text(self, text: str, target_language: str, unit: str) -> str:
         return f"{target_language}:{text}"

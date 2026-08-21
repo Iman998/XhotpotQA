@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.4.0 - 2026-08-21
+
+- Harden model-agnostic generation with bounded deterministic concurrency,
+  per-record retry provenance, exclusive output locks, atomic reconciled error
+  ledgers, explicit difficulty filtering, and nonzero incomplete-run status.
+- Remove silent placeholder and source-copy translation fallbacks; retry invalid
+  endpoint responses under the structured contract and retain typed failure origin.
+- Replace the environment-specific judge runners with one credential-safe,
+  OpenAI-compatible workflow using typed HotpotQA sources, strict JSON prompt v2,
+  deterministic language-balanced sample manifests, resumable compact results,
+  and prompt/model/sample provenance without hidden reasoning retention.
+- Preserve exact versioned hashes for the historical judge prompts so previously
+  generated V1/V2 judge artifacts remain documentable without reinterpreting them
+  as outputs of the new prompt.
+- Add RC1 release tooling for the source-complete `xhotpotqa_v1_1_audited`
+  configuration, the corrective V2 artifact, and separately curated V1/V2 judge
+  artifacts. V1.1 retains every ordered original English `source_sentences` array;
+  release builders emit checksum-bearing manifests and do not imply publication.
+- Remove ad-hoc generation/retry/judge scripts and environment-specific reports in
+  favor of package CLI commands and tested release builders.
+
 ## 0.3.1 - 2026-08-13
 
 - Upgrade the public dataset card with a responsive scientific visual hierarchy,

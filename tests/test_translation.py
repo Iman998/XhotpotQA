@@ -1,9 +1,17 @@
 import json
 from collections.abc import Sequence
+from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
 
 import pytest
 
-from xhotpotqa.generation.translation import PROMPT_HASH, PROMPT_VERSION, StructuredTranslator
+from xhotpotqa.generation.protocols import GenerationResponseError
+from xhotpotqa.generation.translation import (
+    PROMPT_HASH,
+    PROMPT_VERSION,
+    StructuredTranslator,
+    TranslationResponseError,
+)
 
 
 class SequenceGenerator:
@@ -148,3 +156,90 @@ def test_audit_writer_records_rejected_and_accepted_raw_responses() -> None:
     assert translator.translate_text("source", "fa", "answer") == "answer"
     assert [record["status"] for record in records] == ["rejected", "accepted"]
     assert records[0]["raw_response"] == '{"wrong":true}'
+
+
+def test_exhausted_contract_never_silently_copies_source_text() -> None:
+    generator = SequenceGenerator(['{"wrong":true}', '{"still_wrong":true}'])
+    translator = StructuredTranslator(
+        generator,
+        model_id="model",
+        revision="revision",
+        max_retries=2,
+    )
+
+    with pytest.raises(TranslationResponseError, match="exhausted"):
+        translator.translate_text("English source", "fa", "answer")
+
+    assert generator.calls == 2
+
+
+def test_one_character_source_is_sent_to_the_model_without_placeholder_repair() -> None:
+    generator = SequenceGenerator(['{"translation":"one"}'])
+    translator = StructuredTranslator(generator, model_id="model", revision="revision")
+
+    assert translator.translate_text("1", "fa", "answer") == "one"
+    assert _user_payload(generator)["text"] == "1"
+
+
+class PerSourceGenerator:
+    def __init__(self) -> None:
+        self._counts: dict[str, int] = {}
+        self._lock = Lock()
+
+    def generate(self, messages: Sequence[dict[str, str]]) -> str:
+        source = str(json.loads(messages[1]["content"])["text"])
+        with self._lock:
+            count = self._counts.get(source, 0)
+            self._counts[source] = count + 1
+        if source == "retry" and count == 0:
+            return '{"wrong":true}'
+        return json.dumps({"translation": f"translated-{source}"})
+
+
+def test_record_retry_provenance_is_isolated_across_worker_threads() -> None:
+    translator = StructuredTranslator(
+        PerSourceGenerator(),
+        model_id="model",
+        revision="revision",
+        max_retries=2,
+    )
+
+    def translate(source: str) -> tuple[str, int]:
+        with translator.record_scope() as stats:
+            value = translator.translate_text(source, "fa", "answer")
+            return value, stats.retry_count
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        retried = executor.submit(translate, "retry")
+        clean = executor.submit(translate, "clean")
+
+    assert retried.result() == ("translated-retry", 1)
+    assert clean.result() == ("translated-clean", 0)
+    assert translator.retry_count == 1
+
+
+class TruncatedThenValidGenerator:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def generate(self, messages: Sequence[dict[str, str]]) -> str:
+        self.calls += 1
+        if self.calls == 1:
+            raise GenerationResponseError("truncated")
+        return '{"translation":"answer"}'
+
+
+def test_invalid_endpoint_response_is_retried_under_the_same_contract() -> None:
+    generator = TruncatedThenValidGenerator()
+    translator = StructuredTranslator(
+        generator,
+        model_id="model",
+        revision="revision",
+        max_retries=2,
+    )
+
+    with translator.record_scope() as stats:
+        assert translator.translate_text("source", "fa", "answer") == "answer"
+
+    assert generator.calls == 2
+    assert stats.retry_count == 1

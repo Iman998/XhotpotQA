@@ -5,11 +5,17 @@ from __future__ import annotations
 import hashlib
 import json
 import threading
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from contextlib import AbstractContextManager, contextmanager
+from contextvars import ContextVar
 from types import MappingProxyType
 from typing import TypeVar, cast
 
-from xhotpotqa.generation.protocols import ChatGenerator
+from xhotpotqa.generation.protocols import (
+    ChatGenerator,
+    GenerationResponseError,
+    TranslationStats,
+)
 from xhotpotqa.languages import require_language
 
 PROMPT_VERSION = "xhotpotqa-translation-v2.0"
@@ -86,6 +92,10 @@ ResponseT = TypeVar("ResponseT")
 AuditWriter = Callable[[Mapping[str, object]], None]
 
 
+class TranslationResponseError(ValueError):
+    """The endpoint exhausted its attempts without satisfying the response contract."""
+
+
 class StructuredTranslator:
     def __init__(
         self,
@@ -105,6 +115,10 @@ class StructuredTranslator:
         self._max_retries = max_retries
         self._retry_count = 0
         self._retry_lock = threading.Lock()
+        self._active_stats: ContextVar[TranslationStats | None] = ContextVar(
+            f"xhotpotqa_translation_stats_{id(self)}",
+            default=None,
+        )
         self._decoding: Mapping[str, object] = MappingProxyType(dict(decoding or {}))
         self._audit_writer = audit_writer
 
@@ -123,18 +137,33 @@ class StructuredTranslator:
     @property
     def retry_count(self) -> int:
         """Return cumulative parser/schema retries for provenance accounting."""
-        return self._retry_count
+        with self._retry_lock:
+            return self._retry_count
+
+    def record_scope(self) -> AbstractContextManager[TranslationStats]:
+        """Return an isolated retry counter for one dataset record.
+
+        A context variable keeps provenance correct when one translator instance is
+        shared by multiple worker threads. Nested record scopes are rejected because
+        they would make ownership of a retry ambiguous.
+        """
+        return self._record_scope()
+
+    @contextmanager
+    def _record_scope(self) -> Iterator[TranslationStats]:
+        if self._active_stats.get() is not None:
+            raise RuntimeError("Translation record scopes cannot be nested")
+        stats = TranslationStats()
+        token = self._active_stats.set(stats)
+        try:
+            yield stats
+        finally:
+            self._active_stats.reset(token)
 
     def translate_text(self, text: str, target_language: str, unit: str) -> str:
         language = require_language(target_language)
         if target_language == "en":
             return text
-        stripped = text.strip()
-        # Empty or near-empty fragments (common in HotpotQA sentence splits) do not
-        # translate meaningfully. Return a non-empty placeholder so downstream
-        # validation does not reject the candidate paragraph.
-        if not stripped or len(stripped) < 2:
-            return "—"
         request = {
             "task": "translate",
             "unit": unit,
@@ -142,12 +171,7 @@ class StructuredTranslator:
             "text": text,
             "response_schema": _single_translation_schema(),
         }
-        try:
-            return self._request(request, _parse_translation)
-        except (ValueError, json.JSONDecodeError, TypeError):
-            # If the model cannot translate a fragment, keep the original text so
-            # sentence alignment is never broken.
-            return text
+        return self._request(request, _parse_translation)
 
     def translate_sentences(
         self, sentences: Sequence[str], target_language: str
@@ -161,17 +185,10 @@ class StructuredTranslator:
             "sentences": list(sentences),
             "response_schema": _sentence_array_schema(len(sentences)),
         }
-        try:
-            return self._request(
-                request,
-                lambda response: _parse_translations(response, expected_count=len(sentences)),
-            )
-        except (ValueError, json.JSONDecodeError, TypeError):
-            # Fallback: translate each sentence individually to preserve alignment.
-            return tuple(
-                self.translate_text(sentence, target_language, "sentence")
-                for sentence in sentences
-            )
+        return self._request(
+            request,
+            lambda response: _parse_translations(response, expected_count=len(sentences)),
+        )
 
     def _request(
         self,
@@ -181,14 +198,18 @@ class StructuredTranslator:
         last_error: Exception | None = None
         for attempt in range(self._max_retries):
             if attempt:
-                with self._retry_lock:
-                    self._retry_count += 1
-            raw = self._generator.generate(
-                [
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
-                ]
-            )
+                self._record_retry()
+            try:
+                raw = self._generator.generate(
+                    [
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+                    ]
+                )
+            except GenerationResponseError as error:
+                self._write_audit(payload, "", attempt + 1, "rejected", type(error).__name__)
+                last_error = error
+                continue
             try:
                 parsed = _parse_json_object(raw)
                 result = parse_response(parsed)
@@ -198,7 +219,18 @@ class StructuredTranslator:
                 continue
             self._write_audit(payload, raw, attempt + 1, "accepted", "")
             return result
-        raise ValueError(f"Could not parse a structured translation response: {last_error}")
+        error_name = type(last_error).__name__ if last_error is not None else "unknown"
+        raise TranslationResponseError(
+            "Endpoint exhausted structured-translation attempts "
+            f"after {self._max_retries} call(s); last_error={error_name}"
+        ) from last_error
+
+    def _record_retry(self) -> None:
+        with self._retry_lock:
+            self._retry_count += 1
+        active = self._active_stats.get()
+        if active is not None:
+            active.retry_count += 1
 
     def _write_audit(
         self,

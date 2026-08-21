@@ -1,13 +1,14 @@
-model_id: glm-5.2
+model_id: served-judge-model
 backend: openai_compatible
 base_url_env: OPENAI_BASE_URL
 api_key_env: OPENAI_API_KEY
-timeout_seconds: 6000
+timeout_seconds: 600
 http_max_retries: 2
+response_max_attempts: 2
 max_workers: 1
 seed: 20260810
 temperature: 0.0
-max_new_tokens: 4000
+max_new_tokens: 512
 paragraph_sample_per_language: 80
 question_sample_per_language: 20
 answer_sample_per_language: 20

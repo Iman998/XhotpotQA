@@ -1,7 +1,8 @@
 # Reproducibility protocol
 
 1. Pin the source HotpotQA release and record its SHA-256 checksum.
-2. Filter only `hard` training examples; keep all 7,405 distractor validation examples.
+2. Filter only `hard` training examples with the explicit `--difficulty hard` option; keep all
+   7,405 distractor validation examples without a difficulty filter.
 3. Preserve the evaluated V1 assignment manifest and checksum. For a paired corrective V2
    run, pass that manifest with `--assignment-manifest`; this replays question--answer and
    paragraph languages exactly. Use the versioned hash-based assigner and a published seed
@@ -12,11 +13,19 @@
    `minItems == maxItems == len(sentences)`.
    The recorded prompt hash is the SHA-256 of a canonical, sorted-key JSON specification that
    includes the system message and both task-specific request/response templates.
-5. Resume by source ID; never reseed a shard.
+5. Resume by source ID; never reseed a shard. Treat any nonzero generation exit as an
+   incomplete split, preserve the reconciled error ledger, and never run two writers against
+   one output path.
 6. Validate sentence cardinality, IDs, supporting indices, language codes, and checksums.
 7. Run automatic language-ID, entity/number preservation, and answer-preservation checks.
 8. Audit a stratified sample with bilingual annotators and adjudicate disagreements.
 9. Freeze canonical JSONL files, publish the generated manifest, and tag the code commit.
+
+For model-based translation audits, publish the deterministic sample manifest before treating
+the scores as an experimental artifact. The v2 judge prompt requires a strict JSON object and
+is identified by both version and SHA-256; historical free-form `SCORE:` prompts retain a
+separate legacy hash for documentation only. Resume reuses the exact sample and compacts the
+latest result per record ID. Public judge artifacts should omit hidden reasoning.
 
 For XHotpotQA+, freeze the canonical base split and the source-ID keyed question--answer
 translation mapping independently. Run `expand-plus` only after both artifacts pass checksum

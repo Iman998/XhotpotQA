@@ -83,8 +83,8 @@ LANGUAGE_CODES = {
     "Swedish": "sv",
 }
 
-BUILD_VERSION = "xhotpotqa-public-v1-builder/1.1.0"
-CONFIG_NAME = "xhotpotqa_v1_audited"
+BUILD_VERSION = "xhotpotqa-public-v1-builder/1.2.0"
+CONFIG_NAME = "xhotpotqa_v1_1_audited"
 EXPECTED_SOURCE_NAMES = {
     "train": "hotpot_train_v1.1.json",
     "validation": "hotpot_dev_distractor_v1.json",
@@ -227,6 +227,7 @@ SCHEMA = pa.schema(
                         pa.field("paragraph_id", pa.string(), nullable=False),
                         pa.field("candidate_index", pa.int16(), nullable=False),
                         pa.field("source_title", pa.string(), nullable=False),
+                        pa.field("source_sentences", pa.list_(pa.string()), nullable=False),
                         pa.field("title", pa.string(), nullable=False),
                         pa.field("sentences", pa.list_(pa.string()), nullable=False),
                         pa.field("language", pa.string(), nullable=False),
@@ -553,6 +554,7 @@ def build_record(
         if any(not sentence.strip() for sentence in sentences):
             flags.add("blank_sentence")
         source_title = ""
+        source_sentences: list[str] = []
         if index < len(source_context):
             raw_source_candidate = source_context[index]
             if (
@@ -563,7 +565,8 @@ def build_record(
                 and all(isinstance(sentence, str) for sentence in raw_source_candidate[1])
             ):
                 source_title = raw_source_candidate[0]
-                difference = len(sentences) - len(raw_source_candidate[1])
+                source_sentences = list(raw_source_candidate[1])
+                difference = len(sentences) - len(source_sentences)
                 if difference < 0:
                     flags.add("paragraph_sentence_shortfall")
                 elif difference > 0:
@@ -579,6 +582,7 @@ def build_record(
                 "paragraph_id": f"p{index:02d}",
                 "candidate_index": index,
                 "source_title": source_title,
+                "source_sentences": source_sentences,
                 "title": title,
                 "sentences": sentences,
                 "language": paragraph_language,
@@ -903,7 +907,7 @@ def build_release(
     input_snapshots: Mapping[Path, tuple[int, int]],
 ) -> dict[str, object]:
     report: dict[str, object] = {
-        "release_version": "xhotpotqa-public-v1.0-audited",
+        "release_version": "xhotpotqa-public-v1.1-audited",
         "config_name": CONFIG_NAME,
         "train_selection": "sha256-public-v1",
         "builder": {
@@ -922,6 +926,7 @@ def build_release(
         "notes": [
             "All 7,405 validation sources are retained; status marks structural quarantine.",
             "Training selects one deterministic QA-language view from each 24-view source group.",
+            "Every candidate retains its ordered original English source_sentences array.",
             "No translated text is silently repaired or deleted.",
         ],
     }

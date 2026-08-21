@@ -19,7 +19,7 @@ from xhotpotqa.data.plus import load_qa_translations, write_plus_instances
 from xhotpotqa.data.release import upload_dataset
 from xhotpotqa.data.validation import EXPECTED_SPLIT_COUNTS, validate_instances
 from xhotpotqa.evaluation.evaluator import evaluate
-from xhotpotqa.evaluation.judge import JudgeConfig, load_source_questions, run_judge
+from xhotpotqa.evaluation.judge import JudgeConfig, load_source_records, run_judge
 from xhotpotqa.evaluation.normalization import (
     DEFAULT_EVALUATION_PROTOCOL,
     EVALUATION_PROTOCOLS,
@@ -77,6 +77,11 @@ def _parser() -> argparse.ArgumentParser:
     generate.add_argument("--output", type=Path, required=True)
     generate.add_argument("--config", type=Path, required=True)
     generate.add_argument("--split", choices=("train", "validation"), required=True)
+    generate.add_argument(
+        "--difficulty",
+        choices=("easy", "medium", "hard"),
+        help="optional explicit HotpotQA difficulty filter; omitted means all records",
+    )
     generate.add_argument(
         "--assignment-manifest",
         type=Path,
@@ -150,7 +155,19 @@ def _parser() -> argparse.ArgumentParser:
         "judge",
         help="score v2 translation quality with an LLM-as-a-judge",
     )
-    judge.add_argument("--input", type=Path, required=True, help="v2 JSONL file to evaluate")
+    judge.add_argument(
+        "--input",
+        type=Path,
+        action="append",
+        required=True,
+        help="canonical JSONL to evaluate; repeat to combine splits",
+    )
+    judge.add_argument("--source-train", type=Path, help="official HotpotQA train JSON")
+    judge.add_argument(
+        "--source-validation",
+        type=Path,
+        help="official HotpotQA validation JSON",
+    )
     judge.add_argument("--output", type=Path, required=True, help="output path prefix for reports")
     judge.add_argument("--config", type=Path, required=True, help="judge YAML configuration")
     judge.add_argument("--no-progress", action="store_true", help="disable the tqdm progress bar")
@@ -224,8 +241,8 @@ def _generate(args: argparse.Namespace) -> int:
     if args.max_workers and args.max_workers > 1:
         from xhotpotqa.generation.run import generate_dataset_parallel
 
-        written = generate_dataset_parallel(
-            load_hotpot_records(args.input, args.split),
+        report = generate_dataset_parallel(
+            load_hotpot_records(args.input, args.split, difficulty=args.difficulty),
             args.output,
             args.split,
             builder,
@@ -234,8 +251,8 @@ def _generate(args: argparse.Namespace) -> int:
             progress=not args.no_progress,
         )
     else:
-        written = generate_dataset(
-            load_hotpot_records(args.input, args.split),
+        report = generate_dataset(
+            load_hotpot_records(args.input, args.split, difficulty=args.difficulty),
             args.output,
             args.split,
             builder,
@@ -244,14 +261,15 @@ def _generate(args: argparse.Namespace) -> int:
     print(
         json.dumps(
             {
-                "written": written,
+                **asdict(report),
+                "complete": report.complete,
                 "output": str(args.output),
                 "assignment_version": assigner.assignment_version,
                 "assignment_manifest_sha256": assigner.assignment_manifest_sha256 or None,
             }
         )
     )
-    return 0
+    return int(not report.complete)
 
 
 def _import_legacy(args: argparse.Namespace) -> int:
@@ -320,20 +338,27 @@ def _judge(args: argparse.Namespace) -> int:
 
     config = JudgeConfig.from_yaml(args.config)
     source_paths = {
-        "train": Path(config.source_train) if config.source_train else None,
-        "validation": Path(config.source_validation) if config.source_validation else None,
+        "train": args.source_train,
+        "validation": args.source_validation,
     }
-    source_questions = load_source_questions(source_paths)
-    instances = [XHotpotInstance.from_dict(item) for item in read_jsonl(args.input)]
+    if not any(source_paths.values()):
+        raise ValueError("Provide --source-train and/or --source-validation for judge inputs")
+    sources = load_source_records(source_paths)
+    instances = [
+        XHotpotInstance.from_dict(item) for path in args.input for item in read_jsonl(path)
+    ]
     report = run_judge(
         instances,
         config,
-        source_questions=source_questions,
+        source_records=sources,
         output_path=args.output,
         progress=not args.no_progress,
     )
     summary = {
-        "model_name": report.model_name,
+        "model_id": report.model_id,
+        "prompt_version": report.prompt_version,
+        "prompt_hash": report.prompt_hash,
+        "sample_manifest_sha256": report.sample_manifest_sha256,
         "total_units": report.total_units,
         "judged_units": report.judged_units,
         "failed_units": report.failed_units,

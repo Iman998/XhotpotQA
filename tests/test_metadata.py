@@ -93,6 +93,7 @@ def test_dataset_card_uses_hugging_face_katex_delimiters() -> None:
 
 def test_repository_docs_and_builder_distinguish_the_two_release_tracks() -> None:
     audited_config = "xhotpotqa_v1_audited"
+    source_complete_config = "xhotpotqa_v1_1_audited"
     data_revision = "52b8bee41ff2bb0d41cd400ff5646c0e800b5127"
     for relative_path in (
         "README.md",
@@ -118,15 +119,26 @@ def test_repository_docs_and_builder_distinguish_the_two_release_tracks() -> Non
     assert "the incomplete parallel artifacts are not published" in changelog
 
     builder = (REPOSITORY / "scripts/build_hf_public_v1.py").read_text(encoding="utf-8")
-    assert f'CONFIG_NAME = "{audited_config}"' in builder
+    assert f'CONFIG_NAME = "{source_complete_config}"' in builder
+    assert 'BUILD_VERSION = "xhotpotqa-public-v1-builder/1.2.0"' in builder
+    assert '"release_version": "xhotpotqa-public-v1.1-audited"' in builder
 
 
 def test_citation_cff_tracks_public_code_but_omits_unminted_release_identifiers() -> None:
     payload = yaml.safe_load((REPOSITORY / "CITATION.cff").read_text(encoding="utf-8"))
 
     assert payload["type"] == "software"
-    assert payload["version"] == "0.3.1"
+    assert payload["version"] == "0.4.0"
     assert payload["repository-code"] == "https://github.com/Iman998/XhotpotQA"
     assert "24-Language" not in payload["title"]
-    assert str(payload["date-released"]) == "2026-08-13"
+    assert str(payload["date-released"]) == "2026-08-21"
     assert "url" not in payload
+
+
+def test_package_and_citation_versions_match_the_release() -> None:
+    pyproject = (REPOSITORY / "pyproject.toml").read_text(encoding="utf-8")
+    citation = yaml.safe_load((REPOSITORY / "CITATION.cff").read_text(encoding="utf-8"))
+
+    assert 'version = "0.4.0"' in pyproject
+    assert citation["version"] == "0.4.0"
+    assert str(citation["date-released"]) == "2026-08-21"

@@ -17,7 +17,7 @@ from xhotpotqa.data.models import (
     SupportingFact,
     XHotpotInstance,
 )
-from xhotpotqa.generation.protocols import TranslationService
+from xhotpotqa.generation.protocols import TranslationService, TranslationStats
 from xhotpotqa.generation.translation import PROMPT_HASH, PROMPT_VERSION
 
 
@@ -45,6 +45,15 @@ class XHotpotBuilder:
         }
 
     def build(self, source: Mapping[str, Any], source_split: str) -> XHotpotInstance:
+        with self._translator.record_scope() as stats:
+            return self._build(source, source_split, stats)
+
+    def _build(
+        self,
+        source: Mapping[str, Any],
+        source_split: str,
+        stats: TranslationStats,
+    ) -> XHotpotInstance:
         source_id = str(source.get("_id", source.get("id", "")))
         if not source_id:
             raise ValueError("HotpotQA source record is missing _id/id")
@@ -54,7 +63,6 @@ class XHotpotBuilder:
             *(f"paragraph:{index}" for index in range(len(raw_context))),
         )
         self._assigner.validate_source(source_id, unit_ids)
-        retries_before = int(getattr(self._translator, "retry_count", 0))
         question_language = self._assigner.assign(source_id, QUESTION_ANSWER_UNIT_ID)
         question = self._translator.translate_text(
             str(source["question"]), question_language, "question"
@@ -96,7 +104,7 @@ class XHotpotBuilder:
             translation_revision=self._translator.revision,
             prompt_version=PROMPT_VERSION,
             prompt_hash=PROMPT_HASH,
-            retry_count=int(getattr(self._translator, "retry_count", 0)) - retries_before,
+            retry_count=stats.retry_count,
             created_at=datetime.now(timezone.utc).isoformat(),
             validation_status="structural-passed",
             decoding=dict(self._translator.decoding),
