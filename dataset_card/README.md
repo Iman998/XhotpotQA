@@ -974,9 +974,10 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
 
 ```bibtex
 @misc{barati2026xhotpotqa,
-  title  = {XHotpotQA: A Benchmark for Cross-Lingual Multi-Hop Question
-            Answering over Mixed-Language Evidence},
-  author = {Barati, Iman and Ghafouri, Arash and Minaei-Bidgoli, Behrouz},
+  title  = {XHotpotQA: A Benchmark for Cross-Lingual Knowledge Composition
+            in Multi-Hop Question Answering},
+  author = {Barati, Iman and Ghafouri, Arash and Alidoost, Reza and
+            Minaei-Bidgoli, Behrouz},
   year   = {2026},
   howpublished = {Hugging Face dataset},
   url    = {https://huggingface.co/datasets/Iman998/XhotpotQA},
@@ -1000,8 +1001,9 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
 ## 👥 Maintainers and resources
 
 - **Iman Barati** — methodology and resource construction
-- Arash Ghafouri — supervision and manuscript review
-- Behrouz Minaei-Bidgoli — supervision and manuscript review
+- Arash Ghafouri — supervision
+- Reza Alidoost — experiments and analysis
+- Behrouz Minaei-Bidgoli — supervision and validation
 
 Code, generation, evaluation, and audit tooling:
 [GitHub release `v0.4.0`](https://github.com/Iman998/XhotpotQA/tree/v0.4.0)
