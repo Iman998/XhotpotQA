@@ -29,7 +29,7 @@ def test_citations_identify_public_data_but_not_an_unpublished_article() -> None
         assert "A 24-Language Benchmark" not in text
 
 
-def test_public_dataset_card_declares_only_the_audited_parquet_config() -> None:
+def test_public_dataset_card_defaults_to_v1_1_and_retains_legacy_v1() -> None:
     metadata = _dataset_card_metadata()
 
     assert metadata["pretty_name"] == "XHotpotQA"
@@ -39,8 +39,21 @@ def test_public_dataset_card_declares_only_the_audited_parquet_config() -> None:
     assert metadata["size_categories"] == ["10K<n<100K"]
     assert metadata["configs"] == [
         {
-            "config_name": "xhotpotqa_v1_audited",
+            "config_name": "xhotpotqa_v1_1_audited",
             "default": True,
+            "data_files": [
+                {
+                    "split": "train",
+                    "path": "data/xhotpotqa_v1_1_audited/train-*.parquet",
+                },
+                {
+                    "split": "validation",
+                    "path": "data/xhotpotqa_v1_1_audited/validation-*.parquet",
+                },
+            ],
+        },
+        {
+            "config_name": "xhotpotqa_v1_audited",
             "data_files": [
                 {
                     "split": "train",
@@ -51,13 +64,76 @@ def test_public_dataset_card_declares_only_the_audited_parquet_config() -> None:
                     "path": "data/xhotpotqa_v1_audited/validation-*.parquet",
                 },
             ],
-        }
+        },
     ]
 
     card = (REPOSITORY / "dataset_card/README.md").read_text(encoding="utf-8")
     assert "Iman998/XhotpotQA" in card
     assert "revision=DATA_REVISION" in card
-    assert 'revision="52b8bee41ff2bb0d41cd400ff5646c0e800b5127"' in card
+    assert "1d29e7918cf1acc045726c70fddba82371833090" in card
+    assert "source_sentences" in card
+    assert "52b8bee41ff2bb0d41cd400ff5646c0e800b5127" in card
+
+
+def test_all_hub_cards_pin_exact_snapshots_and_canonical_slugs() -> None:
+    collection_url = (
+        "https://huggingface.co/collections/Iman998/"
+        "xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a"
+    )
+    cards = {
+        "dataset_card/README.md": (
+            "Iman998/XhotpotQA",
+            "1d29e7918cf1acc045726c70fddba82371833090",
+            "xhotpotqa_v1_1_audited",
+        ),
+        "dataset_cards/v2/README.md": (
+            "Iman998/XhotpotQA-V2",
+            "b05ba394ad7312e85625624c90d10258cbab31af",
+            "xhotpotqa_v2_audited_rc1",
+        ),
+        "dataset_cards/judge_v1/README.md": (
+            "Iman998/XhotpotQA-GLM52-Judge-V1",
+            "ba891ae62ed989606c9fc2fd5f08f9e88ef37547",
+            "xhotpotqa_glm52_judge_v1",
+        ),
+        "dataset_cards/judge_v2/README.md": (
+            "Iman998/XhotpotQA-GLM52-Judge-V2",
+            "0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840",
+            "xhotpotqa_glm52_judge_v2",
+        ),
+    }
+
+    for relative_path, (repo_id, revision, config_name) in cards.items():
+        text = (REPOSITORY / relative_path).read_text(encoding="utf-8")
+        lines = text.splitlines()
+        closing = lines.index("---", 1)
+        metadata = yaml.safe_load("\n".join(lines[1:closing]))
+
+        assert repo_id in text
+        assert revision in text
+        assert config_name in {config["config_name"] for config in metadata["configs"]}
+        assert collection_url in text
+        assert "Iman998/XHotpotQA" not in text
+        assert not re.search(r"__(?:[A-Z0-9_]+REVISION[A-Z0-9_]*)__", text)
+
+
+def test_release_cards_keep_counts_and_model_claims_in_scope() -> None:
+    v2 = (REPOSITORY / "dataset_cards/v2/README.md").read_text(encoding="utf-8")
+    judge_v1 = (REPOSITORY / "dataset_cards/judge_v1/README.md").read_text(encoding="utf-8")
+    judge_v2 = (REPOSITORY / "dataset_cards/judge_v2/README.md").read_text(encoding="utf-8")
+
+    assert all(value in v2 for value in ("22,836", "23,066", "15,433", "7,403"))
+    assert "Gemma 4 31B Instruct" in v2
+    assert "not the corrected canonical V2" in v2
+
+    for card in (judge_v1, judge_v2):
+        assert "2,760" in card
+        assert "requested" in card.lower()
+        assert "glm-5.2" in card.lower()
+        assert "provider-resolved" in card.lower()
+        assert "not paired" in card.lower() or "unpaired" in card.lower()
+
+    assert "Gemma 4 31B-generated" in judge_v2
 
 
 def test_dataset_card_navigation_targets_plain_stable_headings() -> None:
@@ -87,14 +163,18 @@ def test_dataset_card_uses_hugging_face_katex_delimiters() -> None:
     assert not re.search(r"(?m)^\s*\\[\[\]]\s*$", prose)
     assert not re.search(r"(?<!\\)\\[()]", prose)
     assert prose.count("$$") == 8
-    assert prose.count(r"\\(") == prose.count(r"\\)")
+    without_display_math = re.sub(r"\$\$.*?\$\$", "", prose, flags=re.DOTALL)
+    assert not re.search(r"(?<!\$)\$(?!\$)", without_display_math)
     assert prose.count(r"\\(") > 0
+    assert prose.count(r"\\(") == prose.count(r"\\)")
+    assert r"\\(L_q\\)" in prose
 
 
 def test_repository_docs_and_builder_distinguish_the_two_release_tracks() -> None:
     audited_config = "xhotpotqa_v1_audited"
     source_complete_config = "xhotpotqa_v1_1_audited"
     data_revision = "52b8bee41ff2bb0d41cd400ff5646c0e800b5127"
+    source_complete_revision = "1d29e7918cf1acc045726c70fddba82371833090"
     for relative_path in (
         "README.md",
         "data/README.md",
@@ -104,6 +184,8 @@ def test_repository_docs_and_builder_distinguish_the_two_release_tracks() -> Non
         text = (REPOSITORY / relative_path).read_text(encoding="utf-8")
         assert audited_config in text
         assert data_revision in text
+        assert source_complete_config in text
+        assert source_complete_revision in text
 
     data_readme = (REPOSITORY / "data/README.md").read_text(encoding="utf-8")
     assert "prospective corrected canonical release" in data_readme

@@ -52,6 +52,7 @@ configs:
 [![Rows](https://img.shields.io/badge/audit%20rows-2%2C760-2f80ed?style=for-the-badge)](#sampling-design)
 [![Coverage](https://img.shields.io/badge/scored-100%25-2ca44f?style=for-the-badge)](#results)
 [![Model identity](https://img.shields.io/badge/model-requested%20alias-orange?style=for-the-badge)](#model-provenance)
+[![Snapshot](https://img.shields.io/badge/snapshot-ba891ae-7b61ff?style=for-the-badge)](https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V1/tree/ba891ae62ed989606c9fc2fd5f08f9e88ef37547)
 [![License](https://img.shields.io/badge/license-CC%20BY--SA%204.0-7b61ff?style=for-the-badge)](#license)
 
 **No hidden reasoning · no raw endpoint · no credentials · no source/candidate text duplication**
@@ -67,17 +68,26 @@ This release contains the complete V1 translation audit used in the XHotpotQA re
 
 The public payload removes hidden reasoning and raw texts. Reproducible joins use stable XHotpotQA identifiers plus exact UTF-8 SHA-256 hashes of the source and candidate strings.
 
-This V1 audit and the separately released V2 audit use independently drawn, balanced samples. They are not a paired evaluation and their mean difference must not be interpreted as an instance-level or causal V2 improvement estimate.
+This V1 audit and the separately released V2 audit use independently drawn,
+balanced samples. The audits are **independent and unpaired**; their mean
+difference must not be interpreted as an instance-level or causal V2
+improvement estimate.
+
+The public annotation payload is frozen at Hub revision
+[`ba891ae62ed989606c9fc2fd5f08f9e88ef37547`](https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V1/tree/ba891ae62ed989606c9fc2fd5f08f9e88ef37547).
 
 ## Quickstart
 
 ```python
 from datasets import load_dataset
 
+AUDIT_REVISION = "ba891ae62ed989606c9fc2fd5f08f9e88ef37547"
+
 audit = load_dataset(
-    "Iman998/XHotpotQA-GLM52-Judge-V1",
+    "Iman998/XhotpotQA-GLM52-Judge-V1",
     "xhotpotqa_glm52_judge_v1",
     split="audit",
+    revision=AUDIT_REVISION,
 )
 
 print(audit.num_rows)  # 2760
@@ -85,7 +95,11 @@ print(audit.features)
 print(audit.filter(lambda row: row["unit"] == "paragraph")[0])
 ```
 
-Join rows to the pinned XHotpotQA V1 resource using `instance_id`, `unit`, and `paragraph_id`. Verify the exact joined strings with `source_text_sha256` and `candidate_text_sha256`.
+Join rows to the default V1.1 configuration of the pinned
+[XHotpotQA snapshot](https://huggingface.co/datasets/Iman998/XhotpotQA/tree/1d29e7918cf1acc045726c70fddba82371833090)
+using `instance_id`, `unit`, and `paragraph_id`. V1.1 retains the V1 translations
+and adds original paragraph `source_sentences`. Verify exact joined strings with
+`source_text_sha256` and `candidate_text_sha256`.
 
 ## Sampling design
 
@@ -273,10 +287,16 @@ Answer requests additionally contain `context_question` with the English questio
 
 These annotations derive from CC BY-SA 4.0 HotpotQA/XHotpotQA content and are released under **CC BY-SA 4.0**. The accompanying builder software is MIT-licensed.
 
+## Release family
+
+Browse V1.1, V2 RC1, and both independent GLM-5.2 audit snapshots in the
+[XHotpotQA cross-lingual multi-hop QA collection](https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a).
+
 ## Resources
 
-- Dataset: https://huggingface.co/datasets/Iman998/XHotpotQA
-- Code: https://github.com/Iman998/XHotpotQA
+- Frozen judge snapshot: https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V1/tree/ba891ae62ed989606c9fc2fd5f08f9e88ef37547
+- Pinned XHotpotQA V1.1 source: https://huggingface.co/datasets/Iman998/XhotpotQA/tree/1d29e7918cf1acc045726c70fddba82371833090
+- Code: https://github.com/Iman998/XhotpotQA
 - Official GLM-5.2 announcement: https://z.ai/blog/glm-5.2
 - Official GLM-5.2 model card: https://huggingface.co/zai-org/GLM-5.2
 - Paper/archive: forthcoming

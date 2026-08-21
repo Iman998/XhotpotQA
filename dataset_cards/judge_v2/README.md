@@ -53,6 +53,7 @@ configs:
 [![Rows](https://img.shields.io/badge/audit%20rows-2%2C760-2f80ed?style=for-the-badge)](#sampling-design)
 [![Coverage](https://img.shields.io/badge/scored-100%25-2ca44f?style=for-the-badge)](#results)
 [![Invalid rows removed](https://img.shields.io/badge/invalid%20partial%20answers-240%20removed-d73a49?style=for-the-badge)](#artifact-recovery)
+[![Snapshot](https://img.shields.io/badge/snapshot-0f9cd56-7b61ff?style=for-the-badge)](https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V2/tree/0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840)
 [![License](https://img.shields.io/badge/license-CC%20BY--SA%204.0-7b61ff?style=for-the-badge)](#license)
 
 **Exact prompt hashes · explicit score origins · no hidden reasoning · no credentials**
@@ -68,15 +69,21 @@ This release provides the clean final 2,760-row translation audit for XHotpotQA 
 
 The release builder reconstructs the valid final set from locked artifacts, excludes the known malformed partial answer run, removes hidden reasoning and raw text, and records a cryptographic locator for every source/candidate pair.
 
+The public annotation payload is frozen at Hub revision
+[`0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840`](https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V2/tree/0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840).
+
 ## Quickstart
 
 ```python
 from datasets import load_dataset
 
+AUDIT_REVISION = "0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840"
+
 audit = load_dataset(
-    "Iman998/XHotpotQA-GLM52-Judge-V2",
+    "Iman998/XhotpotQA-GLM52-Judge-V2",
     "xhotpotqa_glm52_judge_v2",
     split="audit",
+    revision=AUDIT_REVISION,
 )
 
 print(audit.num_rows)  # 2760
@@ -85,7 +92,10 @@ thai_answers = audit.filter(lambda row: row["target_language"] == "th" and row["
 print(thai_answers["score"])
 ```
 
-Join against [XHotpotQA V2 RC1](https://huggingface.co/datasets/Iman998/XHotpotQA-V2) using `instance_id`, `unit`, and `paragraph_id`. Validate the joined strings with their exact SHA-256 fields.
+Join against the pinned
+[XHotpotQA V2 RC1 snapshot](https://huggingface.co/datasets/Iman998/XhotpotQA-V2/tree/b05ba394ad7312e85625624c90d10258cbab31af)
+using `instance_id`, `unit`, and `paragraph_id`. Validate the joined strings with
+their exact SHA-256 fields.
 
 ## Sampling design
 
@@ -301,10 +311,16 @@ The answer request additionally carries the original English question as `contex
 
 These annotations derive from CC BY-SA 4.0 HotpotQA/XHotpotQA content and are released under **CC BY-SA 4.0**. Builder code is MIT-licensed.
 
+## Release family
+
+Browse V1.1, V2 RC1, and both independent GLM-5.2 audit snapshots in the
+[XHotpotQA cross-lingual multi-hop QA collection](https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a).
+
 ## Resources
 
-- V2 RC1: https://huggingface.co/datasets/Iman998/XHotpotQA-V2
-- Code: https://github.com/Iman998/XHotpotQA
+- Frozen judge snapshot: https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V2/tree/0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840
+- Pinned V2 RC1 source: https://huggingface.co/datasets/Iman998/XhotpotQA-V2/tree/b05ba394ad7312e85625624c90d10258cbab31af
+- Code: https://github.com/Iman998/XhotpotQA
 - Official GLM-5.2 announcement: https://z.ai/blog/glm-5.2
 - Official GLM-5.2 model card: https://huggingface.co/zai-org/GLM-5.2
 - Gemma 4 technical report: https://arxiv.org/abs/2607.02770

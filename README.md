@@ -9,27 +9,47 @@ retrieval/selection, reading, and end-to-end reasoning can be evaluated separate
 | Property | Value |
 |---|---:|
 | Languages | 24 |
-| Public audited V1 dataset | 15,661 train / 7,405 validation |
-| Frozen data revision | `52b8bee41ff2bb0d41cd400ff5646c0e800b5127` |
+| Recommended audited V1.1 dataset | 15,661 train / 7,405 validation |
+| Frozen V1.1 data revision | `1d29e7918cf1acc045726c70fddba82371833090` |
+| Audited V2 RC1 | 15,433 train / 7,403 validation (230 intended rows missing) |
+| GLM-5.2 judge archives | 2,760 source-referenced units per version |
 | Audited raw parallel train views | 375,864 |
 | Audited raw validation views | 7,405 |
 | Complete XHotpotQA+ target | 553,584 views (not yet complete) |
 | Source task | HotpotQA distractor |
 | Dataset license | CC BY-SA 4.0 |
 
-> **Public audited V1 dataset:**
+> **Recommended public dataset:**
 > [`Iman998/XhotpotQA`](https://huggingface.co/datasets/Iman998/XhotpotQA), configuration
-> `xhotpotqa_v1_audited`. For reproducible experiments, pin data revision
-> [`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`](https://huggingface.co/datasets/Iman998/XhotpotQA/tree/52b8bee41ff2bb0d41cd400ff5646c0e800b5127).
-> This public dataset is an audit-preserving recovery of V1:
+> `xhotpotqa_v1_1_audited`. For reproducible experiments, pin data revision
+> [`1d29e7918cf1acc045726c70fddba82371833090`](https://huggingface.co/datasets/Iman998/XhotpotQA/tree/1d29e7918cf1acc045726c70fddba82371833090).
+> V1.1 adds the recovered original English title and ordered sentence array for every
+> candidate as `source_title` and `source_sentences`; it does not silently change the
+> historical translated text. The dataset remains an audit-preserving recovery of V1:
 > all 15,661 train sources and all 7,405 validation sources are retained, and each row
 > exposes `status` plus `structural_flags`. A quarantined status identifies a known
 > structural defect; it does not remove the row.
 >
-> The strict canonical `xhotpotqa` and `xhotpotqa_plus` configurations remain
-> prospective. In particular, the 177,720-view parallel validation mapping required for
-> XHotpotQA+ is not present in the audited archive. Canonical V2 data are also pending a
-> completed generation and paired quality audit.
+> The earlier `xhotpotqa_v1_audited` configuration remains available at frozen revision
+> `52b8bee41ff2bb0d41cd400ff5646c0e800b5127`. Strict canonical V2 and the 177,720-view
+> parallel validation mapping required for XHotpotQA+ remain prospective. The public V2
+> artifact is explicitly an incomplete audited release candidate, not canonical V2.
+
+## Release family
+
+The official [XHotpotQA collection](https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a)
+keeps benchmark data and evaluation artifacts visibly separate:
+
+| Artifact | Role | Frozen data revision |
+|---|---|---|
+| [`Iman998/XhotpotQA`](https://huggingface.co/datasets/Iman998/XhotpotQA) | Recommended V1.1 benchmark with original English paragraph sentences | `1d29e7918cf1acc045726c70fddba82371833090` |
+| [`Iman998/XhotpotQA-V2`](https://huggingface.co/datasets/Iman998/XhotpotQA-V2) | Gemma 4 31B-generated audited RC1; 22,836/23,066 intended rows | `b05ba394ad7312e85625624c90d10258cbab31af` |
+| [`Iman998/XhotpotQA-GLM52-Judge-V1`](https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V1) | Balanced, source-referenced V1 translation audit | `ba891ae62ed989606c9fc2fd5f08f9e88ef37547` |
+| [`Iman998/XhotpotQA-GLM52-Judge-V2`](https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V2) | Balanced, source-referenced V2 RC1 translation audit | `0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840` |
+
+The two judge samples are independent and language/unit-balanced; their differences are
+descriptive model-judge estimates, not paired causal effects. The requested judge endpoint
+alias was `glm-5.2`; no provider-resolved checkpoint digest is claimed.
 
 ## Why this benchmark?
 
@@ -61,11 +81,11 @@ pip install -e ".[generation]"
 from collections import Counter
 from datasets import load_dataset
 
-DATA_REVISION = "52b8bee41ff2bb0d41cd400ff5646c0e800b5127"
+DATA_REVISION = "1d29e7918cf1acc045726c70fddba82371833090"
 
 dataset = load_dataset(
     "Iman998/XhotpotQA",
-    "xhotpotqa_v1_audited",
+    "xhotpotqa_v1_1_audited",
     revision=DATA_REVISION,
 )
 
@@ -73,6 +93,7 @@ validation = dataset["validation"]
 print(len(dataset["train"]), len(validation))  # 15_661, 7_405
 print(Counter(validation["status"]))
 print(validation[0]["question_language"], validation[0]["structural_flags"])
+print(validation[0]["candidates"][0]["source_sentences"][0])
 ```
 
 Quarantined records intentionally remain part of the complete benchmark denominator. If a
@@ -84,7 +105,7 @@ accepted_validation = validation.filter(lambda row: row["status"] == "accepted")
 print(accepted_validation.num_rows)
 ```
 
-The pinned revision identifies the published audited-V1 data snapshot even if the Hub card
+The pinned revision identifies the published audited-V1.1 data snapshot even if the Hub card
 later receives documentation-only updates. The exact recovered-Parquet schema, provenance
 fields, status semantics, and release
 limitations are documented in the
@@ -93,7 +114,7 @@ limitations are documented in the
 prospective V2 and XHotpotQA+ pipeline; it is not a claim that the recovered V1 rows have
 already passed those strict gates.
 
-## Rebuild the public audited V1
+## Rebuild the public audited V1.1
 
 The public Parquet release is built directly from the two pinned HotpotQA source files and
 the recovered pandas-column translation shards. The standalone builder requires `ijson`
@@ -130,7 +151,7 @@ python scripts/build_hf_public_v1.py \
   --validation-shard "$RAW_DIR/hotpot_validation_translate_4-5.json" \
   --validation-shard "$RAW_DIR/hotpot_validation_translate_5-6.json" \
   --validation-shard "$RAW_DIR/hotpot_validation_translate_6-end.json" \
-  --output-dir build/hf_public_v1 \
+  --output-dir build/hf_public_v1_1 \
   --rows-per-shard 5000
 ```
 
@@ -142,15 +163,15 @@ sibling directory, read back for validation, and moved into place only after all
 Expected output:
 
 ```text
-build/hf_public_v1/
+build/hf_public_v1_1/
 ├── RELEASE_MANIFEST.json
 └── data/
-    └── xhotpotqa_v1_audited/
+    └── xhotpotqa_v1_1_audited/
         ├── train-*.parquet       # 15,661 rows
         └── validation-*.parquet  # 7,405 rows
 ```
 
-The manifest records the `xhotpotqa_v1_audited` configuration, 23,066 total rows,
+The manifest records the `xhotpotqa_v1_1_audited` configuration, 23,066 total rows,
 ordered input roles and hashes, status/flag/language counts, Parquet file hashes, builder
 version and script hash, Git revision including dirty state, and the Python/platform/library
 environment. The builder writes data and the manifest. When reproducing the published
@@ -165,8 +186,9 @@ A complete mapping would produce 375,864 training views and 177,720 validation v
 (553,584 total). The expansion itself is deterministic and does not call a model. The audited
 archive currently contains only the training-side parallel views, so publication of the
 separate `xhotpotqa_plus` Hub configuration remains blocked. The strict
-`xhotpotqa` configuration is likewise prospective. The public audited-V1 repository has
-`xhotpotqa_v1_audited` as its sole and default configuration.
+`xhotpotqa` configuration is likewise prospective. The public repository now recommends
+`xhotpotqa_v1_1_audited`; the immutable earlier `xhotpotqa_v1_audited` configuration
+remains available for exact reproduction of published V1 experiments.
 
 Provide translations as either a source-ID keyed JSON object or the line-oriented JSONL form
 documented in [`docs/XHOTPOTQA_PLUS.md`](docs/XHOTPOTQA_PLUS.md), then run:
@@ -301,6 +323,25 @@ alias, prompt version/hash, sample-manifest hash, and application retries. Hidde
 never requested or retained. Use a new output prefix when changing the model, prompt, inputs,
 or sampling configuration.
 
+## Build the audited V2 and judge Hub payloads
+
+[`scripts/build_hf_rc1_releases.py`](scripts/build_hf_rc1_releases.py) is the fail-closed
+release builder used for the public V2 RC1 and both sanitized judge archives. It accepts the
+pinned HotpotQA sources, V2 split files/error ledgers, the complete V1 judge artifact, the V2
+paragraph/question artifact, and the corrected V2 answer artifact. The builder:
+
+- verifies the exact byte size and SHA-256 of every declared input;
+- joins records to source IDs and preserves original English source fields;
+- emits an explicit missing-source manifest instead of synthesizing absent rows;
+- discards the superseded mixed-run V2 answer rows and admits only the corrected answer run;
+- writes deterministic Parquet shards, release manifests, summary tables, and independent
+  stratified-bootstrap comparisons; and
+- installs the release set atomically only after complete read-back validation.
+
+Run `python scripts/build_hf_rc1_releases.py --help` for the explicit input contract. The
+reviewed Hub metadata live under [`dataset_cards/`](dataset_cards/); they deliberately keep
+benchmark data, V2 RC1, and model-judge artifacts in separate repositories.
+
 ## Evaluate predictions
 
 Prediction JSONL records contain an `id`, `answer`, and a list of supporting facts. Run:
@@ -329,6 +370,7 @@ src/xhotpotqa/evaluation/ normalization, metrics, and language stratification
 scripts/                 thin, automation-friendly entry points
 tests/                   unit and contract tests
 dataset_card/            Hugging Face dataset card
+dataset_cards/           V2 RC1 and GLM-5.2 judge dataset cards
 docs/                    schema, data statement, and reproducibility protocol
 ```
 
@@ -390,8 +432,8 @@ terms, and consult the data statement before deployment.
   year    = {2026},
   howpublished = {Hugging Face dataset},
   url     = {https://huggingface.co/datasets/Iman998/XhotpotQA},
-  note    = {Audited V1 data snapshot, revision
-             52b8bee41ff2bb0d41cd400ff5646c0e800b5127; manuscript in preparation}
+  note    = {Audited V1.1 data snapshot, revision
+             1d29e7918cf1acc045726c70fddba82371833090; manuscript in preparation}
 }
 ```
 

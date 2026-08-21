@@ -49,8 +49,14 @@ tags:
 size_categories:
 - 10K<n<100K
 configs:
-- config_name: xhotpotqa_v1_audited
+- config_name: xhotpotqa_v1_1_audited
   default: true
+  data_files:
+  - split: train
+    path: data/xhotpotqa_v1_1_audited/train-*.parquet
+  - split: validation
+    path: data/xhotpotqa_v1_1_audited/validation-*.parquet
+- config_name: xhotpotqa_v1_audited
   data_files:
   - split: train
     path: data/xhotpotqa_v1_audited/train-*.parquet
@@ -62,7 +68,7 @@ configs:
   <div style="background:linear-gradient(135deg,#0f172a 0%,#164e63 55%,#0f766e 100%);color:#ffffff;padding:24px;">
     <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
       <h1 style="color:#ffffff;margin:0;border:0;font-size:30px;line-height:1.2;">XHotpotQA</h1>
-      <span style="background:#fef3c7;color:#78350f;border:1px solid #fbbf24;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;letter-spacing:.04em;">AUDITED V1 · PUBLIC</span>
+      <span style="background:#dcfce7;color:#14532d;border:1px solid #22c55e;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;letter-spacing:.04em;">AUDITED V1.1 · PUBLIC</span>
     </div>
     <p style="color:#ccfbf1;margin:10px 0 3px;font-size:17px;font-weight:700;">Cross-lingual multi-hop question answering over mixed-language evidence</p>
     <p style="color:#e2e8f0;margin:0;font-size:14px;">One question · multiple evidence paragraphs · languages may change between hops</p>
@@ -81,7 +87,7 @@ configs:
     <a href="#quality-and-version-policy">Quality</a> ·
     <a href="#artifact-verified-validation-analysis">Findings</a> ·
     <a href="#citation">Citation</a> ·
-    <a href="https://github.com/Iman998/XhotpotQA/tree/v0.3.1">Code v0.3.1</a>
+    <a href="https://github.com/Iman998/XhotpotQA/tree/v0.4.0">Code v0.4.0</a>
   </div>
 </div>
 
@@ -93,13 +99,18 @@ to 24 languages. It preserves recovered paragraph order, sentence arrays, task
 metadata, answers, and support annotations while explicitly flagging structural
 deviations from the source.
 
-The public release is deliberately named **`xhotpotqa_v1_audited`**. It is a
-recovered, audit-preserving V1 resource—not the prospective canonical V2. Every
+The preferred public configuration is **`xhotpotqa_v1_1_audited`**. It keeps
+the audit-preserving V1 translations and adds every original English candidate
+paragraph as `source_sentences`, making paragraph-level inspection possible
+without a positional join to a separate HotpotQA file. The frozen
+`xhotpotqa_v1_audited` configuration remains available unchanged for exact
+reproduction of earlier experiments. Neither configuration is the corrected
+canonical V2. Every
 eligible source item in the released scope is retained, including rows with
 known structural defects, and every row carries machine-readable `status` and
 `structural_flags` fields. The frozen
-data snapshot is Hub revision
-[`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`](https://huggingface.co/datasets/Iman998/XhotpotQA/tree/52b8bee41ff2bb0d41cd400ff5646c0e800b5127).
+V1.1 data snapshot is Hub revision
+[`1d29e7918cf1acc045726c70fddba82371833090`](https://huggingface.co/datasets/Iman998/XhotpotQA/tree/1d29e7918cf1acc045726c70fddba82371833090).
 
 <div style="border-left:5px solid #d97706;border-radius:0 10px 10px 0;padding:13px 16px;margin:18px 0;">
   <strong>Release status · recovered and audited, not corrected V2.</strong><br>
@@ -135,7 +146,8 @@ data snapshot is Hub revision
 | Source | [HotpotQA distractor](https://huggingface.co/datasets/hotpotqa/hotpot_qa); hard-only train and full distractor validation |
 | Evidence | Ordered candidate paragraphs with recovered sentence arrays |
 | Supervision | Answer plus sentence-level supporting facts |
-| Current configuration | `xhotpotqa_v1_audited` |
+| Preferred configuration | `xhotpotqa_v1_1_audited` (default; adds original English `source_sentences`) |
+| Frozen legacy configuration | `xhotpotqa_v1_audited` at revision `52b8bee…` |
 | Storage | Sharded, Zstandard-compressed Parquet |
 | Released rows | 23,066 |
 | Unit of release | One recovered view per HotpotQA source |
@@ -147,10 +159,10 @@ the language assignments of the question, the two gold paragraphs, and every
 distractor. The colors below identify **roles**, not quality grades.
 
 <div style="display:flex;flex-wrap:wrap;gap:9px;margin:12px 0 16px;">
-  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #c4b5fd;border-radius:10px;border-top:4px solid #7c3aed;"><strong>Question</strong><br><span style="font-size:13px;">assigned language \\(L_q\\)</span></div>
-  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #93c5fd;border-radius:10px;border-top:4px solid #2563eb;"><strong>Gold A</strong><br><span style="font-size:13px;">evidence language \\(L_{g_1}\\)</span></div>
-  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #86efac;border-radius:10px;border-top:4px solid #16a34a;"><strong>Gold B</strong><br><span style="font-size:13px;">evidence language \\(L_{g_2}\\)</span></div>
-  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;border-top:4px solid #64748b;"><strong>Distractor \\(j\\)</strong><br><span style="font-size:13px;">assigned language \\(L_{d_j}\\)</span></div>
+  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #c4b5fd;border-radius:10px;border-top:4px solid #7c3aed;"><strong>Question</strong><br><span style="font-size:13px;">assigned language <code>L_q</code></span></div>
+  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #93c5fd;border-radius:10px;border-top:4px solid #2563eb;"><strong>Gold A</strong><br><span style="font-size:13px;">evidence language <code>L_g1</code></span></div>
+  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #86efac;border-radius:10px;border-top:4px solid #16a34a;"><strong>Gold B</strong><br><span style="font-size:13px;">evidence language <code>L_g2</code></span></div>
+  <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;border-top:4px solid #64748b;"><strong>Distractor <code>j</code></strong><br><span style="font-size:13px;">assigned language <code>L_dj</code></span></div>
   <div style="flex:1 1 140px;min-width:0;padding:12px;border:1px solid #f9a8d4;border-radius:10px;border-top:4px solid #db2777;"><strong>Gold answer</strong><br><span style="font-size:13px;"><code>L_y = L_q</code></span></div>
 </div>
 
@@ -167,16 +179,16 @@ retrieval or naturally occurring multilingual search behavior.
 
 <div style="display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 16px;">
   <div style="flex:1 1 190px;min-width:0;padding:14px;border:1px solid #86efac;border-radius:10px;border-top:5px solid #16a34a;">
-    <strong>AVAILABLE · AUDITED V1</strong><br>
-    <span style="font-size:13px;">15,661 train rows and all 7,405 validation rows are public.</span>
+    <strong>AVAILABLE · AUDITED V1.1</strong><br>
+    <span style="font-size:13px;">15,661 train and 7,405 validation rows, now with original English paragraph sentences.</span>
   </div>
   <div style="flex:1 1 190px;min-width:0;padding:14px;border:1px solid #cbd5e1;border-radius:10px;border-top:5px solid #64748b;">
     <strong>NOT PUBLISHED · XHotpotQA+</strong><br>
     <span style="font-size:13px;">The complete parallel validation mapping is unavailable; no Hub config is claimed.</span>
   </div>
   <div style="flex:1 1 190px;min-width:0;padding:14px;border:1px solid #fcd34d;border-radius:10px;border-top:5px solid #d97706;">
-    <strong>PROSPECTIVE · CANONICAL V2</strong><br>
-    <span style="font-size:13px;">The model-agnostic pipeline exists; generated data and paired quality evidence do not.</span>
+    <strong>PUBLIC RC1 · NOT CANONICAL V2</strong><br>
+    <span style="font-size:13px;"><a href="https://huggingface.co/datasets/Iman998/XhotpotQA-V2/tree/b05ba394ad7312e85625624c90d10258cbab31af">V2 RC1</a> covers 22,836/23,066 intended rows and remains incomplete.</span>
   </div>
 </div>
 
@@ -192,10 +204,10 @@ retrieval or naturally occurring multilingual search behavior.
 
 | Gate | Audited V1 in this payload | Prospective corrected V2 |
 |---|---|---|
-| Required rows available | ✅ Complete | ⏳ Not supplied |
+| Required rows available | ✅ Complete | ⚠️ RC1 is 230 rows short |
 | Structural status retained | ✅ Per row | Required before release |
 | File hashes and counts frozen | ✅ `RELEASE_MANIFEST.json` | Required before release |
-| Paired V1–V2 quality evidence | Not applicable to publishing recovered V1 | ⛔ Not yet supplied |
+| Paired V1–V2 quality evidence | Not applicable to publishing recovered V1 | ⛔ Independent GLM audits are not paired evidence |
 | Safe claim | Transparent, audit-preserving recovered resource | Pipeline plan only |
 
 The V1 release gate is **transparency**, not a claim that every translation is
@@ -246,11 +258,11 @@ pip install -U datasets
 ```python
 from datasets import load_dataset
 
-DATA_REVISION = "52b8bee41ff2bb0d41cd400ff5646c0e800b5127"
+DATA_REVISION = "1d29e7918cf1acc045726c70fddba82371833090"
 
 dataset = load_dataset(
     "Iman998/XhotpotQA",
-    "xhotpotqa_v1_audited",
+    "xhotpotqa_v1_1_audited",
     revision=DATA_REVISION,
 )
 
@@ -272,11 +284,11 @@ For low-memory inspection, stream Parquet shards:
 ```python
 from datasets import load_dataset
 
-DATA_REVISION = "52b8bee41ff2bb0d41cd400ff5646c0e800b5127"
+DATA_REVISION = "1d29e7918cf1acc045726c70fddba82371833090"
 
 stream = load_dataset(
     "Iman998/XhotpotQA",
-    "xhotpotqa_v1_audited",
+    "xhotpotqa_v1_1_audited",
     split="validation",
     streaming=True,
     revision=DATA_REVISION,
@@ -399,6 +411,7 @@ candidates: list[
   paragraph_id: string
   candidate_index: int16
   source_title: string
+  source_sentences: list[string]
   title: string
   sentences: list[string]
   language: string
@@ -430,8 +443,9 @@ provenance: struct[
 
 Paragraph IDs are positional (`p00`, `p01`, …) and follow the recovered
 candidate order; `candidate_index` preserves the corresponding integer
-position. `source_title` retains the original HotpotQA annotation key while
-`title` stores its translated form. Supporting facts are joined through the
+position. `source_title` and `source_sentences` retain the original English
+HotpotQA paragraph, while `title` and `sentences` store its translated form.
+Supporting facts are joined through the
 source title and then represented by candidate/paragraph ID plus sentence
 index. A null `paragraph_id` or `candidate_index`, or
 `in_bounds=false`, preserves a failed join or unavailable translated sentence
@@ -524,10 +538,10 @@ snapshot. Likewise, `provenance.prompt_version="legacy-v1-recovered"` and
 `provenance.assignment_version="legacy-random-v1-unseeded"` document
 incomplete historical provenance instead of filling it with guessed values.
 
-The prospective V2 pipeline is model-agnostic and uses an OpenAI-compatible API;
-any compatible model can be served, including through vLLM. A Gemma setup is an
-example configuration, not a requirement and not evidence that V2 has already
-been generated or validated.
+The separately published V2 RC1 records identify **Gemma 4 31B Instruct** served
+through vLLM's OpenAI-compatible API. That provenance applies only to V2 RC1;
+it does not retroactively identify the V1 backend. V2 RC1 is incomplete at
+22,836 of 23,066 intended sources and must not be described as canonical V2.
 
 </details>
 
@@ -895,8 +909,8 @@ translation, filtering, or annotation.
 
 ## 🔒 Release integrity and manifest
 
-[`RELEASE_MANIFEST.json`](https://huggingface.co/datasets/Iman998/XhotpotQA/blob/52b8bee41ff2bb0d41cd400ff5646c0e800b5127/RELEASE_MANIFEST.json)
-is the machine-readable authority for the frozen audited-V1 data snapshot. It records:
+[`RELEASE_MANIFEST_V1_1.json`](https://huggingface.co/datasets/Iman998/XhotpotQA/blob/1d29e7918cf1acc045726c70fddba82371833090/RELEASE_MANIFEST_V1_1.json)
+is the machine-readable authority for the frozen audited-V1.1 data snapshot. It records:
 
 - release version and train selection rule;
 - split-level source counts;
@@ -905,7 +919,7 @@ is the machine-readable authority for the frozen audited-V1 data snapshot. It re
 - total rows and bytes.
 
 The companion software is frozen at
-[**GitHub release `v0.3.1`**](https://github.com/Iman998/XhotpotQA/tree/v0.3.1).
+[**GitHub release `v0.4.0`**](https://github.com/Iman998/XhotpotQA/tree/v0.4.0).
 The code tag and frozen Hub data revision serve different purposes: the former
 fixes the toolkit, while the latter fixes the released Parquet bytes.
 
@@ -926,8 +940,8 @@ import json
 manifest_path = hf_hub_download(
     repo_id="Iman998/XhotpotQA",
     repo_type="dataset",
-    filename="RELEASE_MANIFEST.json",
-    revision="52b8bee41ff2bb0d41cd400ff5646c0e800b5127",
+    filename="RELEASE_MANIFEST_V1_1.json",
+    revision="1d29e7918cf1acc045726c70fddba82371833090",
 )
 
 with open(manifest_path, encoding="utf-8") as stream:
@@ -939,6 +953,11 @@ print(manifest["validation"]["flag_counts"])
 ```
 
 </details>
+
+## Release family
+
+Browse the pinned dataset and audit releases together in the
+[XHotpotQA cross-lingual multi-hop QA collection](https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a).
 
 ## License
 
@@ -961,8 +980,8 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
   year   = {2026},
   howpublished = {Hugging Face dataset},
   url    = {https://huggingface.co/datasets/Iman998/XhotpotQA},
-  note   = {Audited V1 data snapshot, revision
-            52b8bee41ff2bb0d41cd400ff5646c0e800b5127; code v0.3.1;
+  note   = {Audited V1.1 data snapshot, revision
+            1d29e7918cf1acc045726c70fddba82371833090; code v0.4.0;
             manuscript in preparation}
 }
 
@@ -985,12 +1004,14 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
 - Behrouz Minaei-Bidgoli — supervision and manuscript review
 
 Code, generation, evaluation, and audit tooling:
-[GitHub release `v0.3.1`](https://github.com/Iman998/XhotpotQA/tree/v0.3.1)
+[GitHub release `v0.4.0`](https://github.com/Iman998/XhotpotQA/tree/v0.4.0)
 
 Public audited V1 data:
 [huggingface.co/datasets/Iman998/XhotpotQA](https://huggingface.co/datasets/Iman998/XhotpotQA)
-(configuration `xhotpotqa_v1_audited`; frozen data revision
-`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`).
+(preferred configuration `xhotpotqa_v1_1_audited`; frozen V1.1 data revision
+`1d29e7918cf1acc045726c70fddba82371833090`). The immutable earlier configuration
+`xhotpotqa_v1_audited` remains available at revision
+`52b8bee41ff2bb0d41cd400ff5646c0e800b5127`.
 
 A persistent manuscript archive link will be added after deposit. Until then,
 cite the versioned Hub revision and preserve its `RELEASE_MANIFEST.json`.

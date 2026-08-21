@@ -56,6 +56,7 @@ configs:
 [![Release](https://img.shields.io/badge/release-RC1-orange?style=for-the-badge)](#release-status)
 [![Rows](https://img.shields.io/badge/rows-22%2C836-2f80ed?style=for-the-badge)](#coverage)
 [![Generator](https://img.shields.io/badge/generator-Gemma%204%2031B-7b61ff?style=for-the-badge)](#generation-provenance)
+[![Snapshot](https://img.shields.io/badge/snapshot-b05ba39-orange?style=for-the-badge)](https://huggingface.co/datasets/Iman998/XhotpotQA-V2/tree/b05ba394ad7312e85625624c90d10258cbab31af)
 [![License](https://img.shields.io/badge/license-CC%20BY--SA%204.0-2ca44f?style=for-the-badge)](#license-and-attribution)
 
 **Auditable source joins · original English fields · sentence-aligned evidence · immutable input locks**
@@ -92,9 +93,12 @@ Of the 230 missing sources, three have entries in the final generation-error led
 ```python
 from datasets import load_dataset
 
+DATA_REVISION = "b05ba394ad7312e85625624c90d10258cbab31af"
+
 dataset = load_dataset(
-    "Iman998/XHotpotQA-V2",
+    "Iman998/XhotpotQA-V2",
     "xhotpotqa_v2_audited_rc1",
+    revision=DATA_REVISION,
 )
 
 row = dataset["validation"][0]
@@ -107,7 +111,10 @@ for paragraph in row["candidates"]:
     print(paragraph["sentences"][0])
 ```
 
-For a byte-reproducible experiment, pin the Hub commit shown in the published `RELEASE_MANIFEST.json` rather than loading a moving `main` revision.
+The example pins the published RC1 snapshot
+[`b05ba394ad7312e85625624c90d10258cbab31af`](https://huggingface.co/datasets/Iman998/XhotpotQA-V2/tree/b05ba394ad7312e85625624c90d10258cbab31af).
+Record this revision together with the release-manifest fingerprint in every
+experiment instead of loading a moving `main` branch.
 
 ## Record structure
 
@@ -207,7 +214,7 @@ The builder writes Parquet into a private staging directory, validates counts an
 
 A separate GLM-5.2 judge release contains a language-balanced audit of 1,840 paragraph, 460 question, and 460 answer translations. V2 mean scores are 94.468, 96.009, and 94.183, respectively. The V1 and V2 samples are almost entirely different source/language assignments, so this is an independent descriptive audit—not a paired improvement estimate.
 
-See [XHotpotQA-GLM52-Judge-V2](https://huggingface.co/datasets/Iman998/XHotpotQA-GLM52-Judge-V2) for the sanitized scores, prompt hashes, and limitations.
+See [XHotpotQA-GLM52-Judge-V2](https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V2/tree/0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840) for the sanitized scores, prompt hashes, and limitations.
 
 ## Release status
 
@@ -249,9 +256,15 @@ HotpotQA is distributed under **CC BY-SA 4.0**. XHotpotQA is a transformed, sour
 
 Please cite HotpotQA and the XHotpotQA paper/repository. A persistent article/archive identifier will be added after deposit.
 
+## Release family
+
+Browse V1.1, V2 RC1, and both independent GLM-5.2 audit snapshots in the
+[XHotpotQA cross-lingual multi-hop QA collection](https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a).
+
 ## Resources
 
-- Code: https://github.com/Iman998/XHotpotQA
+- Frozen dataset snapshot: https://huggingface.co/datasets/Iman998/XhotpotQA-V2/tree/b05ba394ad7312e85625624c90d10258cbab31af
+- Code: https://github.com/Iman998/XhotpotQA
 - Gemma 4 technical report: https://arxiv.org/abs/2607.02770
 - vLLM Gemma 4 guide: https://docs.vllm.ai/projects/recipes/en/stable/Google/Gemma4.html
 - Paper/archive: forthcoming
