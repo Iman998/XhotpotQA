@@ -47,26 +47,40 @@ configs:
         path: data/validation-*.parquet
 ---
 
-<div align="center">
-
-# XHotpotQA V2 Audited RC1
-
-### Cross-lingual multi-hop question answering over mixed-language evidence
-
-[![Release](https://img.shields.io/badge/release-RC1-orange?style=for-the-badge)](#release-status)
-[![Rows](https://img.shields.io/badge/rows-22%2C836-2f80ed?style=for-the-badge)](#coverage)
-[![Generator](https://img.shields.io/badge/generator-Gemma%204%2031B-7b61ff?style=for-the-badge)](#generation-provenance)
-[![Snapshot](https://img.shields.io/badge/snapshot-b05ba39-orange?style=for-the-badge)](https://huggingface.co/datasets/Iman998/XhotpotQA-V2/tree/b05ba394ad7312e85625624c90d10258cbab31af)
-[![License](https://img.shields.io/badge/license-CC%20BY--SA%204.0-2ca44f?style=for-the-badge)](#license-and-attribution)
-
-**Auditable source joins · original English fields · sentence-aligned evidence · immutable input locks**
-
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;border:1px solid #64748b;border-radius:16px;overflow:hidden;margin:0 0 24px;box-shadow:0 8px 24px rgba(15,23,42,.08);">
+  <div style="background:linear-gradient(135deg,#1e1b4b 0%,#7c2d12 58%,#b45309 100%);color:#ffffff;padding:24px;">
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
+      <h1 style="color:#ffffff;margin:0;border:0;font-size:30px;line-height:1.2;">XHotpotQA V2</h1>
+      <span style="background:#fef3c7;color:#78350f;border:1px solid #f59e0b;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;letter-spacing:.04em;">AUDITED RC1 · INCOMPLETE</span>
+    </div>
+    <p style="color:#ffedd5;margin:10px 0 3px;font-size:17px;font-weight:700;">Cross-lingual multi-hop QA over mixed-language evidence</p>
+    <p style="color:#e2e8f0;margin:0;font-size:14px;">Gemma 4 31B · source-aligned fields · transparent release gate</p>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px;border-bottom:1px solid #64748b;">
+    <span style="border:1px solid #d97706;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">STATUS · RC1</span>
+    <span style="border:1px solid #2563eb;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">ROWS · 22,836</span>
+    <span style="border:1px solid #7c3aed;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">GENERATOR · Gemma 4 31B</span>
+    <span style="border:1px solid #dc2626;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">MISSING · 230</span>
+    <span style="border:1px solid #16a34a;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">LICENSE · CC BY-SA 4.0</span>
+  </div>
+  <div style="padding:14px 18px;line-height:1.8;">
+    <strong>Navigate:</strong>
+    <a href="#dataset-at-a-glance">Overview</a> ·
+    <a href="#coverage">Coverage</a> ·
+    <a href="#quickstart">Load</a> ·
+    <a href="#record-structure">Schema</a> ·
+    <a href="#methodology-and-generation-provenance">Methodology</a> ·
+    <a href="#quality-audit">Quality</a> ·
+    <a href="#citation">Citation</a> ·
+    <a href="https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a">Collection</a>
+  </div>
 </div>
 
-> [!IMPORTANT]
-> This is a transparent release candidate, not the corrected canonical V2. The locked files contain 22,836 of 23,066 expected HotpotQA sources. No missing row is generated, copied, or silently hidden by the release builder.
+<div style="border-left:5px solid #d97706;border-radius:0 10px 10px 0;padding:13px 16px;margin:18px 0;">
+  <strong>RC1 release warning.</strong> This is a transparent release candidate, not the corrected canonical V2. The locked files contain 22,836 of 23,066 expected HotpotQA sources. No missing row is generated, copied, or silently hidden by the release builder.
+</div>
 
-## Dataset summary
+## Dataset at a glance
 
 XHotpotQA V2 is a translation-derived benchmark for controlled cross-lingual multi-hop QA. A question and answer use one assigned language while candidate paragraphs may use different languages inside the same instance. Stable paragraph and sentence identifiers preserve the HotpotQA supporting chain.
 
@@ -77,6 +91,25 @@ RC1 adds the English source material needed for direct auditing:
 - row-level structural and quality flags;
 - source, input, and release checksums;
 - a complete manifest for every expected-but-absent source.
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;">
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #93c5fd;border-radius:10px;border-top:4px solid #2563eb;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">RELEASED</strong>
+    <span style="font-size:24px;font-weight:800;">22,836</span><br><small>audited RC1 rows</small>
+  </div>
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #c4b5fd;border-radius:10px;border-top:4px solid #7c3aed;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">EXPECTED</strong>
+    <span style="font-size:24px;font-weight:800;">23,066</span><br><small>HotpotQA sources</small>
+  </div>
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #fca5a5;border-radius:10px;border-top:4px solid #dc2626;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">MISSING</strong>
+    <span style="font-size:24px;font-weight:800;">230</span><br><small>explicitly manifested</small>
+  </div>
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #fcd34d;border-radius:10px;border-top:4px solid #d97706;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">COVERAGE</strong>
+    <span style="font-size:24px;font-weight:800;">99.003%</span><br><small>not canonical-complete</small>
+  </div>
+</div>
 
 ## Coverage
 
@@ -148,9 +181,42 @@ source_match
 
 The release builder takes `source_title` and `source_sentences` from the pinned HotpotQA source. It separately verifies the values recorded by generation and sets `source_match`; a mismatch is never silently accepted.
 
+### Shape-only record preview
+
+Angle-bracketed values below describe the published structure; they are not a
+substitute for loading a released row.
+
+```json
+{
+  "id": "<generated instance identifier>",
+  "source_id": "<HotpotQA source identifier>",
+  "question": "<translated question>",
+  "answer": "<translated answer>",
+  "question_language": "<assigned language code>",
+  "source_question": "<original English question>",
+  "candidates": [
+    {
+      "paragraph_id": "p00",
+      "source_title": "<English source title>",
+      "source_sentences": ["<English source sentence>"],
+      "sentences": ["<translated sentence>"],
+      "language": "<assigned language code>"
+    }
+  ],
+  "supporting_facts": ["<stable paragraph/sentence links>"],
+  "status": "accepted | review_required | quarantined"
+}
+```
+
 ## Status and quality policy
 
 `accepted` means the row passed the deterministic checks and has no content-level review flag. `review_required` means structure remains usable but an automatic quality signal needs inspection. `quarantined` means at least one structural or source-alignment condition failed.
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 16px;">
+  <div style="flex:1 1 180px;min-width:0;padding:13px;border:1px solid #86efac;border-radius:10px;border-top:4px solid #16a34a;"><strong>ACCEPTED</strong><br><span style="font-size:13px;">No blocking flag and no content-level review flag.</span></div>
+  <div style="flex:1 1 180px;min-width:0;padding:13px;border:1px solid #93c5fd;border-radius:10px;border-top:4px solid #2563eb;"><strong>REVIEW REQUIRED</strong><br><span style="font-size:13px;">Structurally usable; automatic quality signal requires inspection.</span></div>
+  <div style="flex:1 1 180px;min-width:0;padding:13px;border:1px solid #fca5a5;border-radius:10px;border-top:4px solid #dc2626;"><strong>QUARANTINED</strong><br><span style="font-size:13px;">Structural or source-alignment condition failed.</span></div>
+</div>
 
 Representative structural flags include:
 
@@ -171,7 +237,7 @@ Representative quality flags include:
 
 Flags prefixed with `source:` describe an inherited source condition. Flags prefixed with `xhotpot:` describe a generated-record or transformation condition. This distinction prevents a HotpotQA anomaly from being misreported as a translation failure.
 
-## Generation provenance
+## Methodology and generation provenance
 
 The supplied run identifies the generator as **Gemma 4 31B Instruct**, served through vLLM's OpenAI-compatible API.
 
@@ -256,10 +322,25 @@ HotpotQA is distributed under **CC BY-SA 4.0**. XHotpotQA is a transformed, sour
 
 Please cite HotpotQA and the XHotpotQA paper/repository. A persistent article/archive identifier will be added after deposit.
 
+## Citation
+
+Use the XHotpotQA and HotpotQA BibTeX entries in the
+[canonical V1.1 dataset card](https://huggingface.co/datasets/Iman998/XhotpotQA#citation).
+In the artifact description, report `Iman998/XhotpotQA-V2`, configuration
+`xhotpotqa_v2_audited_rc1`, frozen revision
+`b05ba394ad7312e85625624c90d10258cbab31af`, and the incomplete RC1 status.
+
 ## Release family
 
 Browse V1.1, V2 RC1, and both independent GLM-5.2 audit snapshots in the
 [XHotpotQA cross-lingual multi-hop QA collection](https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a).
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 16px;">
+  <div style="flex:1 1 155px;min-width:0;padding:12px;border:1px solid #5eead4;border-radius:10px;border-top:4px solid #0f766e;"><strong>V1.1</strong><br><span style="font-size:13px;">Canonical audited data</span><br><a href="https://huggingface.co/datasets/Iman998/XhotpotQA">Open card →</a></div>
+  <div style="flex:1 1 155px;min-width:0;padding:12px;border:1px solid #fcd34d;border-radius:10px;border-top:4px solid #d97706;"><strong>V2 RC1</strong><br><span style="font-size:13px;">Current incomplete release</span><br><a href="https://huggingface.co/datasets/Iman998/XhotpotQA-V2">Open card →</a></div>
+  <div style="flex:1 1 155px;min-width:0;padding:12px;border:1px solid #c4b5fd;border-radius:10px;border-top:4px solid #7c3aed;"><strong>Judge · V1</strong><br><span style="font-size:13px;">Independent GLM-5.2 audit</span><br><a href="https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V1">Open card →</a></div>
+  <div style="flex:1 1 155px;min-width:0;padding:12px;border:1px solid #93c5fd;border-radius:10px;border-top:4px solid #2563eb;"><strong>Judge · V2</strong><br><span style="font-size:13px;">Independent GLM-5.2 audit</span><br><a href="https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V2">Open card →</a></div>
+</div>
 
 ## Resources
 

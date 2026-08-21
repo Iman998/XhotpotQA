@@ -30,7 +30,7 @@ dependencies = ["PyYAML>=6.0"]
 [project.optional-dependencies]
 generation = ["openai>=1.99"]
 legacy = ["ijson>=3.3"]
-release = ["datasets>=3.6", "huggingface-hub>=0.33", "pyarrow>=18"]
+release = ["datasets>=3.6", "huggingface-hub>=0.33", "ijson>=3.3", "pyarrow>=18"]
 dev = [
   "build>=1.2",
   "mypy>=1.15",

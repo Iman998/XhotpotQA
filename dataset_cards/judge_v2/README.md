@@ -44,26 +44,42 @@ configs:
         path: data/audit-*.parquet
 ---
 
-<div align="center">
-
-# XHotpotQA · GLM-5.2 Judge · V2
-
-### Sanitized audit of the Gemma 4 31B-generated release candidate
-
-[![Rows](https://img.shields.io/badge/audit%20rows-2%2C760-2f80ed?style=for-the-badge)](#sampling-design)
-[![Coverage](https://img.shields.io/badge/scored-100%25-2ca44f?style=for-the-badge)](#results)
-[![Invalid rows removed](https://img.shields.io/badge/invalid%20partial%20answers-240%20removed-d73a49?style=for-the-badge)](#artifact-recovery)
-[![Snapshot](https://img.shields.io/badge/snapshot-0f9cd56-7b61ff?style=for-the-badge)](https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V2/tree/0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840)
-[![License](https://img.shields.io/badge/license-CC%20BY--SA%204.0-7b61ff?style=for-the-badge)](#license)
-
-**Exact prompt hashes · explicit score origins · no hidden reasoning · no credentials**
-
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;border:1px solid #64748b;border-radius:16px;overflow:hidden;margin:0 0 24px;box-shadow:0 8px 24px rgba(15,23,42,.08);">
+  <div style="background:linear-gradient(135deg,#0f172a 0%,#155e75 52%,#6d28d9 100%);color:#ffffff;padding:24px;">
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
+      <h1 style="color:#ffffff;margin:0;border:0;font-size:30px;line-height:1.2;">XHotpotQA · GLM-5.2 Judge</h1>
+      <span style="background:#ccfbf1;color:#134e4a;border:1px solid #2dd4bf;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;letter-spacing:.04em;">AUDIT SNAPSHOT · V2</span>
+    </div>
+    <p style="color:#ddd6fe;margin:10px 0 3px;font-size:17px;font-weight:700;">Sanitized audit of the Gemma 4 31B-generated release candidate</p>
+    <p style="color:#e2e8f0;margin:0;font-size:14px;">Clean 2,760-unit set · malformed partial-answer run excluded</p>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px;border-bottom:1px solid #64748b;">
+    <span style="border:1px solid #7c3aed;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">AUDIT · V2 RC1</span>
+    <span style="border:1px solid #2563eb;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">ROWS · 2,760</span>
+    <span style="border:1px solid #0f766e;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">SCORED · 100%</span>
+    <span style="border:1px solid #d97706;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">MODEL · requested alias only</span>
+    <span style="border:1px solid #dc2626;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">EXCLUDED · 240 malformed rows</span>
+    <span style="border:1px solid #db2777;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;">COMPARISON · independent / unpaired</span>
+  </div>
+  <div style="padding:14px 18px;line-height:1.8;">
+    <strong>Navigate:</strong>
+    <a href="#dataset-at-a-glance">Overview</a> ·
+    <a href="#quickstart">Load</a> ·
+    <a href="#methodology-and-sampling-design">Methodology</a> ·
+    <a href="#artifact-recovery">Recovery</a> ·
+    <a href="#results">Results</a> ·
+    <a href="#public-schema">Schema</a> ·
+    <a href="#limitations">Limitations</a> ·
+    <a href="#citation">Citation</a> ·
+    <a href="https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a">Collection</a>
+  </div>
 </div>
 
-> [!IMPORTANT]
-> This is an audit of V2 RC1, not a human-certified quality label. The requested API model string was `glm-5.2`; the provider-resolved checkpoint revision was not stored. V1 and V2 audit samples are independent and must not be described as paired.
+<div style="border-left:5px solid #d97706;border-radius:0 10px 10px 0;padding:13px 16px;margin:18px 0;">
+  <strong>Quality-label and comparison boundary.</strong> This is an audit of V2 RC1, not a human-certified quality label. The requested API model string was <code>glm-5.2</code>; the provider-resolved checkpoint revision was not stored. V1 and V2 audit samples are independent and must not be described as paired.
+</div>
 
-## Overview
+## Dataset at a glance
 
 This release provides the clean final 2,760-row translation audit for XHotpotQA V2 RC1. Paragraphs, questions, and short answers are scored against their English source on a 0–100 scale.
 
@@ -71,6 +87,25 @@ The release builder reconstructs the valid final set from locked artifacts, excl
 
 The public annotation payload is frozen at Hub revision
 [`0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840`](https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V2/tree/0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840).
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px;">
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #93c5fd;border-radius:10px;border-top:4px solid #2563eb;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">AUDIT UNITS</strong>
+    <span style="font-size:24px;font-weight:800;">2,760</span><br><small>clean final set</small>
+  </div>
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #5eead4;border-radius:10px;border-top:4px solid #0f766e;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">TARGET LANGUAGES</strong>
+    <span style="font-size:24px;font-weight:800;">23</span><br><small>balanced sampling</small>
+  </div>
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #fca5a5;border-radius:10px;border-top:4px solid #dc2626;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">EXCLUDED</strong>
+    <span style="font-size:24px;font-weight:800;">240</span><br><small>malformed partial-answer rows</small>
+  </div>
+  <div style="flex:1 1 145px;min-width:0;padding:13px;border:1px solid #c4b5fd;border-radius:10px;border-top:4px solid #7c3aed;">
+    <strong style="display:block;font-size:12px;letter-spacing:.05em;">WEIGHTED MEAN</strong>
+    <span style="font-size:24px;font-weight:800;">94.677</span><br><small>0–100 judge scale</small>
+  </div>
+</div>
 
 ## Quickstart
 
@@ -97,7 +132,7 @@ Join against the pinned
 using `instance_id`, `unit`, and `paragraph_id`. Validate the joined strings with
 their exact SHA-256 fields.
 
-## Sampling design
+## Methodology and sampling design
 
 | Unit | Per language | Total |
 |---|---:|---:|
@@ -206,6 +241,30 @@ This comparison is not paired. Overlap on source ID, target language, and unit i
 
 The dataset omits source/candidate text duplication, hidden reasoning, raw endpoint details, errors, credentials, and logs.
 
+### Shape-only annotation preview
+
+Angle-bracketed values show the joinable public structure without reproducing
+source or candidate text.
+
+```json
+{
+  "judge_record_id": "<deterministic record hash>",
+  "dataset_version": "v2",
+  "instance_id": "<XHotpotQA instance identifier>",
+  "target_language": "<language code>",
+  "unit": "paragraph | question | answer",
+  "paragraph_id": "<paragraph identifier or null>",
+  "score": 0,
+  "score_origin": "<parser provenance>",
+  "judge_explanation": "<visible explanation if returned>",
+  "source_text_sha256": "<SHA-256>",
+  "candidate_text_sha256": "<SHA-256>",
+  "requested_judge_model": "glm-5.2",
+  "resolved_judge_revision": null,
+  "run_group": "<recovery or dedicated answer run>"
+}
+```
+
 ## Score provenance
 
 | Origin | Rows |
@@ -311,10 +370,28 @@ The answer request additionally carries the original English question as `contex
 
 These annotations derive from CC BY-SA 4.0 HotpotQA/XHotpotQA content and are released under **CC BY-SA 4.0**. Builder code is MIT-licensed.
 
+## Citation
+
+Use the XHotpotQA and HotpotQA BibTeX entries in the
+[canonical V1.1 dataset card](https://huggingface.co/datasets/Iman998/XhotpotQA#citation).
+In the audit-artifact description, report
+`Iman998/XhotpotQA-GLM52-Judge-V2`, configuration
+`xhotpotqa_glm52_judge_v2`, frozen revision
+`0f9cd568fabd7f7ad3b3d9a72e31ae8aeb936840`, the requested `glm-5.2` alias,
+the independent/unpaired sampling design, and the exclusion of the 240
+malformed partial-answer rows.
+
 ## Release family
 
 Browse V1.1, V2 RC1, and both independent GLM-5.2 audit snapshots in the
 [XHotpotQA cross-lingual multi-hop QA collection](https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a).
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 16px;">
+  <div style="flex:1 1 155px;min-width:0;padding:12px;border:1px solid #5eead4;border-radius:10px;border-top:4px solid #0f766e;"><strong>V1.1</strong><br><span style="font-size:13px;">Canonical audited data</span><br><a href="https://huggingface.co/datasets/Iman998/XhotpotQA">Open card →</a></div>
+  <div style="flex:1 1 155px;min-width:0;padding:12px;border:1px solid #fcd34d;border-radius:10px;border-top:4px solid #d97706;"><strong>V2 RC1</strong><br><span style="font-size:13px;">Incomplete source dataset</span><br><a href="https://huggingface.co/datasets/Iman998/XhotpotQA-V2">Open card →</a></div>
+  <div style="flex:1 1 155px;min-width:0;padding:12px;border:1px solid #c4b5fd;border-radius:10px;border-top:4px solid #7c3aed;"><strong>Judge · V1</strong><br><span style="font-size:13px;">Independent comparison audit</span><br><a href="https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V1">Open card →</a></div>
+  <div style="flex:1 1 155px;min-width:0;padding:12px;border:1px solid #93c5fd;border-radius:10px;border-top:4px solid #2563eb;"><strong>Judge · V2</strong><br><span style="font-size:13px;">Current independent audit</span><br><a href="https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V2">Open card →</a></div>
+</div>
 
 ## Resources
 

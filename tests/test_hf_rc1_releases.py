@@ -19,6 +19,12 @@ sys.modules[SPEC.name] = builder
 SPEC.loader.exec_module(builder)
 
 
+def test_release_extra_declares_streaming_json_dependency() -> None:
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    release_extra = pyproject.split("release = [", maxsplit=1)[1].split("]", maxsplit=1)[0]
+    assert '"ijson>=3.3"' in release_extra
+
+
 def _judge_row(
     *,
     instance_id: str = "instance-1",

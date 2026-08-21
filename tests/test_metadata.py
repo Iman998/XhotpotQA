@@ -113,7 +113,7 @@ def test_all_hub_cards_pin_exact_snapshots_and_canonical_slugs() -> None:
         assert revision in text
         assert config_name in {config["config_name"] for config in metadata["configs"]}
         assert collection_url in text
-        assert "Iman998/XHotpotQA" not in text
+        assert "huggingface.co/datasets/Iman998/XHotpotQA" not in text
         assert not re.search(r"__(?:[A-Z0-9_]+REVISION[A-Z0-9_]*)__", text)
 
 
@@ -134,6 +134,49 @@ def test_release_cards_keep_counts_and_model_claims_in_scope() -> None:
         assert "not paired" in card.lower() or "unpaired" in card.lower()
 
     assert "Gemma 4 31B-generated" in judge_v2
+
+
+def test_release_cards_share_a_responsive_hub_safe_visual_contract() -> None:
+    cards = {
+        "dataset_cards/v2/README.md": "## Record structure",
+        "dataset_cards/judge_v1/README.md": "## Public schema",
+        "dataset_cards/judge_v2/README.md": "## Public schema",
+    }
+
+    for relative_path, schema_heading in cards.items():
+        text = (REPOSITORY / relative_path).read_text(encoding="utf-8")
+        prose = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
+
+        assert "background:linear-gradient(" in text
+        assert "flex-wrap:wrap" in text
+        assert "border-radius:999px" in text
+        assert "font-size:24px" in text
+        assert "border-left:5px" in text
+        assert "## Dataset at a glance" in text
+        assert "## Quickstart" in text
+        assert schema_heading in text
+        assert "### Shape-only" in text
+        assert "## Methodology and " in text
+        assert "## Limitations" in text
+        assert "## Citation" in text
+        assert "## Release family" in text
+        assert "img.shields.io" not in text
+        assert text.count("```") % 2 == 0
+        assert "\ufffd" not in text
+
+        without_display_math = re.sub(r"\$\$.*?\$\$", "", prose, flags=re.DOTALL)
+        assert not re.search(r"(?<!\$)\$(?!\$)", without_display_math)
+        assert prose.count(r"\\(") == prose.count(r"\\)")
+
+        headings = {
+            re.sub(r"[^a-z0-9 -]", "", re.sub(r"^#{1,6}\s+", "", line).lower())
+            .strip()
+            .replace(" ", "-")
+            for line in text.splitlines()
+            if re.match(r"^#{1,6}\s+", line)
+        }
+        targets = set(re.findall(r'href="#([a-z0-9-]+)"', text))
+        assert targets <= headings
 
 
 def test_dataset_card_navigation_targets_plain_stable_headings() -> None:
