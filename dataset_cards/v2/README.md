@@ -119,7 +119,7 @@ RC1 adds the English source material needed for direct auditing:
 | validation (distractor) | 7,403 | 7,405 | 2 | 99.973% |
 | **total** | **22,836** | **23,066** | **230** | **99.003%** |
 
-Of the 230 missing sources, three have entries in the final generation-error ledgers. The remaining 227 are absent from the locked final JSONL files without a corresponding entry in those final ledgers. See `MISSING_SOURCE_MANIFEST.json` for the exact IDs, source positions, source checksums, and reason labels.
+Both missing validation sources are inherited HotpotQA anomalies: one contains a blank sentence inside a supplied distractor paragraph, and one contains supporting-fact index 902 outside the annotated paragraph. Across both splits, 50 missing rows are triggered by a blank source sentence or an out-of-bounds source support annotation; the other 180 are clean-source training omissions from the incomplete generation run. `MISSING_SOURCE_MANIFEST.json` contains the exact absent source IDs. The 50/180 attribution reported here was recomputed by joining those IDs to the official HotpotQA rows and revalidating their sentence arrays and supporting-fact indices; the original run ledger did not encode every retrospective reason class.
 
 ## Quickstart
 
@@ -313,7 +313,7 @@ Use RC1 for auditing, code validation, and explicitly status-aware experiments. 
 - The content originates from English Wikipedia through HotpotQA; translations do not create native information needs.
 - Translation and transliteration quality can differ by language, script, entity type, and answer type.
 - Exact source copies can be correct for names or titles, so automatic source-copy flags require contextual review.
-- The release is incomplete and the unlogged missing rows require recovery from server-side artifacts or regeneration.
+- The release is incomplete: clean-source omissions require recovery or regeneration, while source-triggered omissions require an explicit policy for malformed upstream rows.
 - The accompanying LLM judge is a single uncalibrated model alias and may apply language-specific transliteration preferences inconsistently.
 
 ## License and attribution

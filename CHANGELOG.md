@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.1 - 2026-08-23
+
+- Align repository, citation, and dataset-card authorship with the final manuscript.
+- Reframe the project summary around the benchmark, role-aware diagnostics, and the
+  observed composition-versus-selection result before release engineering.
+- Clarify that both absent V2 validation rows originate in malformed HotpotQA source
+  records, while clean-source omissions are confined to the incomplete training run.
+
 ## 0.4.0 - 2026-08-21
 
 - Harden model-agnostic generation with bounded deterministic concurrency,

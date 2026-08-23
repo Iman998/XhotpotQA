@@ -87,7 +87,7 @@ configs:
     <a href="#quality-and-version-policy">Quality</a> ·
     <a href="#artifact-verified-validation-analysis">Findings</a> ·
     <a href="#citation">Citation</a> ·
-    <a href="https://github.com/Iman998/XhotpotQA/tree/v0.4.0">Code v0.4.0</a>
+    <a href="https://github.com/Iman998/XhotpotQA/tree/v0.4.1">Code v0.4.1</a>
   </div>
 </div>
 
@@ -781,7 +781,9 @@ outside the question language and across multiple languages. In these frozen
 artifacts, the absolute descriptive reader contrasts are numerically larger than
 the selector contrast. The question-to-gold script contrast compares 3,846
 different-script items with 1,126 same-script-only items. Group composition is
-not held fixed.
+not held fixed. Moreover, S0 has no observed validation items and the reader and
+selector metrics are not directly commensurate; these contrasts neither estimate a
+cross-lingual-versus-monolingual effect nor establish a causal module ranking.
 
 ### Assigned gold-paragraph language
 
@@ -919,7 +921,7 @@ is the machine-readable authority for the frozen audited-V1.1 data snapshot. It 
 - total rows and bytes.
 
 The companion software is frozen at
-[**GitHub release `v0.4.0`**](https://github.com/Iman998/XhotpotQA/tree/v0.4.0).
+[**GitHub release `v0.4.1`**](https://github.com/Iman998/XhotpotQA/tree/v0.4.1).
 The code tag and frozen Hub data revision serve different purposes: the former
 fixes the toolkit, while the latter fixes the released Parquet bytes.
 
@@ -976,13 +978,13 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
 @misc{barati2026xhotpotqa,
   title  = {XHotpotQA: A Benchmark for Cross-Lingual Knowledge Composition
             in Multi-Hop Question Answering},
-  author = {Barati, Iman and Ghafouri, Arash and Alidoost, Reza and
+  author = {Barati, Iman and Ghafouri, Arash and
             Minaei-Bidgoli, Behrouz},
   year   = {2026},
   howpublished = {Hugging Face dataset},
   url    = {https://huggingface.co/datasets/Iman998/XhotpotQA},
   note   = {Audited V1.1 data snapshot, revision
-            1d29e7918cf1acc045726c70fddba82371833090; code v0.4.0;
+            1d29e7918cf1acc045726c70fddba82371833090; code v0.4.1;
             manuscript in preparation}
 }
 
@@ -1002,11 +1004,10 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
 
 - **Iman Barati** — methodology and resource construction
 - Arash Ghafouri — supervision
-- Reza Alidoost — experiments and analysis
 - Behrouz Minaei-Bidgoli — supervision and validation
 
 Code, generation, evaluation, and audit tooling:
-[GitHub release `v0.4.0`](https://github.com/Iman998/XhotpotQA/tree/v0.4.0)
+[GitHub release `v0.4.1`](https://github.com/Iman998/XhotpotQA/tree/v0.4.1)
 
 Public audited V1 data:
 [huggingface.co/datasets/Iman998/XhotpotQA](https://huggingface.co/datasets/Iman998/XhotpotQA)

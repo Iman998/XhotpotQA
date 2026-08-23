@@ -59,6 +59,25 @@ bridge evidence, answer-bearing evidence, and distractors independently. This ma
 possible to measure query–evidence mismatch, cross-hop composition, and irrelevant-language
 interference without conflating them with full-corpus retrieval.
 
+## Scientific contributions
+
+1. **Benchmark:** controlled cross-lingual knowledge composition with supplied distractors
+   and sentence-level supporting facts.
+2. **Diagnostic framework:** role-aware language geometry for the question, bridge evidence,
+   answer-hop evidence, and distractors.
+3. **Empirical finding:** in the evaluated artifacts, cross-lingual composition is markedly
+   more language-sensitive than supplied-candidate selection.
+4. **Reproducibility:** audited, versioned, provenance-aware public releases.
+
+The empirical comparison is descriptive: reader and selector outputs are not directly
+commensurate, and validation contains no populated monolingual S0 stratum. It identifies the
+largest observed within-benchmark sensitivity rather than a causal cross-module effect.
+
+For the V2 validation split, both absent source rows are inherited HotpotQA anomalies: one
+contains a blank sentence inside a supplied paragraph, and one contains an out-of-range
+supporting-fact index. The remaining missing V2 rows occur only in training and are tracked
+separately as source-triggered or generation-run omissions.
+
 ## Installation
 
 ```bash
@@ -428,7 +447,7 @@ terms, and consult the data statement before deployment.
 @misc{barati2026xhotpotqa,
   title   = {XHotpotQA: A Benchmark for Cross-Lingual Knowledge Composition
              in Multi-Hop Question Answering},
-  author  = {Barati, Iman and Ghafouri, Arash and Alidoost, Reza and
+  author  = {Barati, Iman and Ghafouri, Arash and
              Minaei-Bidgoli, Behrouz},
   year    = {2026},
   howpublished = {Hugging Face dataset},

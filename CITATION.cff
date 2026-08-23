@@ -2,17 +2,14 @@ cff-version: 1.2.0
 message: "If you use XHotpotQA, please cite the benchmark paper and HotpotQA."
 title: "XHotpotQA: A Benchmark for Cross-Lingual Knowledge Composition in Multi-Hop Question Answering"
 type: software
-version: 0.4.0
-date-released: 2026-08-21
+version: 0.4.1
+date-released: 2026-08-23
 authors:
   - family-names: Barati
     given-names: Iman
     email: iman_barati@comp.iust.ac.ir
   - family-names: Ghafouri
     given-names: Arash
-  - family-names: Alidoost
-    given-names: Reza
-    email: reza_alidoost@comp.iust.ac.ir
   - family-names: Minaei-Bidgoli
     given-names: Behrouz
 repository-code: "https://github.com/Iman998/XhotpotQA"

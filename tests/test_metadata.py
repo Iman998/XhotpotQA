@@ -253,17 +253,39 @@ def test_citation_cff_tracks_public_code_but_omits_unminted_release_identifiers(
     payload = yaml.safe_load((REPOSITORY / "CITATION.cff").read_text(encoding="utf-8"))
 
     assert payload["type"] == "software"
-    assert payload["version"] == "0.4.0"
+    assert payload["version"] == "0.4.1"
     assert payload["repository-code"] == "https://github.com/Iman998/XhotpotQA"
     assert "24-Language" not in payload["title"]
-    assert str(payload["date-released"]) == "2026-08-21"
+    assert str(payload["date-released"]) == "2026-08-23"
     assert "url" not in payload
+    assert [author["family-names"] for author in payload["authors"]] == [
+        "Barati",
+        "Ghafouri",
+        "Minaei-Bidgoli",
+    ]
 
 
 def test_package_and_citation_versions_match_the_release() -> None:
     pyproject = (REPOSITORY / "pyproject.toml").read_text(encoding="utf-8")
+    package_init = (REPOSITORY / "src/xhotpotqa/__init__.py").read_text(
+        encoding="utf-8"
+    )
     citation = yaml.safe_load((REPOSITORY / "CITATION.cff").read_text(encoding="utf-8"))
 
-    assert 'version = "0.4.0"' in pyproject
-    assert citation["version"] == "0.4.0"
-    assert str(citation["date-released"]) == "2026-08-21"
+    assert 'version = "0.4.1"' in pyproject
+    assert '__version__ = "0.4.1"' in package_init
+    assert citation["version"] == "0.4.1"
+    assert str(citation["date-released"]) == "2026-08-23"
+
+
+def test_public_authorship_matches_the_final_three_author_manuscript() -> None:
+    public_metadata = [
+        REPOSITORY / "CITATION.cff",
+        REPOSITORY / "README.md",
+        REPOSITORY / "dataset_card/README.md",
+    ]
+    for path in public_metadata:
+        text = path.read_text(encoding="utf-8").casefold()
+        assert "iman" in text and "barati" in text, path
+        assert "arash" in text and "ghafouri" in text, path
+        assert "behrouz" in text and "minaei-bidgoli" in text, path
