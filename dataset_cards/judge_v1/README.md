@@ -1,6 +1,7 @@
 ---
 pretty_name: XHotpotQA GLM-5.2 Translation Judge — V1
 license: cc-by-sa-4.0
+arxiv: "2608.27481"
 task_categories:
   - text-classification
 language:
@@ -69,6 +70,7 @@ configs:
     <a href="#model-provenance">Provenance</a> ·
     <a href="#limitations">Limitations</a> ·
     <a href="#citation">Citation</a> ·
+    <a href="https://arxiv.org/abs/2608.27481">Paper</a> ·
     <a href="https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a">Collection</a>
   </div>
 </div>
@@ -348,6 +350,9 @@ These annotations derive from CC BY-SA 4.0 HotpotQA/XHotpotQA content and are re
 
 Use the XHotpotQA and HotpotQA BibTeX entries in the
 [canonical V1.1 dataset card](https://huggingface.co/datasets/Iman998/XhotpotQA#citation).
+The XHotpotQA paper is archived as
+[arXiv:2608.27481](https://arxiv.org/abs/2608.27481), DOI
+[`10.48550/arXiv.2608.27481`](https://doi.org/10.48550/arXiv.2608.27481).
 In the audit-artifact description, report
 `Iman998/XhotpotQA-GLM52-Judge-V1`, configuration
 `xhotpotqa_glm52_judge_v1`, frozen revision
@@ -371,6 +376,7 @@ Browse V1.1, V2 RC1, and both independent GLM-5.2 audit snapshots in the
 - Frozen judge snapshot: https://huggingface.co/datasets/Iman998/XhotpotQA-GLM52-Judge-V1/tree/ba891ae62ed989606c9fc2fd5f08f9e88ef37547
 - Pinned XHotpotQA V1.1 source: https://huggingface.co/datasets/Iman998/XhotpotQA/tree/1d29e7918cf1acc045726c70fddba82371833090
 - Code: https://github.com/Iman998/XhotpotQA
+- Paper: https://arxiv.org/abs/2608.27481
+- Paper DOI: https://doi.org/10.48550/arXiv.2608.27481
 - Official GLM-5.2 announcement: https://z.ai/blog/glm-5.2
 - Official GLM-5.2 model card: https://huggingface.co/zai-org/GLM-5.2
-- Paper/archive: forthcoming

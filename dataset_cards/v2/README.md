@@ -1,6 +1,7 @@
 ---
 pretty_name: XHotpotQA V2 Audited RC1
 license: cc-by-sa-4.0
+arxiv: "2608.27481"
 task_categories:
   - question-answering
 language:
@@ -72,6 +73,7 @@ configs:
     <a href="#methodology-and-generation-provenance">Methodology</a> ·
     <a href="#quality-audit">Quality</a> ·
     <a href="#citation">Citation</a> ·
+    <a href="https://arxiv.org/abs/2608.27481">Paper</a> ·
     <a href="https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a">Collection</a>
   </div>
 </div>
@@ -320,12 +322,17 @@ Use RC1 for auditing, code validation, and explicitly status-aware experiments. 
 
 HotpotQA is distributed under **CC BY-SA 4.0**. XHotpotQA is a transformed, source-aligned resource and is distributed under the same license. Repository software is licensed separately under MIT.
 
-Please cite HotpotQA and the XHotpotQA paper/repository. A persistent article/archive identifier will be added after deposit.
+Please cite HotpotQA and the
+[XHotpotQA paper](https://arxiv.org/abs/2608.27481), DOI
+[`10.48550/arXiv.2608.27481`](https://doi.org/10.48550/arXiv.2608.27481).
 
 ## Citation
 
 Use the XHotpotQA and HotpotQA BibTeX entries in the
 [canonical V1.1 dataset card](https://huggingface.co/datasets/Iman998/XhotpotQA#citation).
+The XHotpotQA paper is archived as
+[arXiv:2608.27481](https://arxiv.org/abs/2608.27481), DOI
+[`10.48550/arXiv.2608.27481`](https://doi.org/10.48550/arXiv.2608.27481).
 In the artifact description, report `Iman998/XhotpotQA-V2`, configuration
 `xhotpotqa_v2_audited_rc1`, frozen revision
 `b05ba394ad7312e85625624c90d10258cbab31af`, and the incomplete RC1 status.
@@ -346,6 +353,7 @@ Browse V1.1, V2 RC1, and both independent GLM-5.2 audit snapshots in the
 
 - Frozen dataset snapshot: https://huggingface.co/datasets/Iman998/XhotpotQA-V2/tree/b05ba394ad7312e85625624c90d10258cbab31af
 - Code: https://github.com/Iman998/XhotpotQA
+- Paper: https://arxiv.org/abs/2608.27481
+- Paper DOI: https://doi.org/10.48550/arXiv.2608.27481
 - Gemma 4 technical report: https://arxiv.org/abs/2607.02770
 - vLLM Gemma 4 guide: https://docs.vllm.ai/projects/recipes/en/stable/Google/Gemma4.html
-- Paper/archive: forthcoming

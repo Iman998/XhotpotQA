@@ -14,3 +14,17 @@ authors:
     given-names: Behrouz
 repository-code: "https://github.com/Iman998/XhotpotQA"
 license: MIT
+preferred-citation:
+  type: article
+  title: "XHotpotQA: A Benchmark for Cross-Lingual Knowledge Composition in Multi-Hop Question Answering"
+  authors:
+    - family-names: Barati
+      given-names: Iman
+    - family-names: Ghafouri
+      given-names: Arash
+    - family-names: Minaei-Bidgoli
+      given-names: Behrouz
+  journal: "arXiv"
+  year: 2026
+  doi: "10.48550/arXiv.2608.27481"
+  url: "https://arxiv.org/abs/2608.27481"

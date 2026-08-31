@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Link the minted XHotpotQA paper (`arXiv:2608.27481`,
+  `10.48550/arXiv.2608.27481`) from citation metadata, package metadata, and all
+  public dataset cards.
+
 ## 0.4.1 - 2026-08-23
 
 - Align repository, citation, and dataset-card authorship with the final manuscript.

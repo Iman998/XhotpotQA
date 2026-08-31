@@ -6,6 +6,8 @@ import yaml
 from xhotpotqa.languages import LANGUAGE_CODES
 
 REPOSITORY = Path(__file__).resolve().parents[1]
+PAPER_URL = "https://arxiv.org/abs/2608.27481"
+PAPER_DOI = "10.48550/arXiv.2608.27481"
 
 
 def _dataset_card_metadata() -> dict[str, object]:
@@ -17,16 +19,36 @@ def _dataset_card_metadata() -> dict[str, object]:
     return metadata
 
 
-def test_citations_identify_public_data_but_not_an_unpublished_article() -> None:
+def test_citations_identify_the_minted_article_and_public_data() -> None:
     for relative_path in ("README.md", "dataset_card/README.md"):
         text = (REPOSITORY / relative_path).read_text(encoding="utf-8")
-        assert "@misc{barati2026xhotpotqa" in text
+        assert "@article{barati2026xhotpotqa" in text
+        assert "journal = {arXiv preprint arXiv:2608.27481}" in text
         assert "journal = {Language Resources and Evaluation}" not in text
-        assert "https://arxiv.org/" not in text
+        assert PAPER_URL in text
+        assert PAPER_DOI in text
         assert "https://huggingface.co/datasets/Iman998/XhotpotQA" in text
         assert "52b8bee41ff2bb0d41cd400ff5646c0e800b5127" in text
-        assert "manuscript in preparation" in text
+        assert "manuscript in preparation" not in text
         assert "A 24-Language Benchmark" not in text
+
+
+def test_all_public_dataset_cards_link_the_minted_article() -> None:
+    cards = [
+        REPOSITORY / "dataset_card/README.md",
+        *sorted((REPOSITORY / "dataset_cards").glob("*/README.md")),
+    ]
+    for path in cards:
+        text = path.read_text(encoding="utf-8")
+        lines = text.splitlines()
+        closing = lines.index("---", 1)
+        metadata = yaml.safe_load("\n".join(lines[1:closing]))
+
+        assert metadata["arxiv"] == "2608.27481", path
+        assert PAPER_URL in text, path
+        assert PAPER_DOI in text, path
+        assert "Paper/archive: forthcoming" not in text, path
+        assert "identifier will be added after deposit" not in text, path
 
 
 def test_public_dataset_card_defaults_to_v1_1_and_retains_legacy_v1() -> None:
@@ -34,6 +56,7 @@ def test_public_dataset_card_defaults_to_v1_1_and_retains_legacy_v1() -> None:
 
     assert metadata["pretty_name"] == "XHotpotQA"
     assert metadata["license"] == "cc-by-sa-4.0"
+    assert metadata["arxiv"] == "2608.27481"
     assert set(metadata["language"]) == set(LANGUAGE_CODES)
     assert len(metadata["language"]) == len(LANGUAGE_CODES)
     assert metadata["size_categories"] == ["10K<n<100K"]
@@ -249,7 +272,7 @@ def test_repository_docs_and_builder_distinguish_the_two_release_tracks() -> Non
     assert '"release_version": "xhotpotqa-public-v1.1-audited"' in builder
 
 
-def test_citation_cff_tracks_public_code_but_omits_unminted_release_identifiers() -> None:
+def test_citation_cff_tracks_public_code_and_the_minted_article() -> None:
     payload = yaml.safe_load((REPOSITORY / "CITATION.cff").read_text(encoding="utf-8"))
 
     assert payload["type"] == "software"
@@ -259,6 +282,18 @@ def test_citation_cff_tracks_public_code_but_omits_unminted_release_identifiers(
     assert str(payload["date-released"]) == "2026-08-23"
     assert "url" not in payload
     assert [author["family-names"] for author in payload["authors"]] == [
+        "Barati",
+        "Ghafouri",
+        "Minaei-Bidgoli",
+    ]
+    preferred = payload["preferred-citation"]
+    assert preferred["type"] == "article"
+    assert preferred["title"] == payload["title"]
+    assert preferred["journal"] == "arXiv"
+    assert preferred["year"] == 2026
+    assert preferred["doi"] == PAPER_DOI
+    assert preferred["url"] == PAPER_URL
+    assert [author["family-names"] for author in preferred["authors"]] == [
         "Barati",
         "Ghafouri",
         "Minaei-Bidgoli",
@@ -276,6 +311,14 @@ def test_package_and_citation_versions_match_the_release() -> None:
     assert '__version__ = "0.4.1"' in package_init
     assert citation["version"] == "0.4.1"
     assert str(citation["date-released"]) == "2026-08-23"
+
+
+def test_package_metadata_links_code_data_and_paper() -> None:
+    pyproject = (REPOSITORY / "pyproject.toml").read_text(encoding="utf-8")
+
+    assert f'Paper = "{PAPER_URL}"' in pyproject
+    assert 'Repository = "https://github.com/Iman998/XhotpotQA"' in pyproject
+    assert 'Dataset = "https://huggingface.co/datasets/Iman998/XhotpotQA"' in pyproject
 
 
 def test_public_authorship_matches_the_final_three_author_manuscript() -> None:

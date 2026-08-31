@@ -27,6 +27,11 @@ classifiers = [
 ]
 dependencies = ["PyYAML>=6.0"]
 
+[project.urls]
+Paper = "https://arxiv.org/abs/2608.27481"
+Repository = "https://github.com/Iman998/XhotpotQA"
+Dataset = "https://huggingface.co/datasets/Iman998/XhotpotQA"
+
 [project.optional-dependencies]
 generation = ["openai>=1.99"]
 legacy = ["ijson>=3.3"]

@@ -26,6 +26,7 @@ language:
 - vi
 - zh
 license: cc-by-sa-4.0
+arxiv: "2608.27481"
 annotations_creators:
 - crowdsourced
 - machine-generated
@@ -87,6 +88,7 @@ configs:
     <a href="#quality-and-version-policy">Quality</a> ·
     <a href="#artifact-verified-validation-analysis">Findings</a> ·
     <a href="#citation">Citation</a> ·
+    <a href="https://arxiv.org/abs/2608.27481">Paper</a> ·
     <a href="https://github.com/Iman998/XhotpotQA/tree/v0.4.1">Code v0.4.1</a>
   </div>
 </div>
@@ -972,20 +974,21 @@ software is licensed separately under the MIT License.
 
 ## Citation
 
-If you use the resource, cite both XHotpotQA and HotpotQA:
+If you use the resource, cite both the XHotpotQA paper and HotpotQA:
 
 ```bibtex
-@misc{barati2026xhotpotqa,
+@article{barati2026xhotpotqa,
   title  = {XHotpotQA: A Benchmark for Cross-Lingual Knowledge Composition
             in Multi-Hop Question Answering},
   author = {Barati, Iman and Ghafouri, Arash and
             Minaei-Bidgoli, Behrouz},
+  journal = {arXiv preprint arXiv:2608.27481},
   year   = {2026},
-  howpublished = {Hugging Face dataset},
-  url    = {https://huggingface.co/datasets/Iman998/XhotpotQA},
-  note   = {Audited V1.1 data snapshot, revision
-            1d29e7918cf1acc045726c70fddba82371833090; code v0.4.1;
-            manuscript in preparation}
+  eprint = {2608.27481},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  doi    = {10.48550/arXiv.2608.27481},
+  url    = {https://arxiv.org/abs/2608.27481}
 }
 
 @inproceedings{yang2018hotpotqa,
@@ -1009,6 +1012,10 @@ If you use the resource, cite both XHotpotQA and HotpotQA:
 Code, generation, evaluation, and audit tooling:
 [GitHub release `v0.4.1`](https://github.com/Iman998/XhotpotQA/tree/v0.4.1)
 
+Paper:
+[arXiv:2608.27481](https://arxiv.org/abs/2608.27481) ·
+[DOI `10.48550/arXiv.2608.27481`](https://doi.org/10.48550/arXiv.2608.27481)
+
 Public audited V1 data:
 [huggingface.co/datasets/Iman998/XhotpotQA](https://huggingface.co/datasets/Iman998/XhotpotQA)
 (preferred configuration `xhotpotqa_v1_1_audited`; frozen V1.1 data revision
@@ -1016,5 +1023,7 @@ Public audited V1 data:
 `xhotpotqa_v1_audited` remains available at revision
 `52b8bee41ff2bb0d41cd400ff5646c0e800b5127`.
 
-A persistent manuscript archive link will be added after deposit. Until then,
-cite the versioned Hub revision and preserve its `RELEASE_MANIFEST.json`.
+When describing the dataset artifact, report configuration
+`xhotpotqa_v1_1_audited`, frozen revision
+`1d29e7918cf1acc045726c70fddba82371833090`, and preserve its
+`RELEASE_MANIFEST.json` alongside derived predictions.

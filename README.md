@@ -1,5 +1,7 @@
 # XHotpotQA
 
+[![Paper](https://img.shields.io/badge/arXiv-2608.27481-B31B1B.svg)](https://arxiv.org/abs/2608.27481)
+
 **XHotpotQA** is a translation-derived benchmark for cross-lingual multi-hop question
 answering over mixed-language evidence. Each question–answer pair has one language while
 each candidate paragraph receives an independently assigned language. The benchmark keeps
@@ -18,6 +20,7 @@ retrieval/selection, reading, and end-to-end reasoning can be evaluated separate
 | Complete XHotpotQA+ target | 553,584 views (not yet complete) |
 | Source task | HotpotQA distractor |
 | Dataset license | CC BY-SA 4.0 |
+| Paper | [arXiv:2608.27481](https://arxiv.org/abs/2608.27481) |
 
 > **Recommended public dataset:**
 > [`Iman998/XhotpotQA`](https://huggingface.co/datasets/Iman998/XhotpotQA), configuration
@@ -444,18 +447,23 @@ terms, and consult the data statement before deployment.
 ## Citation
 
 ```bibtex
-@misc{barati2026xhotpotqa,
+@article{barati2026xhotpotqa,
   title   = {XHotpotQA: A Benchmark for Cross-Lingual Knowledge Composition
              in Multi-Hop Question Answering},
   author  = {Barati, Iman and Ghafouri, Arash and
              Minaei-Bidgoli, Behrouz},
+  journal = {arXiv preprint arXiv:2608.27481},
   year    = {2026},
-  howpublished = {Hugging Face dataset},
-  url     = {https://huggingface.co/datasets/Iman998/XhotpotQA},
-  note    = {Audited V1.1 data snapshot, revision
-             1d29e7918cf1acc045726c70fddba82371833090; manuscript in preparation}
+  eprint  = {2608.27481},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  doi     = {10.48550/arXiv.2608.27481},
+  url     = {https://arxiv.org/abs/2608.27481}
 }
 ```
 
-The persistent manuscript archive and version-history identifier are pending deposit. This
-notice will be replaced with the exact archive record after it has been minted.
+The paper is available as [arXiv:2608.27481](https://arxiv.org/abs/2608.27481), with DOI
+[`10.48550/arXiv.2608.27481`](https://doi.org/10.48550/arXiv.2608.27481). When reporting the
+dataset artifact, also identify `Iman998/XHotpotQA`, configuration
+`xhotpotqa_v1_1_audited`, and frozen revision
+`1d29e7918cf1acc045726c70fddba82371833090`.
