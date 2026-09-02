@@ -1,6 +1,6 @@
 # XHotpotQA
 
-[![Paper](https://img.shields.io/badge/arXiv-2608.27481-B31B1B.svg)](https://arxiv.org/abs/2608.27481)&nbsp;&nbsp;[![Hugging Face Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-XHotpotQA-FFD21E.svg)](https://huggingface.co/datasets/Iman998/XhotpotQA)
+[![Paper](https://img.shields.io/badge/arXiv-2608.27481-B31B1B.svg)](https://arxiv.org/abs/2608.27481)&nbsp;&nbsp;[![Hugging Face Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-XHotpotQA-FFD21E.svg)](https://huggingface.co/datasets/Iman998/XhotpotQA)&nbsp;&nbsp;[![Hugging Face Dataset V2](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-XHotpotQA%20V2-F5A623.svg)](https://huggingface.co/datasets/Iman998/XhotpotQA-V2)&nbsp;&nbsp;[![Hugging Face Collection](https://img.shields.io/badge/%F0%9F%A4%97%20Collection-XHotpotQA-8A2BE2.svg)](https://huggingface.co/collections/Iman998/xhotpotqa-cross-lingual-multi-hop-qa-6a888df6aee4a4f5612c3a1a)
 
 **XHotpotQA** is a translation-derived benchmark for cross-lingual multi-hop question
 answering over mixed-language evidence. Each question–answer pair has one language while
